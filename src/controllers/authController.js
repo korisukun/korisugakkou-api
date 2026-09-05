@@ -31,29 +31,41 @@ const register = async (req, res) => {
     }
 };
 
-// 2. FUNGSI LOGIN
+// 2. FUNGSI LOGIN (DENGAN PELACAK BUG)
 const login = async (req, res) => {
     try {
+        console.log('--- PROSES LOGIN DIMULAI ---');
         const { email, password } = req.body;
+        console.log(`1. Menerima permintaan login untuk email: ${email}`);
 
+        console.log('2. Menghubungi Neon Database...');
         const userResult = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+        console.log(`3. Database merespons! Jumlah akun ditemukan: ${userResult.rows.length}`);
+
         if (userResult.rows.length === 0) {
+            console.log('X. Berhenti: Email tidak terdaftar.');
             return res.status(400).json({ message: 'Email atau password salah!' });
         }
         
         const user = userResult.rows[0];
 
+        console.log('4. Memeriksa kecocokan kata sandi dengan bcrypt...');
         const isMatch = await bcrypt.compare(password, user.password_hash);
+        console.log(`5. Hasil pencocokan sandi: ${isMatch}`);
+
         if (!isMatch) {
+            console.log('X. Berhenti: Kata sandi salah.');
             return res.status(400).json({ message: 'Email atau password salah!' });
         }
 
+        console.log('6. Membuat kunci tiket masuk (JWT)...');
         const token = jwt.sign(
             { id: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
 
+        console.log('7. Proses login SUKSES! Mengirim balasan ke frontend...');
         res.json({
             message: 'Login berhasil! Selamat datang kembali 🐿️',
             token: token,
@@ -61,7 +73,8 @@ const login = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error saat login:', error.message);
+        console.error('ERROR KRITIS SAAT LOGIN:', error.message);
+        console.error(error.stack); // Ini akan melacak letak baris error secara presisi
         res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
     }
 };
