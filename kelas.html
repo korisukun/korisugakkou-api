@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Kelas - KORISU Gakkou</title>
+    <title>Ruang Kelas - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
@@ -12,166 +12,154 @@
             --korisu-black: #212529;
             --korisu-white: #ffffff;
         }
-        body {
-            background-color: #f8f9fa;
-            color: var(--korisu-black);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        body { 
+            background-color: #f8f9fa; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            /* Mencegah layar melar ke samping jika ada elemen yang melebar */
+            overflow-x: hidden; 
         }
-        .navbar-korisu {
-            background-color: var(--korisu-orange);
-        }
-        .course-card {
+        .navbar-korisu { background-color: var(--korisu-orange); }
+        .card-custom {
             background-color: var(--korisu-white);
             border: 2px solid var(--korisu-black);
             border-radius: 10px;
             box-shadow: 4px 4px 0px var(--korisu-black);
-            transition: transform 0.2s;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
         }
-        .course-card:hover {
-            transform: translateY(-5px);
-        }
-        .course-thumbnail {
-            background-color: var(--korisu-black);
-            color: var(--korisu-orange);
-            height: 150px;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            font-weight: bold;
-        }
-        .course-body {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .btn-akses {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-white);
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* Rasio 16:9 yang sempurna */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
             border: 2px solid var(--korisu-black);
-            font-weight: bold;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            margin-top: auto; /* Mendorong tombol ke bawah */
+            height: 100%;
         }
-        .btn-akses:hover {
-            background-color: var(--korisu-black);
-            color: var(--korisu-white);
+        .playlist-item {
+            cursor: pointer;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px;
+            transition: background-color 0.2s;
         }
-        .badge-level {
-            background-color: var(--korisu-black);
-            color: var(--korisu-white);
-            font-size: 0.8rem;
-            padding: 5px 10px;
-            border-radius: 20px;
-            margin-bottom: 10px;
-            display: inline-block;
+        .playlist-item:hover, .playlist-item.active {
+            background-color: #ffe8d6;
+            border-left: 4px solid var(--korisu-orange);
         }
     </style>
 </head>
 <body>
 
-    <!-- Navigasi Atas -->
-    <nav class="navbar navbar-dark navbar-korisu shadow-sm mb-4">
+    <nav class="navbar navbar-dark navbar-korisu shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="dashboard.html">⬅️ Kembali ke Dashboard</a>
+            <a class="navbar-brand fw-bold" href="dashboard.html">📺 Kelas KORISU Gakkou</a>
+            <button class="btn btn-sm btn-light fw-bold" onclick="kembali()">Kembali</button>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="mb-4 border-bottom pb-3">
-            <h2 class="fw-bold">📺 Katalog Video Kelas</h2>
-            <p class="text-muted">Pilih materi yang ingin kamu pelajari hari ini.</p>
-        </div>
+    <div class="container mt-4 mb-5">
+        <div class="row">
+            
+            <!-- Area Pemutar Video -->
+            <div class="col-lg-8 mb-4">
+                <div class="card card-custom p-3">
+                    <h3 class="fw-bold mb-3" id="judul-video-aktif">Memuat Kelas...</h3>
+                    <div class="video-container">
+                        <iframe id="frame-video" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <div class="mt-3">
+                        <h5 class="fw-bold">Deskripsi Materi:</h5>
+                        <p id="deskripsi-video-aktif" class="text-muted">Silakan tunggu sebentar...</p>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Rak Kelas (Grid System Bootstrap) -->
-        <div class="row g-4" id="rak-kelas">
-            <!-- Kartu kelas akan dirender oleh JavaScript di sini -->
+            <!-- Area Daftar Putar (Playlist) -->
+            <div class="col-lg-4">
+                <div class="card card-custom p-0 overflow-hidden">
+                    <div class="bg-dark text-white p-3">
+                        <h5 class="fw-bold mb-0">📚 Daftar Materi</h5>
+                    </div>
+                    <div id="daftar-playlist" class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
+                        <!-- Daftar video akan dimuat di sini oleh JavaScript -->
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // 1. Validasi Keamanan Token
-        const TOKEN_SAYA = localStorage.getItem('korisu_token');
-        if (!TOKEN_SAYA) {
+        const API_URL = 'https://korisugakkou-api.onrender.com/api';
+        const TOKEN = localStorage.getItem('korisu_token');
+        let daftarMateri = [];
+
+        // Tendang penyusup yang tidak punya token
+        if (!TOKEN) {
             window.location.href = "auth.html";
         }
 
-        // 2. Data Simulasi Kelas (Nanti akan ditarik dari API Database LMS)
-        const dataKelas = [
-            {
-                id: 1,
-                judul: "Persiapan Ujian Kaigo Kokka Shiken",
-                deskripsi: "Materi esensial dan pembahasan kosakata khusus asuhan keperawatan lansia untuk lulus ujian Kaigo.",
-                level: "Kaigo",
-                icon: "🏥"
-            },
-            {
-                id: 2,
-                judul: "90 Days Challenge JLPT N3",
-                deskripsi: "Program intensif 3 bulan menguasai tata bahasa, kosakata, dan pemahaman bacaan untuk tembus N3.",
-                level: "JLPT N3",
-                icon: "🎯"
-            },
-            {
-                id: 3,
-                judul: "Fundamental Bahasa Jepang",
-                deskripsi: "Materi dasar hiragana, katakana, dan pola kalimat awal. Sangat cocok untuk anak muda pemula!",
-                level: "JLPT N5",
-                icon: "🌸"
-            },
-            {
-                id: 4,
-                judul: "Kanji Sehari-hari Level Menengah",
-                deskripsi: "Tingkatkan kemampuan membaca huruf Kanji yang sering muncul di kehidupan nyata di Jepang.",
-                level: "JLPT N4",
-                icon: "⛩️"
+        function kembali() {
+            window.location.href = "dashboard.html";
+        }
+
+        // Mengambil daftar kelas dari Backend
+        async function muatKelas() {
+            try {
+                const res = await fetch(`${API_URL}/courses`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    daftarMateri = data.materi;
+                    renderPlaylist();
+                    if (daftarMateri.length > 0) {
+                        putarVideo(0); // Putar video urutan pertama secara default
+                    }
+                } else {
+                    alert("Gagal memuat materi: " + data.message);
+                }
+            } catch (error) {
+                console.error("Error jaringan:", error);
             }
-        ];
+        }
 
-        // 3. Fungsi Menampilkan Kelas ke HTML
-        function renderKelas() {
-            const rak = document.getElementById('rak-kelas');
-            rak.innerHTML = '';
+        // Menyusun daftar putar di sebelah kanan
+        function renderPlaylist() {
+            const wadahPlaylist = document.getElementById('daftar-playlist');
+            wadahPlaylist.innerHTML = "";
 
-            dataKelas.forEach(kelas => {
-                const col = document.createElement('div');
-                col.className = 'col-md-6 col-lg-4'; // Responsive: 2 kolom di tablet, 3 kolom di laptop
-
-                col.innerHTML = `
-                    <div class="course-card">
-                        <div class="course-thumbnail">
-                            ${kelas.icon}
-                        </div>
-                        <div class="course-body">
-                            <div>
-                                <span class="badge-level">${kelas.level}</span>
-                            </div>
-                            <h5 class="fw-bold mt-2">${kelas.judul}</h5>
-                            <p class="text-muted small">${kelas.deskripsi}</p>
-                            <button class="btn btn-akses mt-3" onclick="bukaKelas(${kelas.id})">Tonton Video</button>
-                        </div>
-                    </div>
-                `;
-                rak.appendChild(col);
+            daftarMateri.forEach((materi, index) => {
+                const item = document.createElement('div');
+                item.className = `playlist-item ${index === 0 ? 'active' : ''}`;
+                item.id = `playlist-item-${index}`;
+                item.innerHTML = `<h6 class="fw-bold mb-1">${materi.judul}</h6>`;
+                item.onclick = () => putarVideo(index);
+                wadahPlaylist.appendChild(item);
             });
         }
 
-        // 4. Fungsi Navigasi ke Halaman Pemutar Video
-        function bukaKelas(kelasId) {
-            // Menyimpan ID kelas yang dipilih ke memori sementara
-            localStorage.setItem('korisu_kelas_aktif', kelasId);
-            // Berpindah ke halaman pemutar video
-            window.location.href = "video-player.html";
+        // Mengganti video utama saat daftar putar diklik
+        function putarVideo(indeks) {
+            const materiPilihan = daftarMateri[indeks];
+            
+            // Perbarui Judul & Frame
+            document.getElementById('judul-video-aktif').innerText = materiPilihan.judul;
+            document.getElementById('deskripsi-video-aktif').innerText = materiPilihan.deskripsi;
+            document.getElementById('frame-video').src = materiPilihan.url_video;
+
+            // Perbarui warna sorotan di daftar putar
+            document.querySelectorAll('.playlist-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`playlist-item-${indeks}`).classList.add('active');
         }
 
-        // Eksekusi saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', renderKelas);
+        // Jalankan saat layar pertama kali dibuka
+        document.addEventListener('DOMContentLoaded', muatKelas);
     </script>
 </body>
 </html>
