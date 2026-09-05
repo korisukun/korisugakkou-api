@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko Maskot - KORISU Gakkou</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --korisu-orange: #fd7e14;
+            --korisu-black: #212529;
+            --korisu-white: #ffffff;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: var(--korisu-black);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar-korisu {
+            background-color: var(--korisu-orange);
+        }
+        .shop-card {
+            background-color: var(--korisu-white);
+            border: 2px solid var(--korisu-black);
+            border-radius: 10px;
+            box-shadow: 4px 4px 0px var(--korisu-black);
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .item-image {
+            width: 100px;
+            height: 100px;
+            background-color: #e9ecef;
+            border: 2px dashed var(--korisu-black);
+            border-radius: 10px;
+            margin: 0 auto 15px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        .btn-beli {
+            background-color: var(--korisu-black);
+            color: var(--korisu-white);
+            font-weight: bold;
+            border: none;
+            width: 100%;
+        }
+        .btn-beli:hover {
+            background-color: var(--korisu-orange);
+            color: var(--korisu-black);
+            border: 2px solid var(--korisu-black);
+        }
+        /* Notifikasi Inline */
+        #notif-toko {
+            display: none;
+            font-weight: bold;
+            border: 2px solid var(--korisu-black);
+            box-shadow: 2px 2px 0px var(--korisu-black);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi Atas -->
+    <nav class="navbar navbar-dark navbar-korisu shadow-sm mb-4">
+        <div class="container d-flex justify-content-between">
+            <a class="navbar-brand fw-bold" href="dashboard.html">⬅️ Kembali ke Dashboard</a>
+            <div class="text-white fw-bold fs-5">
+                Saldo: <span id="koin-murid">🪙 Memuat...</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold">🏪 Toko Maskot KORISU</h1>
+            <p>Belanjakan Koin Tupai-mu untuk mendandani maskot belajarmu!</p>
+        </div>
+
+        <!-- Area Notifikasi Pembelian -->
+        <div id="notif-toko" class="alert text-center" role="alert">
+            Pesan Notifikasi
+        </div>
+
+        <!-- Rak Etalase Barang (Akan diisi oleh JavaScript) -->
+        <div class="row" id="rak-toko">
+            <!-- Data akan disuntikkan di sini -->
+        </div>
+    </div>
+
+    <script>
+    const API_URL = 'http://localhost:5000/api';
+    const TOKEN_SAYA = localStorage.getItem('korisu_token');
+
+    if (!TOKEN_SAYA) {
+        window.location.href = "auth.html";
+    }
+
+    // 1. Ambil Saldo Murid
+    async function muatSaldo() {
+        try {
+            const res = await fetch(`${API_URL}/shop/saldo`, {
+                headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
+            });
+            const data = await res.json();
+            if(res.ok) {
+                document.getElementById('koin-murid').innerText = `🪙 ${data.data.koin_dimiliki} Koin`;
+            }
+        } catch (error) {
+            console.error("Gagal memuat saldo:", error);
+        }
+    }
+
+    // 2. Ambil Daftar Barang dari Backend
+    async function muatBarangToko() {
+        try {
+            const res = await fetch(`${API_URL}/shop`, {
+                headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
+            });
+            const data = await res.json();
+            
+            if(res.ok && data.data) {
+                renderRak(data.data);
+            }
+        } catch (error) {
+            console.error("Gagal memuat barang:", error);
+        }
+    }
+
+    // 3. Render Rak Toko
+    function renderRak(items) {
+        const rakToko = document.getElementById('rak-toko');
+        rakToko.innerHTML = ''; 
+
+        items.forEach(item => {
+            const colDiv = document.createElement('div');
+            colDiv.className = 'col-md-4 col-sm-6';
+
+            colDiv.innerHTML = `
+                <div class="shop-card">
+                    <div class="item-image">🎁</div>
+                    <h5 class="fw-bold">${item.nama_item}</h5>
+                    <p class="text-muted text-capitalize mb-2">${item.tipe_item}</p>
+                    <p class="fs-5 fw-bold text-success mb-3">🪙 ${item.harga_koin} Koin</p>
+                    <button class="btn btn-beli py-2" onclick="prosesBeli(${item.id})">Beli Item Ini</button>
+                </div>
+            `;
+            rakToko.appendChild(colDiv);
+        });
+    }
+
+    // 4. Eksekusi Pembelian & Perbarui Saldo Otomatis
+    async function prosesBeli(itemId) {
+        const notifBox = document.getElementById('notif-toko');
+        notifBox.style.display = 'none';
+
+        try {
+            const res = await fetch(`${API_URL}/shop/buy`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${TOKEN_SAYA}` 
+                },
+                body: JSON.stringify({ item_id: itemId })
+            });
+            
+            const hasil = await res.json();
+
+            notifBox.style.display = 'block';
+            notifBox.innerText = hasil.message;
+
+            if(res.ok) {
+                notifBox.className = "alert alert-success text-center";
+                muatSaldo(); // REFRESH SALDO OTOMATIS SETELAH BELI!
+            } else {
+                notifBox.className = "alert alert-danger text-center";
+            }
+            
+        } catch (error) {
+            console.error("Gagal memproses transaksi:", error);
+        }
+    }
+
+    // Jalankan saat halaman dibuka
+    document.addEventListener('DOMContentLoaded', () => {
+        muatSaldo();
+        muatBarangToko();
+    });
+</script>
+</body>
+</html>

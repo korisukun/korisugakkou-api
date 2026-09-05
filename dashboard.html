@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Belajar - KORISU Gakkou</title>
+    <!-- Mengambil gaya Bootstrap langsung dari internet (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* Desain Khusus Tema KORISU Gakkou */
+        :root {
+            --korisu-orange: #fd7e14; /* Warna dominan oranye */
+            --korisu-black: #212529;  /* Warna teks hitam */
+            --korisu-white: #ffffff;  /* Warna putih bersih */
+        }
+        
+        body {
+            background-color: #f8f9fa; /* Sedikit abu-abu agar kartu putih lebih menonjol */
+            color: var(--korisu-black);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-korisu {
+            background-color: var(--korisu-orange);
+        }
+
+        .card-custom {
+            background-color: var(--korisu-white);
+            border: 2px solid var(--korisu-black);
+            border-radius: 10px;
+            box-shadow: 4px 4px 0px var(--korisu-black); /* Efek bayangan tegas */
+            transition: transform 0.2s;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+        }
+
+        .btn-korisu {
+            background-color: var(--korisu-orange);
+            color: var(--korisu-white);
+            border: 2px solid var(--korisu-black);
+            font-weight: bold;
+        }
+
+        .btn-korisu:hover {
+            background-color: var(--korisu-black);
+            color: var(--korisu-white);
+        }
+
+        .quote-box {
+            border-left: 5px solid var(--korisu-orange);
+            background-color: #fff3cd; /* Latar oranye sangat muda */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi Atas -->
+    <nav class="navbar navbar-dark navbar-korisu shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">🐿️ KORISU Gakkou</a>
+            <div class="d-flex text-white align-items-center">
+                <span class="me-3 fw-bold" id="nama-murid">Memuat...</span>
+                <span class="badge bg-dark fs-6" id="koin-murid">🪙 0 Koin</span>
+                <button class="btn btn-sm btn-light ms-3 fw-bold" onclick="logout()">Keluar</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Konten Utama -->
+    <div class="container mt-5">
+        <div class="row">
+            
+            <!-- Kolom Kiri: Motivasi & Progres -->
+            <div class="col-md-8">
+                <h2 class="fw-bold mb-4">おかえりなさい！ Selamat datang kembali!</h2>
+                
+                <!-- Kotak Quote Motivasi (Data dari Backend) -->
+                <div class="card card-custom quote-box p-4 mb-4">
+                    <h5 class="fw-bold text-muted mb-3">Pesan Sensei Hari Ini:</h5>
+                    <h3 class="fw-bold" id="teks-jepang">Memuat pepatah...</h3>
+                    <p class="text-muted mb-1" id="cara-baca">...</p>
+                    <p class="fs-5" id="arti-indo">...</p>
+                </div>
+
+                <!-- Tombol Mulai Belajar -->
+                <div class="card card-custom p-4 text-center">
+                    <h4 class="fw-bold">Jadwal Review Kosakata (SRS)</h4>
+                    <p>Ada <span id="jumlah-antrean" class="fw-bold text-danger fs-5">0</span> kosakata Kaigo yang harus kamu review hari ini.</p>
+                    <button class="btn btn-korisu btn-lg mt-2" onclick="mulaiKuis()">Mulai Kuis Sekarang 🚀</button>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Akses Cepat -->
+            <div class="col-md-4">
+                <div class="card card-custom p-3 mb-4">
+                    <h5 class="fw-bold border-bottom pb-2">Menu Cepat</h5>
+                    <ul class="list-unstyled mt-3">
+                        <li class="mb-3"><a href="kelas.html" class="text-decoration-none text-dark fw-bold">📺 Materi Video Kelas</a></li>
+                        <li class="mb-3"><a href="#" class="text-decoration-none text-dark fw-bold">🎒 Buka Tas Inventaris</a></li>
+                        <li class="mb-3"><a href="toko.html" class="text-decoration-none text-dark fw-bold">🏪 Kunjungi Toko Koin</a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Logika Frontend -->
+    <!-- Script Logika Frontend -->
+    <script>
+        const API_URL = 'http://localhost:5000/api';
+        
+        // 1. MENGAMBIL TOKEN DARI BROWSER
+        const TOKEN_SAYA = localStorage.getItem('korisu_token');
+
+        // Jika murid belum login (token kosong), tendang kembali ke auth.html
+        if (!TOKEN_SAYA) {
+            window.location.href = "auth.html";
+        }
+
+        // 2. Fungsi Mengambil Quote
+        async function muatQuote() {
+            try {
+                const respons = await fetch(`${API_URL}/quotes/random`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
+                });
+                const data = await respons.json();
+                
+                if(respons.ok) {
+                    document.getElementById('teks-jepang').innerText = data.quote.teks_jepang;
+                    document.getElementById('cara-baca').innerText = data.quote.cara_baca;
+                    document.getElementById('arti-indo').innerText = data.quote.arti_indonesia;
+                }
+            } catch (error) {
+                console.error("Gagal memuat quote:", error);
+            }
+        }
+
+        // 3. Fungsi Mengambil Jumlah Antrean SRS
+        async function muatAntreanSRS() {
+            try {
+                const respons = await fetch(`${API_URL}/srs/today`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
+                });
+                const data = await respons.json();
+                
+                if(respons.ok) {
+                    document.getElementById('jumlah-antrean').innerText = data.jumlah_antrean;
+                }
+            } catch (error) {
+                console.error("Gagal memuat antrean:", error);
+            }
+        }
+
+        // 4. Navigasi Halaman
+        function mulaiKuis() {
+            window.location.href = "kuis.html";
+        }
+
+        function logout() {
+            // Hapus memori saat keluar
+            localStorage.removeItem('korisu_token');
+            localStorage.removeItem('korisu_user');
+            window.location.href = "auth.html";
+        }
+
+        // 5. EKSEKUSI SAAT HALAMAN DIMUAT
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pasang Nama Murid dari memori browser
+            const dataMurid = JSON.parse(localStorage.getItem('korisu_user'));
+            if (dataMurid) {
+                document.getElementById('nama-murid').innerText = dataMurid.nama_lengkap;
+            }
+
+            // Panggil API
+            muatQuote();
+            muatAntreanSRS();
+        });
+    </script>
+    
+    <!-- Script pelengkap Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

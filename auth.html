@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk - KORISU Gakkou</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --korisu-orange: #fd7e14;
+            --korisu-black: #212529;
+            --korisu-white: #ffffff;
+        }
+        body {
+            background-color: var(--korisu-orange); /* Latar belakang oranye tebal khas KORISU */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .auth-card {
+            background-color: var(--korisu-white);
+            border: 3px solid var(--korisu-black);
+            border-radius: 15px;
+            box-shadow: 8px 8px 0px var(--korisu-black);
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem;
+        }
+        .btn-korisu {
+            background-color: var(--korisu-black);
+            color: var(--korisu-white);
+            border: 2px solid var(--korisu-black);
+            font-weight: bold;
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+        }
+        .btn-korisu:hover {
+            background-color: var(--korisu-orange);
+            color: var(--korisu-black);
+        }
+        .form-control {
+            border: 2px solid var(--korisu-black);
+            margin-bottom: 15px;
+        }
+        .form-control:focus {
+            border-color: var(--korisu-orange);
+            box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
+        }
+        .toggle-link {
+            color: var(--korisu-orange);
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .toggle-link:hover {
+            text-decoration: underline;
+            color: var(--korisu-black);
+        }
+        /* Menyembunyikan form pendaftaran secara default */
+        #form-register-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">🐿️ KORISU Gakkou</h2>
+            <p class="text-muted" id="auth-subtitle">Silakan masuk untuk melanjutkan belajar.</p>
+        </div>
+
+        <!-- Pesan Notifikasi (Error/Sukses) -->
+        <div id="auth-alert" class="alert d-none text-center fw-bold" role="alert"></div>
+
+        <!-- FORM LOGIN -->
+        <div id="form-login-container">
+            <form id="form-login">
+                <input type="email" id="login-email" class="form-control" placeholder="Alamat Email" required>
+                <input type="password" id="login-password" class="form-control" placeholder="Kata Sandi" required>
+                <button type="submit" class="btn btn-korisu">MASUK</button>
+            </form>
+            <div class="text-center mt-3">
+                Belum punya akun? <span class="toggle-link" onclick="toggleForm('register')">Daftar di sini</span>
+            </div>
+        </div>
+
+        <!-- FORM REGISTER -->
+        <div id="form-register-container">
+            <form id="form-register">
+                <input type="text" id="reg-nama" class="form-control" placeholder="Nama Lengkap" required>
+                <input type="email" id="reg-email" class="form-control" placeholder="Alamat Email" required>
+                <input type="password" id="reg-password" class="form-control" placeholder="Kata Sandi (Minimal 6 karakter)" required>
+                <button type="submit" class="btn btn-korisu">DAFTAR SEKARANG</button>
+            </form>
+            <div class="text-center mt-3">
+                Sudah punya akun? <span class="toggle-link" onclick="toggleForm('login')">Masuk di sini</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/auth';
+
+        // 1. Fungsi Animasi Pergantian Form
+        function toggleForm(mode) {
+            const loginContainer = document.getElementById('form-login-container');
+            const regContainer = document.getElementById('form-register-container');
+            const subtitle = document.getElementById('auth-subtitle');
+            const alertBox = document.getElementById('auth-alert');
+            
+            alertBox.classList.add('d-none'); // Sembunyikan pesan error sebelumnya
+
+            if(mode === 'register') {
+                loginContainer.style.display = 'none';
+                regContainer.style.display = 'block';
+                subtitle.innerText = "Mulai perjalanan bahasa Jepangmu!";
+            } else {
+                regContainer.style.display = 'none';
+                loginContainer.style.display = 'block';
+                subtitle.innerText = "Silakan masuk untuk melanjutkan belajar.";
+            }
+        }
+
+        // Fungsi Bantuan untuk Menampilkan Notifikasi
+        function showNotif(pesan, isSuccess) {
+            const alertBox = document.getElementById('auth-alert');
+            alertBox.innerText = pesan;
+            alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+            
+            if(isSuccess) {
+                alertBox.classList.add('alert-success');
+            } else {
+                alertBox.classList.add('alert-danger');
+            }
+        }
+
+        // 2. Logika Pendaftaran (Register)
+        document.getElementById('form-register').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Mencegah halaman me-refresh
+            
+            const nama = document.getElementById('reg-nama').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nama_lengkap: nama, email: email, password: password, role: 'murid' })
+                });
+                
+                const data = await res.json();
+
+                if(res.ok) {
+                    showNotif("Pendaftaran berhasil! Silakan masuk.", true);
+                    document.getElementById('form-register').reset();
+                    setTimeout(() => toggleForm('login'), 2000); // Geser ke form login setelah 2 detik
+                } else {
+                    showNotif(data.message, false); // Misal: Email sudah terdaftar
+                }
+            } catch (error) {
+                showNotif("Gagal terhubung ke server.", false);
+            }
+        });
+
+        // 3. Logika Masuk (Login)
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                
+                const data = await res.json();
+
+                if(res.ok) {
+                    // INI BAGIAN PALING PENTING: Menyimpan Tiket VIP ke Browser!
+                    localStorage.setItem('korisu_token', data.token);
+                    localStorage.setItem('korisu_user', JSON.stringify(data.user));
+                    
+                    showNotif("Login berhasil! Mengalihkan...", true);
+                    
+                    // Lempar pengguna ke halaman Dashboard
+                    setTimeout(() => {
+                        window.location.href = "dashboard.html";
+                    }, 1000);
+                } else {
+                    showNotif(data.message, false); // Misal: Password salah
+                }
+            } catch (error) {
+                showNotif("Gagal terhubung ke server.", false);
+            }
+        });
+    </script>
+</body>
+</html>
