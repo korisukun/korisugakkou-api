@@ -66,11 +66,17 @@ const login = async (req, res) => {
         );
 
         console.log('7. Proses login SUKSES! Mengirim balasan ke frontend...');
-        res.json({
-            message: 'Login berhasil! Selamat datang kembali 🐿️',
-            token: token,
-            user: { id: user.id, nama_lengkap: user.nama_lengkap, role: user.role }
-        });
+        // Ubah bagian ini di dalam authController.js (fungsi login)
+	res.json({
+    		message: 'Login berhasil! Selamat datang kembali 🐿️',
+    		token: token,
+    		user: { 
+        	id: user.id, 
+        	nama_lengkap: user.nama_lengkap, 
+        	role: user.role,
+        	koin: user.koin || 0 // <-- Tambahkan baris ini
+    }
+});
 
     } catch (error) {
         console.error('ERROR KRITIS SAAT LOGIN:', error.message);

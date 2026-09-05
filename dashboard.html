@@ -173,6 +173,7 @@
             const dataMurid = JSON.parse(localStorage.getItem('korisu_user'));
             if (dataMurid) {
                 document.getElementById('nama-murid').innerText = dataMurid.nama_lengkap;
+		document.getElementById('koin-murid').innerText = `🪙 ${dataMurid.koin} Koin`;
             }
 
             // Panggil API
