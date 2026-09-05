@@ -4,12 +4,20 @@ const db = require('../config/db');
 const addQuote = async (req, res) => {
     try {
         const { teks_jepang, cara_baca, arti_indonesia, sumber_tokoh, kategori_fokus } = req.body;
+        
+        console.log("--> Menerima request tambah quote:", teks_jepang);
+
         const newQuote = await db.query(
             'INSERT INTO study_quotes (teks_jepang, cara_baca, arti_indonesia, sumber_tokoh, kategori_fokus) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [teks_jepang, cara_baca, arti_indonesia, sumber_tokoh, kategori_fokus]
         );
+        
+        console.log("--> Quote sukses masuk database!");
         res.status(201).json({ message: 'Quote motivasi berhasil ditambahkan! 🌸', quote: newQuote.rows[0] });
+        
     } catch (error) {
+        // INI SENTER PELACAK UTAMANYA:
+        console.error('>>> ERROR DATABASE QUOTE:', error.message);
         res.status(500).json({ message: 'Gagal menambah quote.' });
     }
 };
@@ -17,7 +25,6 @@ const addQuote = async (req, res) => {
 // 2. Sistem Menarik 1 Quote Acak untuk Murid
 const getRandomQuote = async (req, res) => {
     try {
-        // Menangkap kategori dari URL (contoh: ?kategori=kanji)
         const { kategori } = req.query; 
         
         let queryStr = 'SELECT * FROM study_quotes';
@@ -28,7 +35,6 @@ const getRandomQuote = async (req, res) => {
             params.push(kategori);
         }
         
-        // Perintah SQL untuk mengacak urutan dan mengambil 1 saja
         queryStr += ' ORDER BY RANDOM() LIMIT 1';
 
         const quoteRes = await db.query(queryStr, params);
@@ -39,7 +45,7 @@ const getRandomQuote = async (req, res) => {
 
         res.json({ quote: quoteRes.rows[0] });
     } catch (error) {
-        console.error(error);
+        console.error('>>> ERROR AMBIL QUOTE:', error.message);
         res.status(500).json({ message: 'Gagal mengambil quote.' });
     }
 };
