@@ -77,7 +77,7 @@
         <!-- Header Progress -->
         <div class="d-flex justify-content-between mb-4 border-bottom pb-2">
             <span class="fw-bold">Misi Harian: <span id="progress-text">0 / 0</span></span>
-            <span class="fw-bold text-danger">Waktu Berjalan ⏱️</span>
+            <span class="fw-bold text-danger" id="teks-timer">0 Detik ⏱️</span>
         </div>
 
         <!-- Area Soal -->
@@ -110,6 +110,8 @@
         let antreanSoal = [];
         let indeksSaatIni = 0;
         let waktuMulai = 0;
+	let timerInterval;
+	let detikBerjalan = 0;
 
         // 1. Ambil Antrean Soal Hari Ini
         async function mulaiSesiSRS() {
@@ -130,25 +132,34 @@
             }
         }
 
-        // 2. Tampilkan Soal ke Layar & Nyalakan Timer
-        function tampilkanSoal(indeks) {
-            const soal = antreanSoal[indeks];
-            
-            document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
-            document.getElementById('kanji').innerText = soal.kanji;
-            document.getElementById('furigana').innerText = soal.furigana;
-            
-            // Reset input dan tampilan
-            document.getElementById('input-arti').value = "";
-            document.getElementById('area-soal').style.display = "block";
-            document.getElementById('hasil-notif').style.display = "none";
-            
-            // Mulai pencatatan waktu
-            waktuMulai = Date.now();
-            
-            // Fokus otomatis ke kotak ketik
-            document.getElementById('input-arti').focus();
-        }
+// 2. Tampilkan Soal ke Layar & Nyalakan Timer
+function tampilkanSoal(indeks) {
+    const soal = antreanSoal[indeks];
+    
+    document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
+    document.getElementById('kanji').innerText = soal.kanji;
+    document.getElementById('furigana').innerText = soal.furigana;
+    
+    // Reset input dan tampilan
+    document.getElementById('input-arti').value = "";
+    document.getElementById('area-soal').style.display = "block";
+    document.getElementById('hasil-notif').style.display = "none";
+    
+    // Mulai pencatatan waktu di latar belakang
+    waktuMulai = Date.now();
+    
+    // NYALAKAN DETAK TIMER DI LAYAR
+    clearInterval(timerInterval); // Hapus sisa timer sebelumnya
+    detikBerjalan = 0;
+    document.getElementById('teks-timer').innerText = `0 Detik ⏱️`;
+    timerInterval = setInterval(() => {
+        detikBerjalan++;
+        document.getElementById('teks-timer').innerText = `${detikBerjalan} Detik ⏱️`;
+    }, 1000);
+    
+    // Fokus otomatis ke kotak ketik
+    document.getElementById('input-arti').focus();
+}
 
         // 3. Evaluasi Jawaban & Hitung Waktu
         async function cekJawaban() {
@@ -184,16 +195,28 @@
                 
                 document.getElementById('arti-sebenarnya').innerText = `Artinya: ${soal.arti_indonesia}`;
 
-                const notifBox = document.getElementById('hasil-notif');
-                if(isBenar) {
-                    notifBox.style.backgroundColor = "#d1e7dd"; // Hijau muda Bootstrap
-                    document.getElementById('status-jawaban').innerText = `Benar! ⏱️ ${detikDihabiskan} Detik`;
-                    document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin Tupai 🐿️`;
-                } else {
-                    notifBox.style.backgroundColor = "#f8d7da"; // Merah muda Bootstrap
-                    document.getElementById('status-jawaban').innerText = `Kurang Tepat!`;
-                    document.getElementById('reward-text').innerText = `Jangan menyerah, kita coba lagi nanti!`;
-                }
+// HENTIKAN TIMER SAAT TOMBOL JAWAB DITEKAN
+clearInterval(timerInterval);
+
+const notifBox = document.getElementById('hasil-notif');
+if(isBenar) {
+    notifBox.style.backgroundColor = "#d1e7dd"; // Hijau muda Bootstrap
+    document.getElementById('status-jawaban').innerText = `Benar! ⏱️ ${detikDihabiskan} Detik`;
+    document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin Tupai 🐿️`;
+    
+    // UPDATE DOMPET DI MEMORI BROWSER UNTUK DASHBOARD
+    let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
+    if (userSekarang) {
+        // Tambahkan koin baru ke dompet lama
+        userSekarang.koin = (userSekarang.koin || 0) + hasilBackend.reward.koin;
+        // Simpan kembali ke dalam brankas browser
+        localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
+    }
+} else {
+    notifBox.style.backgroundColor = "#f8d7da"; // Merah muda Bootstrap
+    document.getElementById('status-jawaban').innerText = `Kurang Tepat!`;
+    document.getElementById('reward-text').innerText = `Jangan menyerah, kita coba lagi nanti!`;
+}
                 
             } catch (error) {
                 console.error("Gagal mengirim jawaban", error);
