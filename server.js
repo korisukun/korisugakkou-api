@@ -74,6 +74,10 @@ app.get('/api/lms/materi-eksklusif', protect, (req, res) => {
     });
 });
 
+// [BARU] Rute untuk memanggil data Maskot di Dashboard
+const { getMascot } = require('./src/controllers/shopController');
+app.get('/api/mascot', protect, getMascot);
+
 app.listen(PORT, () => {
     console.log(`Server siap dan berjalan di port ${PORT}`);
 });

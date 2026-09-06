@@ -13,70 +13,25 @@
             --korisu-white: #ffffff;
         }
         
-        body {
-            background-color: #f8f9fa;
-            color: var(--korisu-black);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-
-        .navbar-korisu {
-            background-color: var(--korisu-orange);
-            border-bottom: 3px solid var(--korisu-black);
-        }
-
+        body { background-color: #f8f9fa; color: var(--korisu-black); font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .navbar-korisu { background-color: var(--korisu-orange); border-bottom: 3px solid var(--korisu-black); }
         .card-custom {
-            background-color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            border-radius: 10px;
-            box-shadow: 4px 4px 0px var(--korisu-black);
-            transition: transform 0.2s;
-            margin-bottom: 1.5rem;
+            background-color: var(--korisu-white); border: 2px solid var(--korisu-black);
+            border-radius: 10px; box-shadow: 4px 4px 0px var(--korisu-black);
+            transition: transform 0.2s; margin-bottom: 1.5rem;
         }
-
-        .card-custom:hover {
-            transform: translateY(-3px);
-        }
-
-        .btn-korisu {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
-        }
-
-        .btn-korisu:hover {
-            background-color: var(--korisu-black);
-            color: var(--korisu-white);
-        }
-
-        .quote-box {
-            border-left: 5px solid var(--korisu-orange);
-            background-color: #fff3cd; 
-        }
-
-        .stats-badge {
-            font-size: 0.9rem;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
-            background-color: var(--korisu-white);
-            color: var(--korisu-black);
-        }
-
-        .progress-custom {
-            height: 20px;
-            border: 2px solid var(--korisu-black);
-            border-radius: 10px;
-            background-color: #e9ecef;
-        }
+        .card-custom:hover { transform: translateY(-3px); }
+        .btn-korisu { background-color: var(--korisu-orange); color: var(--korisu-white); border: 2px solid var(--korisu-black); font-weight: bold; }
+        .btn-korisu:hover { background-color: var(--korisu-black); color: var(--korisu-white); }
+        .quote-box { border-left: 5px solid var(--korisu-orange); background-color: #fff3cd; }
+        .stats-badge { font-size: 0.9rem; padding: 8px 12px; border-radius: 8px; border: 2px solid var(--korisu-black); font-weight: bold; background-color: var(--korisu-white); color: var(--korisu-black); }
+        .progress-custom { height: 20px; border: 2px solid var(--korisu-black); border-radius: 10px; background-color: #e9ecef; }
+        .progress-bar-korisu { background-color: var(--korisu-orange); font-weight: bold; color: var(--korisu-black); }
         
-        .progress-bar-korisu {
-            background-color: var(--korisu-orange);
-            font-weight: bold;
-            color: var(--korisu-black);
-        }
+        /* Area Maskot */
+        .maskot-area { font-size: 6rem; line-height: 1; position: relative; display: inline-block; }
+        .maskot-item-overlay { position: absolute; font-size: 3rem; bottom: -5px; right: -15px; transform: rotate(15deg); }
+        .box-item-dipakai { background-color: #f8f9fa; border: 2px dashed var(--korisu-black); border-radius: 8px; padding: 10px; }
     </style>
 </head>
 <body>
@@ -94,29 +49,55 @@
         </div>
     </nav>
 
-    <!-- Konten Utama -->
     <div class="container mt-4">
         <div class="row">
             
-            <!-- Kolom Kiri: Progres, Motivasi & Kuis -->
+            <!-- Kolom Kiri: Maskot, Progres, Kuis -->
             <div class="col-lg-8">
                 <h2 class="fw-bold mb-1">おかえりなさい！</h2>
-                <p class="text-muted mb-4">Selamat datang kembali. Mari lanjutkan belajarmu hari ini!</p>
+                <p class="text-muted mb-4">Selamat datang kembali. Mari rawat maskotmu dengan terus belajar!</p>
                 
+                <!-- [BARU] KAMAR MASKOT TUPAI -->
+                <div class="card card-custom p-4 mb-4">
+                    <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start">
+                        <!-- Avatar Maskot -->
+                        <div class="maskot-area me-md-4 mb-3 mb-md-0">
+                            🐿️
+                            <span class="maskot-item-overlay" id="ikon-item-dipakai"></span>
+                        </div>
+                        
+                        <!-- Statistik Maskot -->
+                        <div class="flex-grow-1 w-100">
+                            <h4 class="fw-bold mb-1">Maskot Tupaimu <span class="badge bg-danger ms-2 fs-6 border border-dark">Lv. <span id="maskot-level">1</span></span></h4>
+                            
+                            <div class="d-flex justify-content-between mt-3 mb-1">
+                                <small class="fw-bold">Mood Bar (Kenyang & Senang)</small>
+                                <small class="fw-bold" id="mood-text">100%</small>
+                            </div>
+                            <div class="progress progress-custom mb-3" style="height: 15px;">
+                                <div class="progress-bar bg-success" id="mood-bar" style="width: 100%;"></div>
+                            </div>
+                            
+                            <div class="box-item-dipakai">
+                                <small class="text-muted fw-bold d-block mb-1">Item Toko Yang Sedang Dipakai:</small>
+                                <div class="fw-bold fs-5 text-primary" id="nama-item-dipakai">Belum menggunakan item</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Baris Statistik Cepat (EXP) -->
                 <div class="card card-custom p-3 mb-4">
                     <h6 class="fw-bold mb-2">Progres Belajar (EXP)</h6>
                     <div class="progress progress-custom">
-                        <div class="progress-bar progress-bar-korisu" role="progressbar" style="width: 0%;" id="exp-bar">0 EXP</div>
+                        <div class="progress-bar progress-bar-korisu" id="exp-bar" style="width: 0%;">0 EXP</div>
                     </div>
-                    <small class="text-muted mt-2">Kumpulkan EXP dengan menyelesaikan misi dan review SRS harian.</small>
                 </div>
                 
                 <!-- Kotak Quote Motivasi -->
                 <div class="card card-custom quote-box p-4 mb-4">
                     <h5 class="fw-bold text-muted mb-3">Pesan Sensei Hari Ini:</h5>
-                    <h3 class="fw-bold" id="teks-jepang">Memuat pepatah...</h3>
-                    <p class="text-muted mb-1" id="cara-baca">...</p>
+                    <h3 class="fw-bold" id="teks-jepang">...</h3>
                     <p class="fs-5 mb-0" id="arti-indo">...</p>
                 </div>
 
@@ -128,25 +109,25 @@
                 </div>
             </div>
 
-            <!-- Kolom Kanan: Akses Cepat Menu -->
+            <!-- Kolom Kanan: Menu Cepat -->
             <div class="col-lg-4 mt-4 mt-lg-0">
-                <div class="card card-custom p-4">
-                    <h5 class="fw-bold border-bottom pb-2 mb-3">Menu Cepat</h5>
+                <div class="card card-custom p-4 sticky-md-top" style="top: 80px;">
+                    <h5 class="fw-bold border-bottom pb-2 mb-3">Akses Cepat</h5>
                     <ul class="list-unstyled">
                         <li class="mb-3">
-                            <a href="kelas.html" class="text-decoration-none text-dark fw-bold d-block p-2 rounded hover-bg">
-                                📺 Materi Video Kelas
-                            </a>
+                            <button onclick="window.location.href='kelas.html'" class="btn btn-light w-100 text-start border-dark fw-bold p-3 fs-5">
+                                📺 Ruang Kelas (VOD)
+                            </button>
                         </li>
                         <li class="mb-3">
-                            <a href="toko.html" class="text-decoration-none text-dark fw-bold d-block p-2 rounded hover-bg">
-                                🏪 Kunjungi Toko Koin
-                            </a>
+                            <button onclick="window.location.href='toko.html'" class="btn btn-warning w-100 text-start border-dark fw-bold p-3 fs-5">
+                                🏪 Toko Koin Tupai
+                            </button>
                         </li>
                         <li class="mb-3" id="menu-sensei" style="display: none;">
-                            <a href="panel-sensei.html" class="text-decoration-none text-danger fw-bold d-block p-2 rounded hover-bg border border-danger">
-                                👨‍🏫 Panel Admin Sensei
-                            </a>
+                            <button onclick="window.location.href='panel-sensei.html'" class="btn btn-danger w-100 text-start border-dark fw-bold p-3 fs-5">
+                                👨‍🏫 Panel Sensei Admin
+                            </button>
                         </li>
                     </ul>
                 </div>
@@ -159,81 +140,78 @@
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
 
-        if (!TOKEN_SAYA) {
-            window.location.href = "auth.html";
+        if (!TOKEN_SAYA) window.location.href = "auth.html";
+
+        // Fungsi Simulasi Ambil Maskot (Integrasikan API ini di Backend Nanti)
+        async function muatMaskot() {
+            try {
+                const respons = await fetch(`${API_URL}/mascot`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }});
+                const data = await respons.json();
+                
+                if(respons.ok && data.mascot) {
+                    document.getElementById('maskot-level').innerText = data.mascot.level_mascot;
+                    
+                    // Mengatur warna Mood Bar
+                    const mood = data.mascot.status_mood;
+                    const moodBar = document.getElementById('mood-bar');
+                    moodBar.style.width = `${mood}%`;
+                    document.getElementById('mood-text').innerText = `${mood}%`;
+                    
+                    if(mood < 30) moodBar.className = "progress-bar bg-danger";
+                    else if(mood < 70) moodBar.className = "progress-bar bg-warning text-dark";
+                    else moodBar.className = "progress-bar bg-success";
+
+                    // Menampilkan Item yang Dibeli dari Toko
+                    if(data.mascot.item_dipakai) {
+                        document.getElementById('nama-item-dipakai').innerText = data.mascot.item_dipakai.nama_item;
+                        document.getElementById('ikon-item-dipakai').innerText = data.mascot.item_dipakai.image_url; // Memunculkan emoji aksesoris
+                    }
+                }
+            } catch (error) {
+                console.log("Menunggu backend API Maskot disiapkan...");
+            }
         }
 
-        // 1. Fungsi Mengambil Quote dari Database
         async function muatQuote() {
             try {
-                const respons = await fetch(`${API_URL}/quotes/random`, {
-                    headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
-                });
+                const respons = await fetch(`${API_URL}/quotes/random`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }});
                 const data = await respons.json();
-                
                 if(respons.ok && data.quote) {
                     document.getElementById('teks-jepang').innerText = data.quote.teks_jepang;
-                    document.getElementById('cara-baca').innerText = data.quote.cara_baca || '';
                     document.getElementById('arti-indo').innerText = data.quote.arti_indonesia;
-                } else {
-                    document.getElementById('teks-jepang').innerText = "がんばって！";
-                    document.getElementById('arti-indo').innerText = "Semangat belajarnya hari ini!";
                 }
-            } catch (error) {
-                console.error("Gagal memuat quote:", error);
-            }
+            } catch (error) {}
         }
 
-        // 2. Fungsi Mengambil Jumlah Antrean SRS
         async function muatAntreanSRS() {
             try {
-                const respons = await fetch(`${API_URL}/srs/today`, {
-                    headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
-                });
+                const respons = await fetch(`${API_URL}/srs/today`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }});
                 const data = await respons.json();
-                
-                if(respons.ok) {
-                    document.getElementById('jumlah-antrean').innerText = data.jumlah_antrean || 0;
-                }
-            } catch (error) {
-                console.error("Gagal memuat antrean:", error);
-            }
+                if(respons.ok) document.getElementById('jumlah-antrean').innerText = data.jumlah_antrean || 0;
+            } catch (error) {}
         }
 
-        // 3. Navigasi Halaman
-        function mulaiKuis() {
-            window.location.href = "kuis.html";
-        }
+        function mulaiKuis() { window.location.href = "kuis.html"; }
+        function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
 
-        function logout() {
-            localStorage.removeItem('korisu_token');
-            localStorage.removeItem('korisu_user');
-            window.location.href = "auth.html";
-        }
-
-        // 4. EKSEKUSI SAAT HALAMAN DIMUAT
         document.addEventListener('DOMContentLoaded', () => {
             const dataMurid = JSON.parse(localStorage.getItem('korisu_user'));
             
             if (dataMurid) {
-                // Tampilkan Profil Utama
                 document.getElementById('nama-murid').innerText = dataMurid.nama_lengkap;
                 document.getElementById('koin-murid').innerText = dataMurid.koin || 0;
                 document.getElementById('streak-murid').innerText = dataMurid.streak || 0;
                 
-                // Tampilkan EXP (Simulasi maksimal level sementara di 1000 EXP)
                 const exp = dataMurid.exp || 0;
                 const expPersen = Math.min((exp / 1000) * 100, 100);
-                const expBar = document.getElementById('exp-bar');
-                expBar.style.width = `${expPersen}%`;
-                expBar.innerText = `${exp} EXP`;
+                document.getElementById('exp-bar').style.width = `${expPersen}%`;
+                document.getElementById('exp-bar').innerText = `${exp} EXP`;
 
-                // Tampilkan menu rahasia jika role adalah sensei atau admin
                 if(dataMurid.role === 'sensei' || dataMurid.role === 'admin') {
                     document.getElementById('menu-sensei').style.display = 'block';
                 }
             }
-
+            muatMaskot();
             muatQuote();
             muatAntreanSRS();
         });

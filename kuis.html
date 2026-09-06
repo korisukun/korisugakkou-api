@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis SRS - KORISU Gakkou</title>
+    <title>Kuis SRS 6 Arah (Pilihan Ganda) - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
@@ -15,7 +15,7 @@
         body {
             background-color: var(--korisu-orange);
             color: var(--korisu-black);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -27,33 +27,55 @@
             border-radius: 15px;
             box-shadow: 8px 8px 0px var(--korisu-black);
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             padding: 2rem;
             text-align: center;
             margin: 1rem;
         }
-        .kanji-text {
-            font-size: 4.5rem;
+        .teks-utama {
+            font-size: 3.5rem;
             font-weight: bold;
-            margin-bottom: 0;
+            margin-bottom: 5px;
             line-height: 1.2;
+            word-wrap: break-word;
         }
-        .furigana-text {
-            font-size: 1.5rem;
-            color: #6c757d;
-            margin-bottom: 15px;
+        .teks-bantuan {
+            font-size: 1.1rem;
+            color: var(--korisu-orange);
+            margin-bottom: 20px;
             font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .input-jawaban {
+        .btn-pilihan {
+            background-color: var(--korisu-white);
+            color: var(--korisu-black);
             border: 2px solid var(--korisu-black);
-            font-size: 1.2rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+            width: 100%;
+            padding: 12px 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            transition: all 0.2s;
             text-align: center;
-            padding: 12px;
-            border-radius: 8px;
+            white-space: normal;
+            word-wrap: break-word;
         }
-        .input-jawaban:focus {
-            border-color: var(--korisu-orange);
-            box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
+        .btn-pilihan:hover:not(:disabled) {
+            background-color: var(--korisu-orange);
+            color: var(--korisu-white);
+            transform: translateY(-2px);
+        }
+        .btn-pilihan.benar {
+            background-color: #198754 !important;
+            color: white !important;
+            border-color: #146c43 !important;
+        }
+        .btn-pilihan.salah {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #b02a37 !important;
         }
         .btn-submit {
             background-color: var(--korisu-black);
@@ -64,20 +86,11 @@
             width: 100%;
             margin-top: 15px;
             padding: 10px;
-            transition: all 0.2s;
         }
-        .btn-submit:hover {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-black);
-        }
-        #hasil-notif {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            border: 2px solid var(--korisu-black);
-            border-radius: 10px;
-            font-weight: bold;
-        }
+        .btn-submit:hover { background-color: var(--korisu-orange); color: var(--korisu-black); }
+        
+        #hasil-notif { display: none; margin-top: 20px; padding: 20px; border: 2px solid var(--korisu-black); border-radius: 10px; }
+        .jawaban-lengkap { background-color: #f8f9fa; border: 1px dashed var(--korisu-black); border-radius: 8px; padding: 10px; margin-bottom: 15px;}
     </style>
 </head>
 <body>
@@ -89,23 +102,32 @@
             <span class="fw-bold text-danger fs-5" id="teks-timer">0 Detik ⏱️</span>
         </div>
 
-        <!-- Area Soal -->
+        <!-- Area Soal Dinamis -->
         <div id="area-soal">
-            <p class="furigana-text" id="furigana">Memuat...</p>
-            <h1 class="kanji-text" id="kanji">...</h1>
+            <p class="teks-bantuan" id="instruksi-soal">Memuat instruksi...</p>
+            <h1 class="teks-utama mb-4" id="soal-ditampilkan">...</h1>
             
-            <input type="text" id="input-arti" class="form-control input-jawaban mt-4" placeholder="Ketik arti bahasa Indonesianya..." autocomplete="off">
-            <button class="btn btn-submit" id="btn-jawab" onclick="cekJawaban()">JAWAB SEKARANG</button>
+            <!-- Area Pilihan Ganda -->
+            <div class="row" id="area-pilihan-ganda">
+                <!-- Tombol-tombol akan dimunculkan di sini oleh JS -->
+            </div>
         </div>
 
-        <!-- Area Hasil Pop-up (Menyatu dalam Card agar Layout Tidak Rusak) -->
+        <!-- Area Hasil Pop-up -->
         <div id="hasil-notif">
-            <h3 id="status-jawaban" class="fw-bold mb-2">Benar! 🎉</h3>
-            <h5 class="mb-3 text-muted" id="arti-sebenarnya">Arti: ...</h5>
-            <div class="bg-white border border-dark rounded p-2 mb-3">
-                <h5 class="text-success fw-bold mb-0" id="reward-text">+0 EXP | +0 Koin</h5>
+            <h3 id="status-jawaban" class="fw-bold mb-2">...</h3>
+            
+            <div class="jawaban-lengkap text-start">
+                <small class="text-muted d-block mb-1 fw-bold">KARTU KOSAKATA:</small>
+                <div class="fs-5">🇯🇵 Kanji: <strong id="info-kanji"></strong></div>
+                <div class="fs-5">🗣️ Baca: <strong id="info-furi"></strong></div>
+                <div class="fs-5">🇮🇩 Arti: <strong id="info-arti"></strong></div>
             </div>
-            <button class="btn btn-submit" onclick="lanjutSoal()">Lanjut Soal Berikutnya ➔</button>
+
+            <div class="bg-white border border-dark rounded p-2 mb-3">
+                <h5 class="text-success fw-bold mb-0" id="reward-text">...</h5>
+            </div>
+            <button class="btn btn-submit" id="btn-lanjut" onclick="lanjutSoal()">Lanjut ➔</button>
         </div>
     </div>
 
@@ -113,22 +135,21 @@
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
 
-        if (!TOKEN_SAYA) {
-            window.location.href = "auth.html";
-        }
+        if (!TOKEN_SAYA) window.location.href = "auth.html";
 
         let antreanSoal = [];
         let indeksSaatIni = 0;
         let waktuMulai = 0;
         let timerInterval;
         let detikBerjalan = 0;
+        
+        let kunciJawabanSaatIni = ""; 
+        let vocabSaatIni = null;
 
-        // 1. Ambil Antrean Soal Hari Ini
+        // 1. Ambil Antrean Soal
         async function mulaiSesiSRS() {
             try {
-                const res = await fetch(`${API_URL}/srs/today`, {
-                    headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }
-                });
+                const res = await fetch(`${API_URL}/srs/today`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` } });
                 const data = await res.json();
                 
                 if(data.data && data.data.length > 0) {
@@ -138,34 +159,85 @@
                     document.querySelector('.flashcard').innerHTML = `
                         <h1 class="mb-3">🎉</h1>
                         <h3 class="fw-bold mb-3">Misi Selesai!</h3>
-                        <p class="text-muted mb-4">Tidak ada lagi kosakata yang perlu direview hari ini. Kembalilah besok untuk menjaga streak-mu!</p>
-                        <button onclick="window.location.href='dashboard.html'" class="btn btn-submit">Kembali ke Dashboard</button>
+                        <p class="text-muted mb-4">Kamu sudah menyelesaikan seluruh review hari ini!</p>
+                        <button onclick="window.location.href='dashboard.html'" class="btn btn-submit">Ke Dashboard</button>
                     `;
                 }
             } catch (error) {
-                console.error("Gagal mengambil soal", error);
                 document.querySelector('.flashcard').innerHTML = "<h4 class='text-danger'>Gagal terhubung ke server.</h4>";
             }
         }
 
-        // 2. Tampilkan Soal & Nyalakan Timer
+        // 2. Tampilkan Soal (Diacak 6 Arah)
         function tampilkanSoal(indeks) {
-            const soal = antreanSoal[indeks];
-            
+            vocabSaatIni = antreanSoal[indeks];
             document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
-            document.getElementById('kanji').innerText = soal.kanji;
-            document.getElementById('furigana').innerText = soal.furigana || '-';
             
-            // Reset tampilan form
-            document.getElementById('input-arti').value = "";
+            // Logika Acak 1 sampai 6
+            const modeKuis = Math.floor(Math.random() * 6) + 1;
+            
+            let soalTeks = "";
+            let instruksi = "";
+            let fieldTarget = ""; // Untuk menentukan data apa yang dijadikan pilihan (A, B, C, D)
+
+            // Mencegah error jika furigana kosong
+            const furiganaAman = vocabSaatIni.furigana ? vocabSaatIni.furigana : vocabSaatIni.kanji;
+
+            switch(modeKuis) {
+                case 1: // Kanji -> Hiragana
+                    instruksi = "Pilih Cara Bacanya";
+                    soalTeks = vocabSaatIni.kanji;
+                    kunciJawabanSaatIni = furiganaAman;
+                    fieldTarget = "furigana";
+                    break;
+                case 2: // Kanji -> Arti
+                    instruksi = "Pilih Arti dari Kanji ini";
+                    soalTeks = vocabSaatIni.kanji;
+                    kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
+                    fieldTarget = "arti_indonesia";
+                    break;
+                case 3: // Hiragana -> Arti
+                    instruksi = "Pilih Arti dari kata ini";
+                    soalTeks = furiganaAman;
+                    kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
+                    fieldTarget = "arti_indonesia";
+                    break;
+                case 4: // Hiragana -> Kanji
+                    instruksi = "Pilih Kanjinya";
+                    soalTeks = furiganaAman;
+                    kunciJawabanSaatIni = vocabSaatIni.kanji;
+                    fieldTarget = "kanji";
+                    break;
+                case 5: // Arti -> Kanji
+                    instruksi = "Pilih Kanjinya";
+                    soalTeks = vocabSaatIni.arti_indonesia;
+                    kunciJawabanSaatIni = vocabSaatIni.kanji;
+                    fieldTarget = "kanji";
+                    break;
+                case 6: // Arti -> Hiragana
+                    instruksi = "Pilih Bahasa Jepangnya";
+                    soalTeks = vocabSaatIni.arti_indonesia;
+                    kunciJawabanSaatIni = furiganaAman;
+                    fieldTarget = "furigana";
+                    break;
+            }
+
+            document.getElementById('instruksi-soal').innerText = instruksi;
+            document.getElementById('soal-ditampilkan').innerText = soalTeks;
+            
+            // Isi kartu info lengkap untuk halaman hasil
+            document.getElementById('info-kanji').innerText = vocabSaatIni.kanji;
+            document.getElementById('info-furi').innerText = furiganaAman;
+            document.getElementById('info-arti').innerText = vocabSaatIni.arti_indonesia;
+
+            // Generate Pilihan Ganda
+            buatPilihanGanda(fieldTarget, kunciJawabanSaatIni);
+
+            // Reset UI
             document.getElementById('area-soal').style.display = "block";
             document.getElementById('hasil-notif').style.display = "none";
-            document.getElementById('btn-jawab').disabled = false;
-            document.getElementById('btn-jawab').innerText = "JAWAB SEKARANG";
             
             waktuMulai = Date.now();
-            
-            // Nyalakan Timer
             clearInterval(timerInterval);
             detikBerjalan = 0;
             document.getElementById('teks-timer').innerText = `0 Detik ⏱️`;
@@ -173,100 +245,148 @@
                 detikBerjalan++;
                 document.getElementById('teks-timer').innerText = `${detikBerjalan} Detik ⏱️`;
             }, 1000);
-            
-            document.getElementById('input-arti').focus();
         }
 
-        // 3. Evaluasi Jawaban & Update Data Lokal
-        async function cekJawaban() {
-            const btnJawab = document.getElementById('btn-jawab');
-            btnJawab.disabled = true;
-            btnJawab.innerText = "MEMERIKSA...";
+        // ALGORITMA DISTRAKTOR PINTAR (MENGECOH)
+        function buatPilihanGanda(fieldTarget, kunci) {
+            let pilihanSet = new Set();
+            pilihanSet.add(kunci); // Masukkan jawaban benar
 
+            // Analisis Kunci Jawaban untuk pengecoh yang setara
+            let hasComma = kunci.includes(',');
+            let lastChar = kunci.slice(-1);
+
+            // Filter antreanSoal untuk mencari pengecoh yang mirip
+            let poolPengecoh = antreanSoal.filter(v => {
+                let val = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
+                if (val === kunci) return false; // Jangan masukkan kunci yang sama
+
+                // Aturan Mengecoh: Samakan koma, atau samakan akhiran hiragana (seperti く, る)
+                if (fieldTarget === 'arti_indonesia' && hasComma && !val.includes(',')) return false;
+                if ((fieldTarget === 'furigana' || fieldTarget === 'kanji') && val.slice(-1) !== lastChar) return false;
+                
+                return true;
+            });
+
+            // Jika pengecoh pintar kurang dari 3, ambil dari seluruh soal N5
+            if (poolPengecoh.length < 3) {
+                poolPengecoh = antreanSoal.filter(v => {
+                    let val = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
+                    return val !== kunci;
+                });
+            }
+
+            // Ambil acak hingga genap 4 pilihan
+            let limitLoop = 0;
+            while(pilihanSet.size < 4 && limitLoop < 100) {
+                let randomIndex = Math.floor(Math.random() * poolPengecoh.length);
+                let randomVal = fieldTarget === 'furigana' 
+                    ? (poolPengecoh[randomIndex].furigana || poolPengecoh[randomIndex].kanji) 
+                    : poolPengecoh[randomIndex][fieldTarget];
+                
+                pilihanSet.add(randomVal);
+                limitLoop++;
+            }
+
+            // Acak urutan (Shuffle)
+            let arrayPilihan = Array.from(pilihanSet);
+            for (let i = arrayPilihan.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arrayPilihan[i], arrayPilihan[j]] = [arrayPilihan[j], arrayPilihan[i]];
+            }
+
+            // Render ke HTML
+            const wadah = document.getElementById('area-pilihan-ganda');
+            wadah.innerHTML = "";
+            arrayPilihan.forEach((teksPilihan, idx) => {
+                // Konversi kutip agar tidak merusak HTML string
+                const teksAman = teksPilihan.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                
+                wadah.innerHTML += `
+                    <div class="col-6">
+                        <button class="btn btn-pilihan" id="btn-pil-${idx}" onclick="cekJawaban('${teksAman}', this.id)">
+                            ${teksPilihan}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. Evaluasi Jawaban Terpilih
+        async function cekJawaban(jawabanUser, btnId) {
             clearInterval(timerInterval);
-            const waktuSelesai = Date.now();
-            const detikDihabiskan = Math.round((waktuSelesai - waktuMulai) / 1000);
+            const detikDihabiskan = Math.round((Date.now() - waktuMulai) / 1000);
+            const vocabId = vocabSaatIni.vocab_id;
             
-            const soal = antreanSoal[indeksSaatIni];
-            const jawabanUser = document.getElementById('input-arti').value.toLowerCase().trim();
-            const jawabanAsli = soal.arti_indonesia.toLowerCase().trim();
-            
-            const isBenar = (jawabanUser === jawabanAsli);
+            const isBenar = (jawabanUser === kunciJawabanSaatIni);
+
+            // Kunci semua tombol agar tidak diklik dua kali
+            const semuaTombol = document.querySelectorAll('.btn-pilihan');
+            semuaTombol.forEach(btn => btn.disabled = true);
+
+            // Beri warna pada tombol yang diklik
+            const tombolDipilih = document.getElementById(btnId);
+            if (isBenar) {
+                tombolDipilih.classList.add('benar');
+            } else {
+                tombolDipilih.classList.add('salah');
+                // Highlight mana jawaban yang sebenarnya benar
+                semuaTombol.forEach(btn => {
+                    if (btn.innerText === kunciJawabanSaatIni) btn.classList.add('benar');
+                });
+            }
 
             try {
+                // Kirim ke Backend
                 const res = await fetch(`${API_URL}/srs/submit`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${TOKEN_SAYA}`
-                    },
-                    body: JSON.stringify({
-                        vocab_id: soal.vocab_id,
-                        waktu_jawab_detik: detikDihabiskan,
-                        is_correct: isBenar
-                    })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_SAYA}` },
+                    body: JSON.stringify({ vocab_id: vocabId, waktu_jawab_detik: detikDihabiskan, is_correct: isBenar })
                 });
                 
                 const hasilBackend = await res.json();
-
-                // Manipulasi DOM untuk menampilkan hasil
-                document.getElementById('area-soal').style.display = "none";
-                const notifBox = document.getElementById('hasil-notif');
-                notifBox.style.display = "block";
                 
-                document.getElementById('arti-sebenarnya').innerText = `Artinya: ${soal.arti_indonesia}`;
+                // Tunda 1 detik agar murid sempat melihat warna hijau/merah di pilihan gandanya
+                setTimeout(() => {
+                    document.getElementById('area-soal').style.display = "none";
+                    const notifBox = document.getElementById('hasil-notif');
+                    notifBox.style.display = "block";
 
-                if(isBenar) {
-                    notifBox.style.backgroundColor = "#d1e7dd"; // Hijau Bootstrap
-                    notifBox.style.borderColor = "#0f5132";
-                    document.getElementById('status-jawaban').innerText = `Tepat Sekali! ⏱️ ${detikDihabiskan}s`;
-                    document.getElementById('status-jawaban').className = "fw-bold mb-2 text-success";
-                    document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin Tupai 🐿️`;
-                    
-                    // Update Dompet di Memori Browser agar sinkron dengan Dashboard
-                    let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
-                    if (userSekarang) {
-                        userSekarang.koin = (userSekarang.koin || 0) + hasilBackend.reward.koin;
-                        userSekarang.exp = (userSekarang.exp || 0) + hasilBackend.reward.exp;
-                        localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
+                    if(isBenar) {
+                        notifBox.style.backgroundColor = "#d1e7dd"; 
+                        notifBox.style.borderColor = "#0f5132";
+                        document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${detikDihabiskan}s)`;
+                        document.getElementById('status-jawaban').className = "fw-bold mb-3 text-success";
+                        document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin 🐿️`;
+                        
+                        let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
+                        if (userSekarang) {
+                            userSekarang.koin = (userSekarang.koin || 0) + hasilBackend.reward.koin;
+                            userSekarang.exp = (userSekarang.exp || 0) + hasilBackend.reward.exp;
+                            localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
+                        }
+                    } else {
+                        notifBox.style.backgroundColor = "#f8d7da"; 
+                        notifBox.style.borderColor = "#842029";
+                        document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat!`;
+                        document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
+                        document.getElementById('reward-text').innerText = `Tidak apa-apa, kita review lagi nanti!`;
                     }
-                } else {
-                    notifBox.style.backgroundColor = "#f8d7da"; // Merah Bootstrap
-                    notifBox.style.borderColor = "#842029";
-                    document.getElementById('status-jawaban').innerText = `Kurang Tepat!`;
-                    document.getElementById('status-jawaban').className = "fw-bold mb-2 text-danger";
-                    document.getElementById('reward-text').innerText = `Review lagi nanti ya! 頑張って (Ganbatte)!`;
-                }
+                    
+                    document.getElementById('btn-lanjut').focus(); // Fokus ke tombol lanjut agar bisa dienter
+                }, 1000); // Jeda 1 detik
                 
             } catch (error) {
-                console.error("Gagal mengirim jawaban", error);
                 alert("Terjadi kesalahan jaringan.");
-                btnJawab.disabled = false;
-                btnJawab.innerText = "JAWAB SEKARANG";
+                semuaTombol.forEach(btn => btn.disabled = false);
             }
         }
 
-        // 4. Lanjut ke Soal Berikutnya
         function lanjutSoal() {
             indeksSaatIni++;
-            if (indeksSaatIni < antreanSoal.length) {
-                tampilkanSoal(indeksSaatIni);
-            } else {
-                // Tarik ulang API untuk memastikan tidak ada soal 'again' (salah jawab) yang terlewat
-                mulaiSesiSRS();
-            }
+            if (indeksSaatIni < antreanSoal.length) tampilkanSoal(indeksSaatIni);
+            else mulaiSesiSRS(); // Refresh antrean dari server
         }
-
-        // Fitur tekan 'Enter' untuk menjawab
-        document.getElementById("input-arti").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                // Cegah spam enter jika tombol sudah didisable
-                if (!document.getElementById('btn-jawab').disabled) {
-                    cekJawaban();
-                }
-            }
-        });
 
         document.addEventListener('DOMContentLoaded', mulaiSesiSRS);
     </script>
