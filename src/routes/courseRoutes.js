@@ -1,12 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { getAllCourses, getCourseCurriculum } = require('../controllers/courseController');
+
+// PERBAIKAN FATAL ADA DI BARIS INI: 
+// Pastikan "enrollCourse" ikut tertulis di dalam kurung kurawal agar bisa digunakan
+const { getAllCourses, getCourseCurriculum, enrollCourse } = require('../controllers/courseController');
 const { protect } = require('../middlewares/authMiddleware');
 
-router.get('/', protect, getAllCourses); // Menampilkan semua kelas
-router.get('/:id', protect, getCourseCurriculum); // Menampilkan 1 kurikulum kelas
+router.get('/', protect, getAllCourses); 
+router.get('/:id', protect, getCourseCurriculum); 
 
-// [BARU] Rute untuk menekan tombol Ikuti Kelas
+// Rute untuk menekan tombol Ikuti Kelas
 router.post('/:id/enroll', protect, enrollCourse); 
 
 module.exports = router;
