@@ -15,9 +15,18 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
+        // A. Simpan data profil utama
         const newUser = await db.query(
             'INSERT INTO users (nama_lengkap, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, nama_lengkap, email, role',
             [nama_lengkap, email, password_hash, role || 'murid']
+        );
+
+        const newUserId = newUser.rows[0].id;
+
+        // B. [PENTING ERD V.1.0] Buat dompet statistik kosong untuk murid ini
+        await db.query(
+            'INSERT INTO user_statistics (murid_id, total_exp_points, koin_dimiliki, current_streak) VALUES ($1, 0, 0, 0)',
+            [newUserId]
         );
 
         res.status(201).json({
@@ -31,56 +40,52 @@ const register = async (req, res) => {
     }
 };
 
-// 2. FUNGSI LOGIN (DENGAN PELACAK BUG)
+// 2. FUNGSI LOGIN
 const login = async (req, res) => {
     try {
-        console.log('--- PROSES LOGIN DIMULAI ---');
         const { email, password } = req.body;
-        console.log(`1. Menerima permintaan login untuk email: ${email}`);
 
-        console.log('2. Menghubungi Neon Database...');
         const userResult = await db.query('SELECT * FROM users WHERE email = $1', [email]);
-        console.log(`3. Database merespons! Jumlah akun ditemukan: ${userResult.rows.length}`);
-
+        
         if (userResult.rows.length === 0) {
-            console.log('X. Berhenti: Email tidak terdaftar.');
             return res.status(400).json({ message: 'Email atau password salah!' });
         }
         
         const user = userResult.rows[0];
 
-        console.log('4. Memeriksa kecocokan kata sandi dengan bcrypt...');
         const isMatch = await bcrypt.compare(password, user.password_hash);
-        console.log(`5. Hasil pencocokan sandi: ${isMatch}`);
-
+        
         if (!isMatch) {
-            console.log('X. Berhenti: Kata sandi salah.');
             return res.status(400).json({ message: 'Email atau password salah!' });
         }
 
-        console.log('6. Membuat kunci tiket masuk (JWT)...');
+        // C. [PENTING ERD V.1.0] Ambil dompet statistik murid dari tabel terpisah
+        const statsResult = await db.query('SELECT koin_dimiliki, total_exp_points, current_streak FROM user_statistics WHERE murid_id = $1', [user.id]);
+        
+        // Beri nilai bawaan 0 jika dompet karena alasan tertentu belum terbuat
+        const userStats = statsResult.rows.length > 0 ? statsResult.rows[0] : { koin_dimiliki: 0, total_exp_points: 0, current_streak: 0 };
+
         const token = jwt.sign(
             { id: user.id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
 
-        console.log('7. Proses login SUKSES! Mengirim balasan ke frontend...');
-        // Ubah bagian ini di dalam authController.js (fungsi login)
-	res.json({
-    		message: 'Login berhasil! Selamat datang kembali 🐿️',
-    		token: token,
-    		user: { 
-        	id: user.id, 
-        	nama_lengkap: user.nama_lengkap, 
-        	role: user.role,
-        	koin: user.koin || 0 // <-- Tambahkan baris ini
-    }
-});
+        res.json({
+            message: 'Login berhasil! Selamat datang kembali 🐿️',
+            token: token,
+            user: { 
+                id: user.id, 
+                nama_lengkap: user.nama_lengkap, 
+                role: user.role,
+                koin: userStats.koin_dimiliki, // Diambil dari user_statistics
+                exp: userStats.total_exp_points, // Diambil dari user_statistics
+                streak: userStats.current_streak // Diambil dari user_statistics
+            }
+        });
 
     } catch (error) {
         console.error('ERROR KRITIS SAAT LOGIN:', error.message);
-        console.error(error.stack); // Ini akan melacak letak baris error secara presisi
         res.status(500).json({ message: 'Terjadi kesalahan pada server.' });
     }
 };

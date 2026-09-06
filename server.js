@@ -32,14 +32,14 @@ db.query('SELECT NOW()', (err, res) => {
 // ROUTING API
 // ==========================================
 const authRoutes = require('./src/routes/authRoutes');
-// Diubah menjadi '/api' agar cocok dengan frontend yang memanggil /api/login
 app.use('/api', authRoutes); 
 
 const courseRoutes = require('./src/routes/courseRoutes');
 app.use('/api/courses', courseRoutes);
 
+// KOREKSI: Diubah dari /api/curriculum menjadi /api/lessons agar cocok dengan frontend video-player.html
 const lessonRoutes = require('./src/routes/lessonRoutes');
-app.use('/api/curriculum', lessonRoutes);
+app.use('/api/lessons', lessonRoutes);
 
 const vocabRoutes = require('./src/routes/vocabRoutes');
 app.use('/api/vocabulary', vocabRoutes);

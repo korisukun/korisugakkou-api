@@ -16,7 +16,7 @@
             background-color: var(--korisu-orange);
             color: var(--korisu-black);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -30,22 +30,30 @@
             max-width: 500px;
             padding: 2rem;
             text-align: center;
+            margin: 1rem;
         }
         .kanji-text {
-            font-size: 4rem;
+            font-size: 4.5rem;
             font-weight: bold;
             margin-bottom: 0;
+            line-height: 1.2;
         }
         .furigana-text {
             font-size: 1.5rem;
             color: #6c757d;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
         }
         .input-jawaban {
             border: 2px solid var(--korisu-black);
             font-size: 1.2rem;
             text-align: center;
-            padding: 10px;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .input-jawaban:focus {
+            border-color: var(--korisu-orange);
+            box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
         }
         .btn-submit {
             background-color: var(--korisu-black);
@@ -55,16 +63,17 @@
             font-size: 1.2rem;
             width: 100%;
             margin-top: 15px;
+            padding: 10px;
+            transition: all 0.2s;
         }
         .btn-submit:hover {
             background-color: var(--korisu-orange);
             color: var(--korisu-black);
         }
-        /* Area Notifikasi (Sembunyi by default) */
         #hasil-notif {
             display: none;
             margin-top: 20px;
-            padding: 15px;
+            padding: 20px;
             border: 2px solid var(--korisu-black);
             border-radius: 10px;
             font-weight: bold;
@@ -74,10 +83,10 @@
 <body>
 
     <div class="flashcard">
-        <!-- Header Progress -->
-        <div class="d-flex justify-content-between mb-4 border-bottom pb-2">
-            <span class="fw-bold">Misi Harian: <span id="progress-text">0 / 0</span></span>
-            <span class="fw-bold text-danger" id="teks-timer">0 Detik ⏱️</span>
+        <!-- Header Progress & Timer -->
+        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+            <span class="fw-bold fs-5">Misi: <span id="progress-text">0 / 0</span></span>
+            <span class="fw-bold text-danger fs-5" id="teks-timer">0 Detik ⏱️</span>
         </div>
 
         <!-- Area Soal -->
@@ -86,15 +95,17 @@
             <h1 class="kanji-text" id="kanji">...</h1>
             
             <input type="text" id="input-arti" class="form-control input-jawaban mt-4" placeholder="Ketik arti bahasa Indonesianya..." autocomplete="off">
-            <button class="btn btn-submit" onclick="cekJawaban()">JAWAB</button>
+            <button class="btn btn-submit" id="btn-jawab" onclick="cekJawaban()">JAWAB SEKARANG</button>
         </div>
 
-        <!-- Area Hasil Pop-up (Dalam Card) -->
+        <!-- Area Hasil Pop-up (Menyatu dalam Card agar Layout Tidak Rusak) -->
         <div id="hasil-notif">
-            <h4 id="status-jawaban">Benar! 🎉</h4>
-            <p class="mb-1" id="arti-sebenarnya">Arti: Kursi Roda</p>
-            <p class="text-success mb-3" id="reward-text">+15 EXP | +5 Koin</p>
-            <button class="btn btn-submit" onclick="lanjutSoal()">Lanjut Soal Berikutnya</button>
+            <h3 id="status-jawaban" class="fw-bold mb-2">Benar! 🎉</h3>
+            <h5 class="mb-3 text-muted" id="arti-sebenarnya">Arti: ...</h5>
+            <div class="bg-white border border-dark rounded p-2 mb-3">
+                <h5 class="text-success fw-bold mb-0" id="reward-text">+0 EXP | +0 Koin</h5>
+            </div>
+            <button class="btn btn-submit" onclick="lanjutSoal()">Lanjut Soal Berikutnya ➔</button>
         </div>
     </div>
 
@@ -102,7 +113,6 @@
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
 
-        // Usir kembali ke halaman login jika tidak ada token (belum masuk)
         if (!TOKEN_SAYA) {
             window.location.href = "auth.html";
         }
@@ -110,8 +120,8 @@
         let antreanSoal = [];
         let indeksSaatIni = 0;
         let waktuMulai = 0;
-	let timerInterval;
-	let detikBerjalan = 0;
+        let timerInterval;
+        let detikBerjalan = 0;
 
         // 1. Ambil Antrean Soal Hari Ini
         async function mulaiSesiSRS() {
@@ -125,44 +135,55 @@
                     antreanSoal = data.data;
                     tampilkanSoal(0);
                 } else {
-                    document.querySelector('.flashcard').innerHTML = "<h2>🎉 Selesai!</h2><p>Tidak ada lagi kosakata Kaigo yang perlu direview hari ini.</p><a href='dashboard.html' class='btn btn-submit'>Kembali ke Dashboard</a>";
+                    document.querySelector('.flashcard').innerHTML = `
+                        <h1 class="mb-3">🎉</h1>
+                        <h3 class="fw-bold mb-3">Misi Selesai!</h3>
+                        <p class="text-muted mb-4">Tidak ada lagi kosakata yang perlu direview hari ini. Kembalilah besok untuk menjaga streak-mu!</p>
+                        <button onclick="window.location.href='dashboard.html'" class="btn btn-submit">Kembali ke Dashboard</button>
+                    `;
                 }
             } catch (error) {
                 console.error("Gagal mengambil soal", error);
+                document.querySelector('.flashcard').innerHTML = "<h4 class='text-danger'>Gagal terhubung ke server.</h4>";
             }
         }
 
-// 2. Tampilkan Soal ke Layar & Nyalakan Timer
-function tampilkanSoal(indeks) {
-    const soal = antreanSoal[indeks];
-    
-    document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
-    document.getElementById('kanji').innerText = soal.kanji;
-    document.getElementById('furigana').innerText = soal.furigana;
-    
-    // Reset input dan tampilan
-    document.getElementById('input-arti').value = "";
-    document.getElementById('area-soal').style.display = "block";
-    document.getElementById('hasil-notif').style.display = "none";
-    
-    // Mulai pencatatan waktu di latar belakang
-    waktuMulai = Date.now();
-    
-    // NYALAKAN DETAK TIMER DI LAYAR
-    clearInterval(timerInterval); // Hapus sisa timer sebelumnya
-    detikBerjalan = 0;
-    document.getElementById('teks-timer').innerText = `0 Detik ⏱️`;
-    timerInterval = setInterval(() => {
-        detikBerjalan++;
-        document.getElementById('teks-timer').innerText = `${detikBerjalan} Detik ⏱️`;
-    }, 1000);
-    
-    // Fokus otomatis ke kotak ketik
-    document.getElementById('input-arti').focus();
-}
+        // 2. Tampilkan Soal & Nyalakan Timer
+        function tampilkanSoal(indeks) {
+            const soal = antreanSoal[indeks];
+            
+            document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
+            document.getElementById('kanji').innerText = soal.kanji;
+            document.getElementById('furigana').innerText = soal.furigana || '-';
+            
+            // Reset tampilan form
+            document.getElementById('input-arti').value = "";
+            document.getElementById('area-soal').style.display = "block";
+            document.getElementById('hasil-notif').style.display = "none";
+            document.getElementById('btn-jawab').disabled = false;
+            document.getElementById('btn-jawab').innerText = "JAWAB SEKARANG";
+            
+            waktuMulai = Date.now();
+            
+            // Nyalakan Timer
+            clearInterval(timerInterval);
+            detikBerjalan = 0;
+            document.getElementById('teks-timer').innerText = `0 Detik ⏱️`;
+            timerInterval = setInterval(() => {
+                detikBerjalan++;
+                document.getElementById('teks-timer').innerText = `${detikBerjalan} Detik ⏱️`;
+            }, 1000);
+            
+            document.getElementById('input-arti').focus();
+        }
 
-        // 3. Evaluasi Jawaban & Hitung Waktu
+        // 3. Evaluasi Jawaban & Update Data Lokal
         async function cekJawaban() {
+            const btnJawab = document.getElementById('btn-jawab');
+            btnJawab.disabled = true;
+            btnJawab.innerText = "MEMERIKSA...";
+
+            clearInterval(timerInterval);
             const waktuSelesai = Date.now();
             const detikDihabiskan = Math.round((waktuSelesai - waktuMulai) / 1000);
             
@@ -172,7 +193,6 @@ function tampilkanSoal(indeks) {
             
             const isBenar = (jawabanUser === jawabanAsli);
 
-            // Kirim hasil ke Backend Node.js
             try {
                 const res = await fetch(`${API_URL}/srs/submit`, {
                     method: 'POST',
@@ -189,37 +209,40 @@ function tampilkanSoal(indeks) {
                 
                 const hasilBackend = await res.json();
 
-                // Tampilkan notifikasi (DOM Manipulation yang tidak merusak layout background)
+                // Manipulasi DOM untuk menampilkan hasil
                 document.getElementById('area-soal').style.display = "none";
-                document.getElementById('hasil-notif').style.display = "block";
+                const notifBox = document.getElementById('hasil-notif');
+                notifBox.style.display = "block";
                 
                 document.getElementById('arti-sebenarnya').innerText = `Artinya: ${soal.arti_indonesia}`;
 
-// HENTIKAN TIMER SAAT TOMBOL JAWAB DITEKAN
-clearInterval(timerInterval);
-
-const notifBox = document.getElementById('hasil-notif');
-if(isBenar) {
-    notifBox.style.backgroundColor = "#d1e7dd"; // Hijau muda Bootstrap
-    document.getElementById('status-jawaban').innerText = `Benar! ⏱️ ${detikDihabiskan} Detik`;
-    document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin Tupai 🐿️`;
-    
-    // UPDATE DOMPET DI MEMORI BROWSER UNTUK DASHBOARD
-    let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
-    if (userSekarang) {
-        // Tambahkan koin baru ke dompet lama
-        userSekarang.koin = (userSekarang.koin || 0) + hasilBackend.reward.koin;
-        // Simpan kembali ke dalam brankas browser
-        localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
-    }
-} else {
-    notifBox.style.backgroundColor = "#f8d7da"; // Merah muda Bootstrap
-    document.getElementById('status-jawaban').innerText = `Kurang Tepat!`;
-    document.getElementById('reward-text').innerText = `Jangan menyerah, kita coba lagi nanti!`;
-}
+                if(isBenar) {
+                    notifBox.style.backgroundColor = "#d1e7dd"; // Hijau Bootstrap
+                    notifBox.style.borderColor = "#0f5132";
+                    document.getElementById('status-jawaban').innerText = `Tepat Sekali! ⏱️ ${detikDihabiskan}s`;
+                    document.getElementById('status-jawaban').className = "fw-bold mb-2 text-success";
+                    document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin Tupai 🐿️`;
+                    
+                    // Update Dompet di Memori Browser agar sinkron dengan Dashboard
+                    let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
+                    if (userSekarang) {
+                        userSekarang.koin = (userSekarang.koin || 0) + hasilBackend.reward.koin;
+                        userSekarang.exp = (userSekarang.exp || 0) + hasilBackend.reward.exp;
+                        localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
+                    }
+                } else {
+                    notifBox.style.backgroundColor = "#f8d7da"; // Merah Bootstrap
+                    notifBox.style.borderColor = "#842029";
+                    document.getElementById('status-jawaban').innerText = `Kurang Tepat!`;
+                    document.getElementById('status-jawaban').className = "fw-bold mb-2 text-danger";
+                    document.getElementById('reward-text').innerText = `Review lagi nanti ya! 頑張って (Ganbatte)!`;
+                }
                 
             } catch (error) {
                 console.error("Gagal mengirim jawaban", error);
+                alert("Terjadi kesalahan jaringan.");
+                btnJawab.disabled = false;
+                btnJawab.innerText = "JAWAB SEKARANG";
             }
         }
 
@@ -229,20 +252,22 @@ if(isBenar) {
             if (indeksSaatIni < antreanSoal.length) {
                 tampilkanSoal(indeksSaatIni);
             } else {
-                // Jika soal habis, panggil fungsi fetch lagi untuk ngecek (siapa tau ada yang harus diulang)
+                // Tarik ulang API untuk memastikan tidak ada soal 'again' (salah jawab) yang terlewat
                 mulaiSesiSRS();
             }
         }
 
-        // Memungkinkan tekan "Enter" untuk menjawab
+        // Fitur tekan 'Enter' untuk menjawab
         document.getElementById("input-arti").addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
-                cekJawaban();
+                // Cegah spam enter jika tombol sudah didisable
+                if (!document.getElementById('btn-jawab').disabled) {
+                    cekJawaban();
+                }
             }
         });
 
-        // Eksekusi pertama kali
         document.addEventListener('DOMContentLoaded', mulaiSesiSRS);
     </script>
 </body>

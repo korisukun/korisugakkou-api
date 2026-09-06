@@ -1,28 +1,46 @@
+const db = require('../config/db');
+
 const getCourses = async (req, res) => {
     try {
-        // Data sementara. Nantinya ini bisa dengan mudah dipindahkan ke database Neon.
-        const daftarMateri = [
-            { 
-                id: 1, 
-                judul: "Materi 1: Pengantar Kaigo Kokka Shiken", 
-                deskripsi: "Mengenal dasar-dasar ujian nasional keperawatan lansia di Jepang beserta format soalnya.",
-                url_video: "https://www.youtube.com/embed/jfKfPfyJRdk" // Ganti dengan ID video YouTube Anda
-            },
-            { 
-                id: 2, 
-                judul: "Materi 2: Kosakata Mobilitas (Alat Bantu Jalan)", 
-                deskripsi: "Membahas tuntas kanji dan kosakata terkait dukungan pergerakan pasien.",
-                url_video: "https://www.youtube.com/embed/jfKfPfyJRdk"
-            }
-        ];
+        // 1. Ambil data Course
+        const courseRes = await db.query('SELECT * FROM courses ORDER BY id ASC LIMIT 1');
+        if (courseRes.rows.length === 0) {
+            return res.status(200).json({ courses: [] });
+        }
+        
+        const course = courseRes.rows[0];
+
+        // 2. Ambil Modul untuk Course tersebut
+        const modRes = await db.query('SELECT * FROM modules WHERE course_id = $1 ORDER BY urutan_modul ASC', [course.id]);
+        
+        // 3. Ambil seluruh Lesson
+        const lesRes = await db.query('SELECT * FROM lessons ORDER BY urutan_lesson ASC');
+
+        // 4. Susun hierarkinya (Module -> berisi Lessons)
+        const modulesData = modRes.rows.map(mod => {
+            return {
+                id: mod.id,
+                judul_modul: mod.judul_modul,
+                lessons: lesRes.rows.filter(l => l.module_id === mod.id)
+            };
+        });
+
+        // 5. Gabungkan ke dalam Course
+        const kurikulumLengkap = {
+            id: course.id,
+            judul_course: course.judul_course,
+            deskripsi: course.deskripsi,
+            modules: modulesData
+        };
 
         res.status(200).json({ 
-            message: 'Berhasil memuat materi video 🐿️', 
-            materi: daftarMateri 
+            message: 'Berhasil memuat kurikulum 🐿️', 
+            course: kurikulumLengkap 
         });
+
     } catch (error) {
         console.error('Error muat materi:', error.message);
-        res.status(500).json({ message: 'Gagal memuat materi kelas.' });
+        res.status(500).json({ message: 'Gagal memuat kurikulum kelas.' });
     }
 };
 

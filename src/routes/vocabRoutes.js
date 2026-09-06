@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { addVocabulary } = require('../controllers/vocabController');
+// Pastikan addBulkVocabulary ikut diimpor
+const { addVocabulary, addBulkVocabulary } = require('../controllers/vocabController');
 const { protect, isSensei } = require('../middlewares/authMiddleware');
 
-// Rute ini dijaga ketat: Harus punya token (protect) DAN harus berstatus sensei
 router.post('/add', protect, isSensei, addVocabulary);
+
+// [BARU] Rute untuk menangkap data masal
+router.post('/bulk-add', protect, isSensei, addBulkVocabulary);
 
 module.exports = router;

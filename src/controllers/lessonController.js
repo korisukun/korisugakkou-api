@@ -1,43 +1,45 @@
 const db = require('../config/db');
 
-// 1. Fungsi Membuat Bab (Modul)
-const createModule = async (req, res) => {
+// 1. Mengambil satu materi spesifik berdasarkan ID
+const getLesson = async (req, res) => {
     try {
-        const { course_id, judul_modul, urutan_modul } = req.body;
+        const { id } = req.params;
+        const lessonRes = await db.query('SELECT * FROM lessons WHERE id = $1', [id]);
         
-        const newModule = await db.query(
-            'INSERT INTO modules (course_id, judul_modul, urutan_modul) VALUES ($1, $2, $3) RETURNING *',
-            [course_id, judul_modul, urutan_modul]
-        );
-
-        res.status(201).json({
-            message: 'Modul/Bab berhasil dibuat!',
-            module: newModule.rows[0]
-        });
+        if (lessonRes.rows.length === 0) {
+            return res.status(404).json({ message: 'Materi tidak ditemukan.' });
+        }
+        
+        res.json({ lesson: lessonRes.rows[0] });
     } catch (error) {
-        console.error('Error createModule:', error.message);
-        res.status(500).json({ message: 'Gagal membuat modul.' });
+        console.error('Error memuat video:', error.message);
+        res.status(500).json({ message: 'Gagal memuat materi.' });
     }
 };
 
-// 2. Fungsi Memasukkan Video/Materi (Lesson)
-const createLesson = async (req, res) => {
+// 2. Mencatat bahwa murid sudah selesai menonton & Memberi EXP
+const completeLesson = async (req, res) => {
     try {
-        const { module_id, judul_materi, tipe_lesson, konten_url, urutan_lesson } = req.body;
-        
-        const newLesson = await db.query(
-            'INSERT INTO lessons (module_id, judul_materi, tipe_lesson, konten_url, urutan_lesson) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-            [module_id, judul_materi, tipe_lesson, konten_url, urutan_lesson]
-        );
+        const { id } = req.params;
+        const murid_id = req.user.id;
 
-        res.status(201).json({
-            message: 'Video materi berhasil ditambahkan ke dalam Bab! 🎬',
-            lesson: newLesson.rows[0]
-        });
+        // Cek apakah progres sudah pernah dicatat
+        const cekProgress = await db.query('SELECT id FROM lesson_progress WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
+        
+        if (cekProgress.rows.length === 0) {
+            await db.query('INSERT INTO lesson_progress (murid_id, lesson_id, is_completed) VALUES ($1, $2, true)', [murid_id, id]);
+        } else {
+            await db.query('UPDATE lesson_progress SET is_completed = true WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
+        }
+
+        // Gamifikasi: Berikan 10 EXP karena rajin menonton video
+        await db.query('UPDATE user_statistics SET total_exp_points = total_exp_points + 10 WHERE murid_id = $1', [murid_id]);
+
+        res.json({ message: 'Materi diselesaikan! +10 EXP 🐿️', exp_didapat: 10 });
     } catch (error) {
-        console.error('Error createLesson:', error.message);
-        res.status(500).json({ message: 'Gagal membuat materi.' });
+        console.error('Error simpan progres:', error.message);
+        res.status(500).json({ message: 'Gagal menyimpan progres belajar.' });
     }
 };
 
-module.exports = { createModule, createLesson };
+module.exports = { getLesson, completeLesson };

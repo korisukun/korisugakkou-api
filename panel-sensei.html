@@ -9,67 +9,82 @@
         :root {
             --korisu-orange: #fd7e14;
             --korisu-black: #212529;
+            --korisu-white: #ffffff;
         }
         body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-        .navbar-korisu { background-color: var(--korisu-orange); }
-        .card-custom { border: 2px solid var(--korisu-black); box-shadow: 4px 4px 0px var(--korisu-black); }
-        .btn-korisu { background-color: var(--korisu-black); color: white; border: 2px solid var(--korisu-black); font-weight: bold; }
+        .navbar-korisu { background-color: var(--korisu-orange); border-bottom: 3px solid var(--korisu-black);}
+        .card-custom { border: 2px solid var(--korisu-black); box-shadow: 4px 4px 0px var(--korisu-black); border-radius: 10px; background-color: var(--korisu-white);}
+        .btn-korisu { background-color: var(--korisu-black); color: white; border: 2px solid var(--korisu-black); font-weight: bold; padding: 10px;}
         .btn-korisu:hover { background-color: var(--korisu-orange); color: var(--korisu-black); }
+        .form-control, .form-select { border: 2px solid var(--korisu-black); }
+        .form-control:focus, .form-select:focus { border-color: var(--korisu-orange); box-shadow: none; }
+        .instruksi-box { background-color: #e9ecef; border-left: 4px solid var(--korisu-orange); padding: 10px; font-size: 0.9rem;}
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark navbar-korisu shadow-sm">
+    <nav class="navbar navbar-dark navbar-korisu shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="dashboard.html">🐿️ KORISU Gakkou - Ruang Sensei</a>
-            <button class="btn btn-sm btn-light fw-bold" onclick="kembali()">Kembali ke Dashboard</button>
+            <button class="btn btn-sm btn-light fw-bold border-dark" onclick="kembali()">Kembali ke Dashboard</button>
         </div>
     </nav>
 
     <div class="container mt-5">
         <div class="row">
-            <!-- Form Tambah Kosakata -->
+            <!-- Form Tambah Kosakata MASAL -->
             <div class="col-md-6 mb-4">
-                <div class="card card-custom p-4">
-                    <h4 class="fw-bold mb-4">📚 Tambah Kosakata Kaigo</h4>
-                    <form id="form-vocab">
+                <div class="card card-custom p-4 h-100">
+                    <h4 class="fw-bold mb-3">📚 Tambah Kosakata (Masal)</h4>
+                    
+                    <div class="instruksi-box mb-3 fw-bold text-muted">
+                        Format 1 baris: Kanji, Furigana, Arti<br>
+                        <span class="text-danger">Contoh:</span><br>
+                        食べる, たべる, Makan<br>
+                        車椅子, くるまいす, Kursi roda
+                    </div>
+
+                    <form id="form-vocab-bulk">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Kanji</label>
-                            <input type="text" id="v-kanji" class="form-control" placeholder="Contoh: 車椅子" required>
+                            <label class="form-label fw-bold">Pilih Kategori Level</label>
+                            <select id="v-kategori" class="form-select">
+                                <option value="jlpt_n5">JLPT N5</option>
+                                <option value="jlpt_n4">JLPT N4</option>
+                                <option value="jlpt_n3">JLPT N3</option>
+                                <option value="kaigo">Kaigo Kokka Shiken</option>
+                            </select>
                         </div>
+                        
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Furigana (Cara Baca)</label>
-                            <input type="text" id="v-furigana" class="form-control" placeholder="Contoh: くるまいす" required>
+                            <label class="form-label fw-bold">Data Kosakata</label>
+                            <textarea id="v-bulk-input" class="form-control" rows="8" placeholder="Ketik atau paste data kosakatamu di sini..." required></textarea>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Arti Indonesia</label>
-                            <input type="text" id="v-arti" class="form-control" placeholder="Contoh: Kursi roda" required>
-                        </div>
-                        <button type="submit" class="btn btn-korisu w-100">SIMPAN KOSAKATA</button>
+
+                        <button type="submit" id="btn-submit-vocab" class="btn btn-korisu w-100 mt-auto">SIMPAN SEMUA KOSAKATA</button>
                     </form>
                 </div>
             </div>
 
             <!-- Form Tambah Quote -->
             <div class="col-md-6 mb-4">
-                <div class="card card-custom p-4">
+                <div class="card card-custom p-4 h-100">
                     <h4 class="fw-bold mb-4">🌸 Tambah Pepatah Motivasi</h4>
                     <form id="form-quote">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Teks Jepang</label>
-                            <input type="text" id="q-teks" class="form-control" required>
+                            <input type="text" id="q-teks" class="form-control" placeholder="Contoh: 頑張って" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Cara Baca Romaji</label>
-                            <input type="text" id="q-baca" class="form-control">
+                            <input type="text" id="q-baca" class="form-control" placeholder="Contoh: Ganbatte">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Arti Indonesia</label>
-                            <input type="text" id="q-arti" class="form-control" required>
+                            <input type="text" id="q-arti" class="form-control" placeholder="Contoh: Semangat!" required>
                         </div>
                         <div class="row">
                             <div class="col-6 mb-3">
-                                <label class="form-label fw-bold">Tokoh</label>
+                                <label class="form-label fw-bold">Tokoh / Sumber</label>
                                 <input type="text" id="q-tokoh" class="form-control" placeholder="Anonim">
                             </div>
                             <div class="col-6 mb-3">
@@ -77,7 +92,7 @@
                                 <input type="text" id="q-kategori" class="form-control" placeholder="motivasi">
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-korisu w-100">SIMPAN PEPATAH</button>
+                        <button type="submit" class="btn btn-korisu w-100 mt-auto">SIMPAN PEPATAH</button>
                     </form>
                 </div>
             </div>
@@ -89,7 +104,7 @@
         const TOKEN = localStorage.getItem('korisu_token');
         const USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
 
-        // SATPAM HALAMAN: Usir jika bukan Sensei
+        // SATPAM HALAMAN
         if (!TOKEN || USER.role !== 'sensei') {
             alert("Akses Ditolak! Halaman ini khusus untuk Sensei.");
             window.location.href = "dashboard.html";
@@ -97,7 +112,77 @@
 
         function kembali() { window.location.href = "dashboard.html"; }
 
-        // MENGIRIM DATA QUOTE
+        // LOGIKA MENGIRIM KOSAKATA MASAL
+        document.getElementById('form-vocab-bulk').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btn-submit-vocab');
+            btnSubmit.innerText = "MEMPROSES...";
+            btnSubmit.disabled = true;
+
+            const kategori = document.getElementById('v-kategori').value;
+            const rawData = document.getElementById('v-bulk-input').value;
+            
+            // Memecah teks dari baris baru (enter)
+            const barisData = rawData.split('\n');
+            const arrayKosakata = [];
+
+            // Memproses setiap baris
+            for (let i = 0; i < barisData.length; i++) {
+                const baris = barisData[i].trim();
+                if (!baris) continue; // Abaikan jika baris kosong
+
+                // Pecah berdasarkan koma
+                const kolom = baris.split(',');
+                
+                // Pastikan ada 3 bagian (Kanji, Furigana, Arti)
+                if (kolom.length >= 3) {
+                    arrayKosakata.push({
+                        kanji: kolom[0].trim(),
+                        furigana: kolom[1].trim(),
+                        arti_indonesia: kolom[2].trim(),
+                        kategori: kategori
+                    });
+                } else {
+                    alert(`Format salah pada baris ${i + 1}:\n"${baris}"\nPastikan dipisah dengan koma!`);
+                    btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
+                    btnSubmit.disabled = false;
+                    return; // Hentikan proses
+                }
+            }
+
+            if(arrayKosakata.length === 0) {
+                alert("Data tidak valid. Silakan cek kembali tulisan Anda.");
+                btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
+                btnSubmit.disabled = false;
+                return;
+            }
+
+            // Kirim array ke Backend
+            try {
+                const res = await fetch(`${API_URL}/vocabulary/bulk-add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                    body: JSON.stringify({ vocabularies: arrayKosakata })
+                });
+                
+                const result = await res.json();
+                
+                if(res.ok) {
+                    alert(result.message);
+                    document.getElementById('v-bulk-input').value = ""; // Bersihkan kotak
+                } else {
+                    alert("Gagal: " + result.message);
+                }
+            } catch (err) { 
+                alert("Error jaringan."); 
+            } finally {
+                btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
+                btnSubmit.disabled = false;
+            }
+        });
+
+        // LOGIKA MENGIRIM QUOTE (Tetap Sama)
         document.getElementById('form-quote').addEventListener('submit', async (e) => {
             e.preventDefault();
             const dataQuote = {
@@ -118,29 +203,6 @@
                 if(res.ok) {
                     alert("✅ Quote berhasil ditambahkan!");
                     document.getElementById('form-quote').reset();
-                } else alert("Gagal: " + result.message);
-            } catch (err) { alert("Error jaringan."); }
-        });
-
-        // MENGIRIM DATA KOSAKATA
-        document.getElementById('form-vocab').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const dataVocab = {
-                kanji: document.getElementById('v-kanji').value,
-                furigana: document.getElementById('v-furigana').value,
-                arti_indonesia: document.getElementById('v-arti').value
-            };
-
-            try {
-                const res = await fetch(`${API_URL}/vocabulary/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify(dataVocab)
-                });
-                const result = await res.json();
-                if(res.ok) {
-                    alert("✅ Kosakata Kaigo berhasil ditambahkan!");
-                    document.getElementById('form-vocab').reset();
                 } else alert("Gagal: " + result.message);
             } catch (err) { alert("Error jaringan."); }
         });

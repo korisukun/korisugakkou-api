@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ruang Kelas - KORISU Gakkou</title>
+    <title>Kurikulum Kelas - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
@@ -12,154 +12,165 @@
             --korisu-black: #212529;
             --korisu-white: #ffffff;
         }
-        body { 
-            background-color: #f8f9fa; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            /* Mencegah layar melar ke samping jika ada elemen yang melebar */
-            overflow-x: hidden; 
-        }
-        .navbar-korisu { background-color: var(--korisu-orange); }
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .navbar-korisu { background-color: var(--korisu-orange); border-bottom: 3px solid var(--korisu-black); }
         .card-custom {
             background-color: var(--korisu-white);
             border: 2px solid var(--korisu-black);
             border-radius: 10px;
             box-shadow: 4px 4px 0px var(--korisu-black);
         }
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%; /* Rasio 16:9 yang sempurna */
-            height: 0;
-            overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid var(--korisu-black);
+        .header-course {
+            background-color: var(--korisu-black);
+            color: var(--korisu-white);
+            padding: 40px 20px;
+            border-bottom: 5px solid var(--korisu-orange);
+            margin-bottom: 30px;
         }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .accordion-button {
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #f1f3f5;
+            color: var(--korisu-black);
+            border: 2px solid var(--korisu-black) !important;
         }
-        .playlist-item {
-            cursor: pointer;
+        .accordion-button:not(.collapsed) {
+            background-color: var(--korisu-orange);
+            color: var(--korisu-white);
+            border-color: var(--korisu-black) !important;
+        }
+        .accordion-item {
+            border: none;
+            margin-bottom: 10px;
+        }
+        .lesson-item {
+            padding: 15px;
             border-bottom: 1px solid #dee2e6;
-            padding: 10px;
-            transition: background-color 0.2s;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
         }
-        .playlist-item:hover, .playlist-item.active {
+        .lesson-item:hover {
             background-color: #ffe8d6;
             border-left: 4px solid var(--korisu-orange);
+        }
+        .lesson-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark navbar-korisu shadow-sm">
+    <nav class="navbar navbar-dark navbar-korisu shadow-sm sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="dashboard.html">📺 Kelas KORISU Gakkou</a>
-            <button class="btn btn-sm btn-light fw-bold" onclick="kembali()">Kembali</button>
+            <button class="btn btn-sm btn-light fw-bold border-dark" onclick="window.location.href='dashboard.html'">Kembali ke Dashboard</button>
         </div>
     </nav>
 
-    <div class="container mt-4 mb-5">
-        <div class="row">
-            
-            <!-- Area Pemutar Video -->
-            <div class="col-lg-8 mb-4">
-                <div class="card card-custom p-3">
-                    <h3 class="fw-bold mb-3" id="judul-video-aktif">Memuat Kelas...</h3>
-                    <div class="video-container">
-                        <iframe id="frame-video" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="mt-3">
-                        <h5 class="fw-bold">Deskripsi Materi:</h5>
-                        <p id="deskripsi-video-aktif" class="text-muted">Silakan tunggu sebentar...</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Area Daftar Putar (Playlist) -->
-            <div class="col-lg-4">
-                <div class="card card-custom p-0 overflow-hidden">
-                    <div class="bg-dark text-white p-3">
-                        <h5 class="fw-bold mb-0">📚 Daftar Materi</h5>
-                    </div>
-                    <div id="daftar-playlist" class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
-                        <!-- Daftar video akan dimuat di sini oleh JavaScript -->
-                    </div>
-                </div>
-            </div>
-
+    <!-- Header Judul Kelas -->
+    <div class="header-course text-center">
+        <div class="container">
+            <h1 class="fw-bold" id="judul-course">Memuat Kelas...</h1>
+            <p class="fs-5 mt-2" id="desc-course">Silakan tunggu sebentar.</p>
         </div>
     </div>
 
+    <!-- Area Kurikulum (Accordion) -->
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card card-custom p-4">
+                    <h4 class="fw-bold mb-4">📚 Kurikulum Pembelajaran</h4>
+                    
+                    <div class="accordion" id="kurikulum-accordion">
+                        <!-- Modul akan dirender di sini oleh JavaScript -->
+                        <div class="text-center text-muted fw-bold py-4" id="loading-text">Menyinkronkan data dengan server...</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN = localStorage.getItem('korisu_token');
-        let daftarMateri = [];
 
-        // Tendang penyusup yang tidak punya token
-        if (!TOKEN) {
-            window.location.href = "auth.html";
-        }
+        if (!TOKEN) window.location.href = "auth.html";
 
-        function kembali() {
-            window.location.href = "dashboard.html";
-        }
-
-        // Mengambil daftar kelas dari Backend
-        async function muatKelas() {
+        async function muatKurikulum() {
             try {
                 const res = await fetch(`${API_URL}/courses`, {
                     headers: { 'Authorization': `Bearer ${TOKEN}` }
                 });
                 const data = await res.json();
 
-                if (res.ok) {
-                    daftarMateri = data.materi;
-                    renderPlaylist();
-                    if (daftarMateri.length > 0) {
-                        putarVideo(0); // Putar video urutan pertama secara default
-                    }
+                if (res.ok && data.course) {
+                    const course = data.course;
+                    
+                    // Pasang Header
+                    document.getElementById('judul-course').innerText = course.judul_course;
+                    document.getElementById('desc-course').innerText = course.deskripsi;
+
+                    // Render Accordion Modul
+                    const wadah = document.getElementById('kurikulum-accordion');
+                    wadah.innerHTML = "";
+
+                    course.modules.forEach((modul, indexModul) => {
+                        let htmlLessons = "";
+                        
+                        // Render Lessons di dalam Modul
+                        modul.lessons.forEach(lesson => {
+                            let icon = lesson.tipe_lesson.includes('video') ? '🎥' : '📝';
+                            
+                            htmlLessons += `
+                                <div class="lesson-item" onclick="bukaVideo(${lesson.id})">
+                                    <div class="lesson-icon">${icon}</div>
+                                    <div class="fw-bold text-dark">${lesson.judul_materi}</div>
+                                </div>
+                            `;
+                        });
+
+                        const isFirst = indexModul === 0;
+                        const showClass = isFirst ? 'show' : '';
+                        const collapsedClass = isFirst ? '' : 'collapsed';
+
+                        wadah.innerHTML += `
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-${modul.id}">
+                                    <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${modul.id}">
+                                        ${modul.judul_modul}
+                                    </button>
+                                </h2>
+                                <div id="collapse-${modul.id}" class="accordion-collapse collapse ${showClass}" data-bs-parent="#kurikulum-accordion">
+                                    <div class="accordion-body p-0 border border-dark border-top-0">
+                                        ${htmlLessons || '<div class="p-3 text-muted">Belum ada materi di modul ini.</div>'}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
                 } else {
-                    alert("Gagal memuat materi: " + data.message);
+                    document.getElementById('loading-text').innerText = "Belum ada kelas yang tersedia saat ini.";
                 }
             } catch (error) {
                 console.error("Error jaringan:", error);
+                document.getElementById('loading-text').innerHTML = "<span class='text-danger'>Gagal terhubung ke server.</span>";
             }
         }
 
-        // Menyusun daftar putar di sebelah kanan
-        function renderPlaylist() {
-            const wadahPlaylist = document.getElementById('daftar-playlist');
-            wadahPlaylist.innerHTML = "";
-
-            daftarMateri.forEach((materi, index) => {
-                const item = document.createElement('div');
-                item.className = `playlist-item ${index === 0 ? 'active' : ''}`;
-                item.id = `playlist-item-${index}`;
-                item.innerHTML = `<h6 class="fw-bold mb-1">${materi.judul}</h6>`;
-                item.onclick = () => putarVideo(index);
-                wadahPlaylist.appendChild(item);
-            });
+        // Fungsi Arahkan ke Halaman Pemutar Video
+        function bukaVideo(lessonId) {
+            // Kita akan melempar ID pelajaran ke URL agar video-player tahu video mana yang diputar
+            window.location.href = `video-player.html?id=${lessonId}`;
         }
 
-        // Mengganti video utama saat daftar putar diklik
-        function putarVideo(indeks) {
-            const materiPilihan = daftarMateri[indeks];
-            
-            // Perbarui Judul & Frame
-            document.getElementById('judul-video-aktif').innerText = materiPilihan.judul;
-            document.getElementById('deskripsi-video-aktif').innerText = materiPilihan.deskripsi;
-            document.getElementById('frame-video').src = materiPilihan.url_video;
-
-            // Perbarui warna sorotan di daftar putar
-            document.querySelectorAll('.playlist-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`playlist-item-${indeks}`).classList.add('active');
-        }
-
-        // Jalankan saat layar pertama kali dibuka
-        document.addEventListener('DOMContentLoaded', muatKelas);
+        document.addEventListener('DOMContentLoaded', muatKurikulum);
     </script>
 </body>
 </html>

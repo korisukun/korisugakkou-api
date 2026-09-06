@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pemutar Video - KORISU Gakkou</title>
+    <title>Pemutar Materi - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
@@ -12,25 +12,22 @@
             --korisu-black: #212529;
             --korisu-white: #ffffff;
         }
-        body {
-            background-color: #f8f9fa;
-            color: var(--korisu-black);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar-korisu {
-            background-color: var(--korisu-orange);
-        }
-        
-        /* Gaya Khusus Area Video */
-        .video-container {
-            background-color: var(--korisu-black);
-            border: 3px solid var(--korisu-black);
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        .navbar-korisu { background-color: var(--korisu-orange); border-bottom: 3px solid var(--korisu-black); }
+        .card-custom {
+            background-color: var(--korisu-white);
+            border: 2px solid var(--korisu-black);
             border-radius: 10px;
             box-shadow: 4px 4px 0px var(--korisu-black);
-            overflow: hidden;
+        }
+        .video-container {
             position: relative;
-            padding-bottom: 56.25%; /* Rasio aspek 16:9 */
+            padding-bottom: 56.25%; /* Rasio 16:9 */
             height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid var(--korisu-black);
+            background-color: #000;
         }
         .video-container iframe {
             position: absolute;
@@ -38,172 +35,124 @@
             left: 0;
             width: 100%;
             height: 100%;
-            border: none;
         }
-
-        /* Gaya Khusus Playlist / Daftar Materi */
-        .playlist-card {
-            background-color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            border-radius: 10px;
-            box-shadow: 4px 4px 0px var(--korisu-black);
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .playlist-item {
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .playlist-item:hover {
-            background-color: #f1f3f5;
-        }
-        .playlist-item.active {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-white);
-            font-weight: bold;
-        }
-        .playlist-item.active .text-muted {
-            color: #ffe8d6 !important;
-        }
+        .btn-korisu { background-color: var(--korisu-black); color: white; border: 2px solid var(--korisu-black); font-weight: bold; }
+        .btn-korisu:hover { background-color: var(--korisu-orange); color: var(--korisu-black); }
+        .btn-selesai { background-color: #198754; color: white; border: 2px solid var(--korisu-black); font-weight: bold; }
+        .btn-selesai:hover { background-color: #146c43; color: white; }
     </style>
 </head>
 <body>
 
-    <!-- Navigasi Atas -->
-    <nav class="navbar navbar-dark navbar-korisu shadow-sm mb-4">
-        <div class="container d-flex justify-content-between">
-            <a class="navbar-brand fw-bold" href="kelas.html">⬅️ Kembali ke Katalog</a>
-            <div class="text-white fw-bold fs-5" id="judul-kelas-nav">Memuat Kelas...</div>
+    <nav class="navbar navbar-dark navbar-korisu shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="kelas.html">🔙 Kembali ke Kurikulum</a>
+            <span class="text-white fw-bold d-none d-md-block">📺 Ruang Putar KORISU Gakkou</span>
         </div>
     </nav>
 
-    <div class="container pb-5">
-        <div class="row g-4">
-            
-            <!-- KOLOM KIRI: Pemutar Video -->
-            <div class="col-lg-8">
-                <div class="video-container mb-3">
-                    <!-- Menggunakan embed YouTube standar sebagai tempat penampung -->
-                    <iframe id="layar-video" src="" allowfullscreen></iframe>
-                </div>
-                
-                <h3 class="fw-bold mt-3" id="judul-video-aktif">Memuat Video...</h3>
-                <p class="text-muted" id="deskripsi-video-aktif">Pilih materi di daftar putar sebelah kanan untuk memulai pembelajaran.</p>
-                
-                <div class="mt-4 border-top pt-3">
-                    <button class="btn btn-dark fw-bold px-4" onclick="tandaiSelesai()">✅ Tandai Selesai & Dapatkan 10 EXP</button>
+    <div class="container mt-4 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card card-custom p-3 p-md-4">
+                    
+                    <h3 class="fw-bold mb-3" id="judul-materi">Memuat Video...</h3>
+                    
+                    <div class="video-container mb-4">
+                        <iframe id="frame-video" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center bg-light p-3 border border-dark rounded">
+                        <div class="mb-3 mb-md-0 text-center text-md-start">
+                            <h6 class="fw-bold mb-1">Tugas Kamu:</h6>
+                            <small class="text-muted">Tonton video hingga selesai untuk memahami materi.</small>
+                        </div>
+                        <button id="btn-tandai" class="btn btn-selesai px-4 py-2" onclick="tandaiSelesai()">Tandai Selesai & Ambil EXP ✔️</button>
+                    </div>
+
                 </div>
             </div>
-
-            <!-- KOLOM KANAN: Daftar Playlist -->
-            <div class="col-lg-4">
-                <h4 class="fw-bold mb-3">Daftar Materi</h4>
-                <div class="playlist-card" id="wadah-playlist">
-                    <!-- Daftar bab akan disuntikkan oleh JavaScript di sini -->
-                </div>
-            </div>
-
         </div>
     </div>
 
+    <!-- Modal Sukses -->
+    <div class="modal fade" id="modalSukses" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border: 3px solid var(--korisu-black); border-radius: 15px;">
+                <div class="modal-body text-center p-4">
+                    <h1 class="mb-3">🎉</h1>
+                    <h4 class="fw-bold mb-2">Materi Selesai!</h4>
+                    <p class="text-success fw-bold mb-4" id="teks-exp">+10 EXP Didapatkan</p>
+                    <button type="button" class="btn btn-korisu w-100" onclick="window.location.href='kelas.html'">Kembali ke Kurikulum</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. Cek Keamanan Token & Ambil ID Kelas
-        const TOKEN_SAYA = localStorage.getItem('korisu_token');
-        const KELAS_AKTIF = localStorage.getItem('korisu_kelas_aktif');
+        const API_URL = 'https://korisugakkou-api.onrender.com/api';
+        const TOKEN = localStorage.getItem('korisu_token');
+        let USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+        
+        // Mengambil ID dari URL (Contoh: video-player.html?id=2)
+        const urlParams = new URLSearchParams(window.location.search);
+        const lessonId = urlParams.get('id');
 
-        if (!TOKEN_SAYA) window.location.href = "auth.html";
-        if (!KELAS_AKTIF) window.location.href = "kelas.html"; // Jika tidak ada kelas dipilih, tendang ke katalog
+        if (!TOKEN) window.location.href = "auth.html";
+        if (!lessonId) window.location.href = "kelas.html";
 
-        // 2. Database Simulasi (Kurikulum VOD)
-        // Di sistem nyata, data ini diambil dari PostgreSQL tabel 'lms_chapters' & 'lms_materials'
-        const databaseKurikulum = {
-            "1": { // ID 1: Kaigo Kokka Shiken
-                judul_kelas: "Persiapan Ujian Kaigo Kokka Shiken",
-                materi: [
-                    { id: 101, judul: "Bab 1: Kosakata Dasar Panti Jompo", durasi: "12:30", url: "https://www.youtube.com/embed/tgbNymZ7vqY" },
-                    { id: 102, judul: "Bab 2: Teknik Memindahkan Pasien (Ijou)", durasi: "15:45", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-                    { id: 103, judul: "Bab 3: Etika Komunikasi Lansia", durasi: "10:15", url: "https://www.youtube.com/embed/tgbNymZ7vqY" }
-                ]
-            },
-            "2": { // ID 2: 90 Days Challenge N3
-                judul_kelas: "90 Days Challenge JLPT N3",
-                materi: [
-                    { id: 201, judul: "Day 1: Bunpou ~Koto ni naru", durasi: "08:20", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" },
-                    { id: 202, judul: "Day 2: Choukai - Menangkap Kata Kunci", durasi: "14:10", url: "https://www.youtube.com/embed/tgbNymZ7vqY" },
-                    { id: 203, judul: "Day 3: Dokkai - Membaca Email Bisnis", durasi: "18:05", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }
-                ]
-            },
-            "3": { judul_kelas: "Fundamental Bahasa Jepang", materi: [{ id: 301, judul: "Perkenalan Huruf Hiragana", durasi: "10:00", url: "https://www.youtube.com/embed/tgbNymZ7vqY" }] },
-            "4": { judul_kelas: "Kanji Sehari-hari Level Menengah", materi: [{ id: 401, judul: "Kanji Stasiun dan Kereta", durasi: "11:20", url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }] }
-        };
+        async function muatVideo() {
+            try {
+                const res = await fetch(`${API_URL}/lessons/${lessonId}`, {
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await res.json();
 
-        // 3. Inisialisasi Tampilan
-        function muatHalamanVideo() {
-            const dataMataPelajaran = databaseKurikulum[KELAS_AKTIF];
-            
-            if (!dataMataPelajaran) {
-                alert("Kelas tidak ditemukan!");
-                window.location.href = "kelas.html";
-                return;
-            }
-
-            // Tulis judul kelas di navigasi
-            document.getElementById('judul-kelas-nav').innerText = dataMataPelajaran.judul_kelas;
-
-            // Render daftar playlist
-            const wadahPlaylist = document.getElementById('wadah-playlist');
-            wadahPlaylist.innerHTML = "";
-
-            dataMataPelajaran.materi.forEach((video, indeks) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = `playlist-item ${indeks === 0 ? 'active' : ''}`;
-                itemDiv.id = `playlist-item-${video.id}`;
-                itemDiv.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-1 fw-bold">▶️ ${video.judul}</h6>
-                            <small class="text-muted">⏱️ ${video.durasi}</small>
-                        </div>
-                    </div>
-                `;
-                
-                // Tambahkan interaktivitas klik
-                itemDiv.onclick = () => mainkanVideo(video, itemDiv);
-                
-                wadahPlaylist.appendChild(itemDiv);
-            });
-
-            // Putar video pertama secara otomatis saat halaman dibuka
-            if(dataMataPelajaran.materi.length > 0) {
-                mainkanVideo(dataMataPelajaran.materi[0], document.getElementById(`playlist-item-${dataMataPelajaran.materi[0].id}`));
+                if (res.ok && data.lesson) {
+                    document.getElementById('judul-materi').innerText = data.lesson.judul_materi;
+                    document.getElementById('frame-video').src = data.lesson.konten_url;
+                } else {
+                    document.getElementById('judul-materi').innerText = "Materi tidak ditemukan.";
+                    document.getElementById('btn-tandai').disabled = true;
+                }
+            } catch (error) {
+                document.getElementById('judul-materi').innerHTML = "<span class='text-danger'>Gagal memuat video.</span>";
             }
         }
 
-        // 4. Fungsi Mengganti Video yang Diputar
-        function mainkanVideo(dataVideo, elemenKlik) {
-            // Hapus warna 'active' dari semua daftar
-            const semuaItem = document.querySelectorAll('.playlist-item');
-            semuaItem.forEach(item => item.classList.remove('active'));
+        async function tandaiSelesai() {
+            const btn = document.getElementById('btn-tandai');
+            btn.disabled = true;
+            btn.innerText = "MENYIMPAN...";
 
-            // Beri warna oranye 'active' pada item yang diklik
-            elemenKlik.classList.add('active');
+            try {
+                const res = await fetch(`${API_URL}/lessons/${lessonId}/complete`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                const data = await res.json();
 
-            // Ganti URL iframe dan Teks Judul
-            document.getElementById('layar-video').src = dataVideo.url;
-            document.getElementById('judul-video-aktif').innerText = dataVideo.judul;
-            document.getElementById('deskripsi-video-aktif').innerText = "Tonton dan perhatikan materi ini dengan seksama. Jangan lupa catat kosakata barunya!";
+                if (res.ok) {
+                    // Update EXP di memori browser
+                    USER.exp = (USER.exp || 0) + data.exp_didapat;
+                    localStorage.setItem('korisu_user', JSON.stringify(USER));
+
+                    document.getElementById('teks-exp').innerText = `+${data.exp_didapat} EXP Didapatkan 🐿️`;
+                    const myModal = new bootstrap.Modal(document.getElementById('modalSukses'));
+                    myModal.show();
+                } else {
+                    alert(data.message);
+                    btn.disabled = false;
+                    btn.innerText = "Tandai Selesai & Ambil EXP ✔️";
+                }
+            } catch (error) {
+                alert("Gagal menghubungi server.");
+                btn.disabled = false;
+            }
         }
 
-        // 5. Simulasi Tombol Selesai
-        function tandaiSelesai() {
-            alert("Bagus! Materi ini ditandai selesai. \n+10 EXP ditambahkan ke statistikmu! (Simulasi API)");
-            // Di masa depan, tombol ini akan mengirim fetch() POST ke backend gamifikasi
-        }
-
-        // Eksekusi
-        document.addEventListener('DOMContentLoaded', muatHalamanVideo);
+        document.addEventListener('DOMContentLoaded', muatVideo);
     </script>
 </body>
 </html>

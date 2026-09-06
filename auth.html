@@ -13,7 +13,7 @@
             --korisu-white: #ffffff;
         }
         body {
-            background-color: var(--korisu-orange); /* Latar belakang oranye tebal khas KORISU */
+            background-color: var(--korisu-orange);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -27,7 +27,7 @@
             box-shadow: 8px 8px 0px var(--korisu-black);
             width: 100%;
             max-width: 400px;
-            padding: 2rem;
+            padding: 2.5rem 2rem;
         }
         .btn-korisu {
             background-color: var(--korisu-black);
@@ -37,6 +37,7 @@
             width: 100%;
             padding: 10px;
             margin-top: 15px;
+            transition: all 0.2s;
         }
         .btn-korisu:hover {
             background-color: var(--korisu-orange);
@@ -45,6 +46,7 @@
         .form-control {
             border: 2px solid var(--korisu-black);
             margin-bottom: 15px;
+            padding: 10px;
         }
         .form-control:focus {
             border-color: var(--korisu-orange);
@@ -60,9 +62,13 @@
             text-decoration: underline;
             color: var(--korisu-black);
         }
-        /* Menyembunyikan form pendaftaran secara default */
         #form-register-container {
             display: none;
+        }
+        .alert-custom {
+            border: 2px solid var(--korisu-black);
+            font-weight: bold;
+            border-radius: 8px;
         }
     </style>
 </head>
@@ -74,8 +80,8 @@
             <p class="text-muted" id="auth-subtitle">Silakan masuk untuk melanjutkan belajar.</p>
         </div>
 
-        <!-- Pesan Notifikasi (Error/Sukses) -->
-        <div id="auth-alert" class="alert d-none text-center fw-bold" role="alert"></div>
+        <!-- Pesan Notifikasi -->
+        <div id="auth-alert" class="alert alert-custom d-none text-center" role="alert"></div>
 
         <!-- FORM LOGIN -->
         <div id="form-login-container">
@@ -106,14 +112,14 @@
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
 
-        // 1. Fungsi Animasi Pergantian Form
+        // Fungsi Animasi Pergantian Form
         function toggleForm(mode) {
             const loginContainer = document.getElementById('form-login-container');
             const regContainer = document.getElementById('form-register-container');
             const subtitle = document.getElementById('auth-subtitle');
             const alertBox = document.getElementById('auth-alert');
             
-            alertBox.classList.add('d-none'); // Sembunyikan pesan error sebelumnya
+            alertBox.classList.add('d-none'); 
 
             if(mode === 'register') {
                 loginContainer.style.display = 'none';
@@ -126,11 +132,11 @@
             }
         }
 
-        // Fungsi Bantuan untuk Menampilkan Notifikasi
+        // Fungsi Menampilkan Notifikasi
         function showNotif(pesan, isSuccess) {
             const alertBox = document.getElementById('auth-alert');
             alertBox.innerText = pesan;
-            alertBox.classList.remove('d-none', 'alert-success', 'alert-danger');
+            alertBox.classList.remove('d-none', 'alert-success', 'alert-danger', 'bg-warning');
             
             if(isSuccess) {
                 alertBox.classList.add('alert-success');
@@ -139,10 +145,13 @@
             }
         }
 
-        // 2. Logika Pendaftaran (Register)
+        // Logika Pendaftaran (Register)
         document.getElementById('form-register').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Mencegah halaman me-refresh
-            
+            e.preventDefault();
+            const btnSubmit = e.target.querySelector('button');
+            btnSubmit.innerText = "MEMPROSES...";
+            btnSubmit.disabled = true;
+
             const nama = document.getElementById('reg-nama').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
@@ -151,7 +160,7 @@
                 const res = await fetch(`${API_URL}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nama_lengkap: nama, email: email, password: password, role: 'murid' })
+                    body: JSON.stringify({ nama_lengkap: nama, email: email, password: password }) // Role otomatis 'murid' di DB
                 });
                 
                 const data = await res.json();
@@ -159,18 +168,24 @@
                 if(res.ok) {
                     showNotif("Pendaftaran berhasil! Silakan masuk.", true);
                     document.getElementById('form-register').reset();
-                    setTimeout(() => toggleForm('login'), 2000); // Geser ke form login setelah 2 detik
+                    setTimeout(() => toggleForm('login'), 2000);
                 } else {
-                    showNotif(data.message, false); // Misal: Email sudah terdaftar
+                    showNotif(data.message || "Pendaftaran gagal.", false);
                 }
             } catch (error) {
                 showNotif("Gagal terhubung ke server.", false);
+            } finally {
+                btnSubmit.innerText = "DAFTAR SEKARANG";
+                btnSubmit.disabled = false;
             }
         });
 
-        // 3. Logika Masuk (Login)
+        // Logika Masuk (Login)
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnSubmit = e.target.querySelector('button');
+            btnSubmit.innerText = "MEMERIKSA...";
+            btnSubmit.disabled = true;
             
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
@@ -185,21 +200,23 @@
                 const data = await res.json();
 
                 if(res.ok) {
-                    // INI BAGIAN PALING PENTING: Menyimpan Tiket VIP ke Browser!
+                    // Simpan data tiket dan profil (termasuk stats) ke memori browser
                     localStorage.setItem('korisu_token', data.token);
                     localStorage.setItem('korisu_user', JSON.stringify(data.user));
                     
-                    showNotif("Login berhasil! Mengalihkan...", true);
+                    showNotif("Masuk berhasil! Menyiapkan meja belajarmu...", true);
                     
-                    // Lempar pengguna ke halaman Dashboard
                     setTimeout(() => {
                         window.location.href = "dashboard.html";
-                    }, 1000);
+                    }, 1500);
                 } else {
-                    showNotif(data.message, false); // Misal: Password salah
+                    showNotif(data.message || "Email atau kata sandi salah.", false);
                 }
             } catch (error) {
                 showNotif("Gagal terhubung ke server.", false);
+            } finally {
+                btnSubmit.innerText = "MASUK";
+                btnSubmit.disabled = false;
             }
         });
     </script>
