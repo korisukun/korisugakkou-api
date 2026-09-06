@@ -45,15 +45,12 @@
                     </div>
 
                     <form id="form-vocab-bulk">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Pilih Kategori Level</label>
-                            <select id="v-kategori" class="form-select">
-                                <option value="jlpt_n5">JLPT N5</option>
-                                <option value="jlpt_n4">JLPT N4</option>
-                                <option value="jlpt_n3">JLPT N3</option>
-                                <option value="kaigo">Kaigo Kokka Shiken</option>
-                            </select>
-                        </div>
+<div class="mb-3">
+    <label class="form-label fw-bold">Pilih Katalog Kelas Target</label>
+    <select id="v-course-id" class="form-select" required>
+        <option value="">⏳ Memuat daftar katalog kelas...</option>
+    </select>
+</div>
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Data Kosakata</label>
@@ -100,112 +97,131 @@
     </div>
 
     <script>
-        const API_URL = 'https://korisugakkou-api.onrender.com/api';
-        const TOKEN = localStorage.getItem('korisu_token');
-        const USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+    const API_URL = 'https://korisugakkou-api.onrender.com/api';
+    const TOKEN = localStorage.getItem('korisu_token');
+    const USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
 
-        // SATPAM HALAMAN
-        if (!TOKEN || USER.role !== 'sensei') {
-            alert("Akses Ditolak! Halaman ini khusus untuk Sensei.");
-            window.location.href = "dashboard.html";
+    if (!TOKEN || USER.role !== 'sensei') {
+        alert("Akses Ditolak! Halaman ini khusus untuk Sensei.");
+        window.location.href = "dashboard.html";
+    }
+
+    function kembali() { window.location.href = "dashboard.html"; }
+
+    // 1. [BARU] FUNGSI MENGAMBIL DAFTAR KELAS UNTUK DROPDOWN
+    async function muatDropdownKatalog() {
+        try {
+            const res = await fetch(`${API_URL}/courses`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const data = await res.json();
+            
+            const select = document.getElementById('v-course-id');
+            select.innerHTML = ""; // Bersihkan opsi loading
+            
+            if (res.ok && data.courses.length > 0) {
+                data.courses.forEach(course => {
+                    select.innerHTML += `<option value="${course.id}">${course.judul_course}</option>`;
+                });
+            } else {
+                select.innerHTML = `<option value="">Belum ada kelas di database</option>`;
+            }
+        } catch (error) {
+            console.error("Gagal memuat katalog", error);
+            document.getElementById('v-course-id').innerHTML = `<option value="">Gagal memuat data server</option>`;
+        }
+    }
+
+    // 2. LOGIKA MENGIRIM KOSAKATA MASAL
+    document.getElementById('form-vocab-bulk').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const btnSubmit = document.getElementById('btn-submit-vocab');
+        btnSubmit.innerText = "MEMPROSES...";
+        btnSubmit.disabled = true;
+
+        const courseId = document.getElementById('v-course-id').value;
+        const rawData = document.getElementById('v-bulk-input').value;
+        
+        if(!courseId) {
+            alert("Harap pilih katalog kelas terlebih dahulu!");
+            btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
+            btnSubmit.disabled = false;
+            return;
         }
 
-        function kembali() { window.location.href = "dashboard.html"; }
+        const barisData = rawData.split('\n');
+        const arrayKosakata = [];
 
-        // LOGIKA MENGIRIM KOSAKATA MASAL
-        document.getElementById('form-vocab-bulk').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const btnSubmit = document.getElementById('btn-submit-vocab');
-            btnSubmit.innerText = "MEMPROSES...";
-            btnSubmit.disabled = true;
+        for (let i = 0; i < barisData.length; i++) {
+            const baris = barisData[i].trim();
+            if (!baris) continue; 
 
-            const kategori = document.getElementById('v-kategori').value;
-            const rawData = document.getElementById('v-bulk-input').value;
-            
-            // Memecah teks dari baris baru (enter)
-            const barisData = rawData.split('\n');
-            const arrayKosakata = [];
-
-            // Memproses setiap baris
-            for (let i = 0; i < barisData.length; i++) {
-                const baris = barisData[i].trim();
-                if (!baris) continue; // Abaikan jika baris kosong
-
-                // Pecah berdasarkan koma
-                const kolom = baris.split(',');
-                
-                // Pastikan ada 3 bagian (Kanji, Furigana, Arti)
-                if (kolom.length >= 3) {
-                    arrayKosakata.push({
-                        kanji: kolom[0].trim(),
-                        furigana: kolom[1].trim(),
-                        arti_indonesia: kolom[2].trim(),
-                        kategori: kategori
-                    });
-                } else {
-                    alert(`Format salah pada baris ${i + 1}:\n"${baris}"\nPastikan dipisah dengan koma!`);
-                    btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
-                    btnSubmit.disabled = false;
-                    return; // Hentikan proses
-                }
-            }
-
-            if(arrayKosakata.length === 0) {
-                alert("Data tidak valid. Silakan cek kembali tulisan Anda.");
+            const kolom = baris.split(',');
+            if (kolom.length >= 3) {
+                arrayKosakata.push({
+                    kanji: kolom[0].trim(),
+                    furigana: kolom[1].trim(),
+                    arti_indonesia: kolom[2].trim()
+                });
+            } else {
+                alert(`Format salah pada baris ${i + 1}:\n"${baris}"\nPastikan dipisah dengan koma!`);
                 btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
                 btnSubmit.disabled = false;
-                return;
+                return; 
             }
+        }
 
-            // Kirim array ke Backend
-            try {
-                const res = await fetch(`${API_URL}/vocabulary/bulk-add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify({ vocabularies: arrayKosakata })
-                });
-                
-                const result = await res.json();
-                
-                if(res.ok) {
-                    alert(result.message);
-                    document.getElementById('v-bulk-input').value = ""; // Bersihkan kotak
-                } else {
-                    alert("Gagal: " + result.message);
-                }
-            } catch (err) { 
-                alert("Error jaringan."); 
-            } finally {
-                btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
-                btnSubmit.disabled = false;
-            }
-        });
+        if(arrayKosakata.length === 0) return;
 
-        // LOGIKA MENGIRIM QUOTE (Tetap Sama)
-        document.getElementById('form-quote').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const dataQuote = {
-                teks_jepang: document.getElementById('q-teks').value,
-                cara_baca: document.getElementById('q-baca').value,
-                arti_indonesia: document.getElementById('q-arti').value,
-                sumber_tokoh: document.getElementById('q-tokoh').value || 'Sensei',
-                kategori_fokus: document.getElementById('q-kategori').value || 'motivasi'
-            };
+        try {
+            // Perhatikan: course_id sekarang dikirim terpisah di luar array
+            const res = await fetch(`${API_URL}/vocabulary/bulk-add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                body: JSON.stringify({ vocabularies: arrayKosakata, course_id: courseId })
+            });
+            
+            const result = await res.json();
+            
+            if(res.ok) {
+                alert(result.message);
+                document.getElementById('v-bulk-input').value = ""; 
+            } else alert("Gagal: " + result.message);
+        } catch (err) { alert("Error jaringan."); } 
+        finally {
+            btnSubmit.innerText = "SIMPAN SEMUA KOSAKATA";
+            btnSubmit.disabled = false;
+        }
+    });
 
-            try {
-                const res = await fetch(`${API_URL}/quotes/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify(dataQuote)
-                });
-                const result = await res.json();
-                if(res.ok) {
-                    alert("✅ Quote berhasil ditambahkan!");
-                    document.getElementById('form-quote').reset();
-                } else alert("Gagal: " + result.message);
-            } catch (err) { alert("Error jaringan."); }
-        });
-    </script>
+    // 3. LOGIKA MENGIRIM QUOTE
+    document.getElementById('form-quote').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dataQuote = {
+            teks_jepang: document.getElementById('q-teks').value,
+            cara_baca: document.getElementById('q-baca').value,
+            arti_indonesia: document.getElementById('q-arti').value,
+            sumber_tokoh: document.getElementById('q-tokoh').value || 'Sensei',
+            kategori_fokus: document.getElementById('q-kategori').value || 'motivasi'
+        };
+
+        try {
+            const res = await fetch(`${API_URL}/quotes/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                body: JSON.stringify(dataQuote)
+            });
+            const result = await res.json();
+            if(res.ok) {
+                alert("✅ Quote berhasil ditambahkan!");
+                document.getElementById('form-quote').reset();
+            } else alert("Gagal: " + result.message);
+        } catch (err) { alert("Error jaringan."); }
+    });
+
+    // 4. JALANKAN SAAT HALAMAN DIBUKA
+    document.addEventListener('DOMContentLoaded', muatDropdownKatalog);
+</script>
 </body>
 </html>
