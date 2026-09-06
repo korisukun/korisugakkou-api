@@ -1,22 +1,29 @@
 const db = require('../config/db');
 
-const getCourses = async (req, res) => {
+// 1. Mengambil Semua Daftar Kelas (Katalog)
+const getAllCourses = async (req, res) => {
     try {
-        // 1. Ambil data Course
-        const courseRes = await db.query('SELECT * FROM courses ORDER BY id ASC LIMIT 1');
+        const result = await db.query('SELECT * FROM courses ORDER BY id ASC');
+        res.json({ courses: result.rows });
+    } catch (error) {
+        res.status(500).json({ message: 'Gagal memuat katalog kelas.' });
+    }
+};
+
+// 2. Mengambil Kurikulum dari 1 Kelas Spesifik
+const getCourseCurriculum = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const courseRes = await db.query('SELECT * FROM courses WHERE id = $1', [id]);
+        
         if (courseRes.rows.length === 0) {
-            return res.status(200).json({ courses: [] });
+            return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
         }
         
         const course = courseRes.rows[0];
-
-        // 2. Ambil Modul untuk Course tersebut
-        const modRes = await db.query('SELECT * FROM modules WHERE course_id = $1 ORDER BY urutan_modul ASC', [course.id]);
-        
-        // 3. Ambil seluruh Lesson
+        const modRes = await db.query('SELECT * FROM modules WHERE course_id = $1 ORDER BY urutan_modul ASC', [id]);
         const lesRes = await db.query('SELECT * FROM lessons ORDER BY urutan_lesson ASC');
 
-        // 4. Susun hierarkinya (Module -> berisi Lessons)
         const modulesData = modRes.rows.map(mod => {
             return {
                 id: mod.id,
@@ -25,23 +32,11 @@ const getCourses = async (req, res) => {
             };
         });
 
-        // 5. Gabungkan ke dalam Course
-        const kurikulumLengkap = {
-            id: course.id,
-            judul_course: course.judul_course,
-            deskripsi: course.deskripsi,
-            modules: modulesData
-        };
-
-        res.status(200).json({ 
-            message: 'Berhasil memuat kurikulum 🐿️', 
-            course: kurikulumLengkap 
-        });
-
+        res.json({ course: { ...course, modules: modulesData } });
     } catch (error) {
-        console.error('Error muat materi:', error.message);
+        console.error('Error muat kurikulum:', error.message);
         res.status(500).json({ message: 'Gagal memuat kurikulum kelas.' });
     }
 };
 
-module.exports = { getCourses };
+module.exports = { getAllCourses, getCourseCurriculum };

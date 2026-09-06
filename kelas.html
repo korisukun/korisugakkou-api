@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kurikulum Kelas - KORISU Gakkou</title>
+    <title>Katalog Kelas - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
@@ -19,7 +19,16 @@
             border: 2px solid var(--korisu-black);
             border-radius: 10px;
             box-shadow: 4px 4px 0px var(--korisu-black);
+            transition: transform 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
+        .card-custom:hover { transform: translateY(-5px); background-color: #fff9f5; border-color: var(--korisu-orange); }
+        .thumbnail-icon { font-size: 3.5rem; text-align: center; margin-bottom: 15px; }
+        
+        /* Style Area Kurikulum */
         .header-course {
             background-color: var(--korisu-black);
             color: var(--korisu-white);
@@ -27,69 +36,54 @@
             border-bottom: 5px solid var(--korisu-orange);
             margin-bottom: 30px;
         }
-        .accordion-button {
-            font-weight: bold;
-            font-size: 1.1rem;
-            background-color: #f1f3f5;
-            color: var(--korisu-black);
-            border: 2px solid var(--korisu-black) !important;
-        }
-        .accordion-button:not(.collapsed) {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-white);
-            border-color: var(--korisu-black) !important;
-        }
-        .accordion-item {
-            border: none;
-            margin-bottom: 10px;
-        }
-        .lesson-item {
-            padding: 15px;
-            border-bottom: 1px solid #dee2e6;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-        }
-        .lesson-item:hover {
-            background-color: #ffe8d6;
-            border-left: 4px solid var(--korisu-orange);
-        }
-        .lesson-icon {
-            font-size: 1.5rem;
-            margin-right: 15px;
-        }
+        .accordion-button { font-weight: bold; font-size: 1.1rem; border: 2px solid var(--korisu-black) !important; color: var(--korisu-black); }
+        .accordion-button:not(.collapsed) { background-color: var(--korisu-orange); color: var(--korisu-white); }
+        .lesson-item { padding: 15px; border-bottom: 1px solid #dee2e6; cursor: pointer; display: flex; align-items: center; transition: all 0.2s;}
+        .lesson-item:hover { background-color: #ffe8d6; border-left: 4px solid var(--korisu-orange); }
+        .lesson-icon { font-size: 1.5rem; margin-right: 15px; }
+        
+        .btn-korisu { background-color: var(--korisu-black); color: white; border: 2px solid var(--korisu-black); font-weight: bold; }
+        .btn-korisu:hover { background-color: var(--korisu-orange); color: var(--korisu-black); }
     </style>
 </head>
 <body>
 
     <nav class="navbar navbar-dark navbar-korisu shadow-sm sticky-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="dashboard.html">📺 Kelas KORISU Gakkou</a>
-            <button class="btn btn-sm btn-light fw-bold border-dark" onclick="window.location.href='dashboard.html'">Kembali ke Dashboard</button>
+            <a class="navbar-brand fw-bold" href="dashboard.html">📺 Ruang Kelas KORISU Gakkou</a>
+            <button class="btn btn-sm btn-light fw-bold border-dark" onclick="window.location.href='dashboard.html'">Dasbor</button>
         </div>
     </nav>
 
-    <!-- Header Judul Kelas -->
-    <div class="header-course text-center">
-        <div class="container">
-            <h1 class="fw-bold" id="judul-course">Memuat Kelas...</h1>
-            <p class="fs-5 mt-2" id="desc-course">Silakan tunggu sebentar.</p>
+    <!-- TAMPILAN 1: KATALOG KELAS -->
+    <div id="view-katalog" class="container mt-5 mb-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Jelajahi Kelas Kami</h2>
+            <p class="text-muted">Pilih program belajar yang sesuai dengan targetmu.</p>
+        </div>
+        <div class="row" id="etalase-kelas">
+            <div class="col-12 text-center text-muted fw-bold">Memuat daftar kelas...</div>
         </div>
     </div>
 
-    <!-- Area Kurikulum (Accordion) -->
-    <div class="container mb-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card card-custom p-4">
-                    <h4 class="fw-bold mb-4">📚 Kurikulum Pembelajaran</h4>
-                    
-                    <div class="accordion" id="kurikulum-accordion">
-                        <!-- Modul akan dirender di sini oleh JavaScript -->
-                        <div class="text-center text-muted fw-bold py-4" id="loading-text">Menyinkronkan data dengan server...</div>
+    <!-- TAMPILAN 2: KURIKULUM (Tersembunyi by default) -->
+    <div id="view-kurikulum" style="display: none;">
+        <div class="header-course text-center">
+            <div class="container">
+                <button class="btn btn-sm btn-light fw-bold border-dark mb-3" onclick="kembaliKeKatalog()">🔙 Kembali ke Katalog</button>
+                <h1 class="fw-bold" id="judul-course">...</h1>
+                <p class="fs-5 mt-2" id="desc-course">...</p>
+            </div>
+        </div>
+        <div class="container mb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card p-4 border border-dark rounded shadow-sm">
+                        <h4 class="fw-bold mb-4">📚 Kurikulum Pembelajaran</h4>
+                        <div class="accordion" id="kurikulum-accordion">
+                            <!-- Kurikulum masuk ke sini -->
+                        </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -102,33 +96,66 @@
 
         if (!TOKEN) window.location.href = "auth.html";
 
-        async function muatKurikulum() {
+        // 1. Ambil Katalog Kelas saat pertama kali dibuka
+        async function muatKatalog() {
             try {
-                const res = await fetch(`${API_URL}/courses`, {
-                    headers: { 'Authorization': `Bearer ${TOKEN}` }
-                });
+                const res = await fetch(`${API_URL}/courses`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+                const data = await res.json();
+
+                const etalase = document.getElementById('etalase-kelas');
+                etalase.innerHTML = "";
+
+                if (res.ok && data.courses.length > 0) {
+                    data.courses.forEach(course => {
+                        let icon = course.thumbnail_url || '📘'; // Pakai thumbnail dari database, atau buku sebagai default
+                        etalase.innerHTML += `
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card p-4 card-custom" onclick="bukaKurikulum(${course.id})">
+                                    <div class="thumbnail-icon">${icon}</div>
+                                    <h4 class="fw-bold text-center mb-2">${course.judul_course}</h4>
+                                    <p class="text-muted text-center flex-grow-1">${course.deskripsi}</p>
+                                    <button class="btn btn-korisu mt-3 w-100">LIHAT KELAS</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    etalase.innerHTML = "<h5 class='text-muted text-center w-100'>Belum ada kelas yang tersedia.</h5>";
+                }
+            } catch (error) {
+                document.getElementById('etalase-kelas').innerHTML = "<div class='text-danger text-center w-100'>Gagal terhubung ke server.</div>";
+            }
+        }
+
+        // 2. Transisi: Buka 1 Kelas Spesifik
+        async function bukaKurikulum(courseId) {
+            document.getElementById('view-katalog').style.display = 'none';
+            document.getElementById('view-kurikulum').style.display = 'block';
+            document.getElementById('kurikulum-accordion').innerHTML = "<div class='text-center fw-bold py-3'>Menyinkronkan data...</div>";
+
+            try {
+                const res = await fetch(`${API_URL}/courses/${courseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
                 const data = await res.json();
 
                 if (res.ok && data.course) {
                     const course = data.course;
-                    
-                    // Pasang Header
                     document.getElementById('judul-course').innerText = course.judul_course;
                     document.getElementById('desc-course').innerText = course.deskripsi;
 
-                    // Render Accordion Modul
                     const wadah = document.getElementById('kurikulum-accordion');
                     wadah.innerHTML = "";
 
+                    if(course.modules.length === 0) {
+                        wadah.innerHTML = "<div class='alert alert-warning border-dark fw-bold text-center'>Materi untuk kelas ini sedang disiapkan oleh Sensei.</div>";
+                        return;
+                    }
+
                     course.modules.forEach((modul, indexModul) => {
                         let htmlLessons = "";
-                        
-                        // Render Lessons di dalam Modul
                         modul.lessons.forEach(lesson => {
                             let icon = lesson.tipe_lesson.includes('video') ? '🎥' : '📝';
-                            
                             htmlLessons += `
-                                <div class="lesson-item" onclick="bukaVideo(${lesson.id})">
+                                <div class="lesson-item" onclick="window.location.href='video-player.html?id=${lesson.id}'">
                                     <div class="lesson-icon">${icon}</div>
                                     <div class="fw-bold text-dark">${lesson.judul_materi}</div>
                                 </div>
@@ -140,37 +167,34 @@
                         const collapsedClass = isFirst ? '' : 'collapsed';
 
                         wadah.innerHTML += `
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading-${modul.id}">
-                                    <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${modul.id}">
+                            <div class="accordion-item mb-2 border-0">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button ${collapsedClass} rounded" type="button" data-bs-toggle="collapse" data-bs-target="#col-${modul.id}">
                                         ${modul.judul_modul}
                                     </button>
                                 </h2>
-                                <div id="collapse-${modul.id}" class="accordion-collapse collapse ${showClass}" data-bs-parent="#kurikulum-accordion">
-                                    <div class="accordion-body p-0 border border-dark border-top-0">
-                                        ${htmlLessons || '<div class="p-3 text-muted">Belum ada materi di modul ini.</div>'}
+                                <div id="col-${modul.id}" class="accordion-collapse collapse ${showClass}" data-bs-parent="#kurikulum-accordion">
+                                    <div class="accordion-body p-0 border border-dark border-top-0 rounded-bottom">
+                                        ${htmlLessons || '<div class="p-3 text-muted">Materi belum diunggah.</div>'}
                                     </div>
                                 </div>
                             </div>
                         `;
                     });
-
-                } else {
-                    document.getElementById('loading-text').innerText = "Belum ada kelas yang tersedia saat ini.";
                 }
             } catch (error) {
-                console.error("Error jaringan:", error);
-                document.getElementById('loading-text').innerHTML = "<span class='text-danger'>Gagal terhubung ke server.</span>";
+                document.getElementById('kurikulum-accordion').innerHTML = "<div class='text-danger text-center'>Gagal memuat kurikulum.</div>";
             }
         }
 
-        // Fungsi Arahkan ke Halaman Pemutar Video
-        function bukaVideo(lessonId) {
-            // Kita akan melempar ID pelajaran ke URL agar video-player tahu video mana yang diputar
-            window.location.href = `video-player.html?id=${lessonId}`;
+        // 3. Tombol Kembali
+        function kembaliKeKatalog() {
+            document.getElementById('view-kurikulum').style.display = 'none';
+            document.getElementById('view-katalog').style.display = 'block';
         }
 
-        document.addEventListener('DOMContentLoaded', muatKurikulum);
+        // Eksekusi
+        document.addEventListener('DOMContentLoaded', muatKatalog);
     </script>
 </body>
 </html>
