@@ -72,7 +72,10 @@
             <div class="container">
                 <button class="btn btn-sm btn-light fw-bold border-dark mb-3" onclick="kembaliKeKatalog()">🔙 Kembali ke Katalog</button>
                 <h1 class="fw-bold" id="judul-course">...</h1>
-                <p class="fs-5 mt-2" id="desc-course">...</p>
+                <p class="fs-5 mt-2 mb-4" id="desc-course">...</p>
+                
+                <!-- TOMBOL IKUTI KELAS -->
+                <button id="btn-enroll" class="btn btn-success btn-lg fw-bold border border-dark" onclick="ikutiKelas()">➕ Ikuti Kelas & Mulai Hafalkan Kosakata</button>
             </div>
         </div>
         <div class="container mb-5">
@@ -93,6 +96,7 @@
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN = localStorage.getItem('korisu_token');
+        let activeCourseId = null; // Variabel penyimpan ID kelas aktif
 
         if (!TOKEN) window.location.href = "auth.html";
 
@@ -107,7 +111,7 @@
 
                 if (res.ok && data.courses.length > 0) {
                     data.courses.forEach(course => {
-                        let icon = course.thumbnail_url || '📘'; // Pakai thumbnail dari database, atau buku sebagai default
+                        let icon = course.thumbnail_url || '📘'; 
                         etalase.innerHTML += `
                             <div class="col-md-6 col-lg-4 mb-4">
                                 <div class="card p-4 card-custom" onclick="bukaKurikulum(${course.id})">
@@ -129,6 +133,7 @@
 
         // 2. Transisi: Buka 1 Kelas Spesifik
         async function bukaKurikulum(courseId) {
+            activeCourseId = courseId; // Menyimpan ID kelas yang sedang dibuka
             document.getElementById('view-katalog').style.display = 'none';
             document.getElementById('view-kurikulum').style.display = 'block';
             document.getElementById('kurikulum-accordion').innerHTML = "<div class='text-center fw-bold py-3'>Menyinkronkan data...</div>";
@@ -141,6 +146,10 @@
                     const course = data.course;
                     document.getElementById('judul-course').innerText = course.judul_course;
                     document.getElementById('desc-course').innerText = course.deskripsi;
+                    
+                    // Reset status tombol pendaftaran saat kelas dibuka
+                    document.getElementById('btn-enroll').innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
+                    document.getElementById('btn-enroll').disabled = false;
 
                     const wadah = document.getElementById('kurikulum-accordion');
                     wadah.innerHTML = "";
@@ -187,7 +196,37 @@
             }
         }
 
-        // 3. Tombol Kembali
+        // 3. Fungsi Mendaftar Kelas
+        async function ikutiKelas() {
+            if(!activeCourseId) return;
+
+            const btn = document.getElementById('btn-enroll');
+            btn.innerText = "MEMPROSES Pendaftaran...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_URL}/courses/${activeCourseId}/enroll`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${TOKEN}` }
+                });
+                
+                const data = await res.json();
+                alert(data.message);
+
+                if (res.ok) {
+                    btn.innerText = "✅ Kelas Sudah Diikuti";
+                } else {
+                    btn.innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                alert("Gagal menghubungi server.");
+                btn.innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
+                btn.disabled = false;
+            }
+        }
+
+        // 4. Tombol Kembali
         function kembaliKeKatalog() {
             document.getElementById('view-kurikulum').style.display = 'none';
             document.getElementById('view-katalog').style.display = 'block';

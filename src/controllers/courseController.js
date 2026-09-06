@@ -39,4 +39,47 @@ const getCourseCurriculum = async (req, res) => {
     }
 };
 
-module.exports = { getAllCourses, getCourseCurriculum };
+// 3. [BARU] Murid Mendaftar Kelas (Menyalin Kosakata ke Meja Belajar)
+const enrollCourse = async (req, res) => {
+    const courseId = req.params.id;
+    const muridId = req.user.id; // Didapat dari token login
+
+    try {
+        // Cek apakah kosakata untuk kelas ini sudah ada di meja belajar murid
+        const cekSrs = await db.query(
+            'SELECT id FROM srs_reviews WHERE murid_id = $1 AND vocab_id IN (SELECT id FROM vocabularies WHERE course_id = $2) LIMIT 1', 
+            [muridId, courseId]
+        );
+
+        if (cekSrs.rows.length > 0) {
+            return res.status(400).json({ message: 'Kamu sudah mengikuti kelas ini! Kosakata sudah ada di misi harianmu.' });
+        }
+
+        // Pindahkan semua kosakata dari Gudang ke Meja Belajar (tabel srs_reviews)
+        // ON CONFLICT digunakan agar tidak ada data ganda[cite: 1]
+        const insertSrs = await db.query(`
+            INSERT INTO srs_reviews (murid_id, vocab_id, srs_level, next_review_date, kategori_terakhir)
+            SELECT $1, id, 0, CURRENT_TIMESTAMP, 'again'
+            FROM vocabularies
+            WHERE course_id = $2
+            ON CONFLICT (murid_id, vocab_id) DO NOTHING
+        `, [muridId, courseId]);
+
+        // (Opsional) Catat ke dalam user_access[cite: 1]
+        const courseData = await db.query('SELECT product_id FROM courses WHERE id = $1', [courseId]);
+        if(courseData.rows.length > 0) {
+            await db.query(`
+                INSERT INTO user_access (murid_id, product_id, tipe_akses)
+                VALUES ($1, $2, 'lifetime')
+            `, [muridId, courseData.rows[0].product_id]);
+        }
+
+        res.json({ message: 'Pendaftaran Berhasil! Kosakata kelas ini telah ditambahkan ke Kuis SRS harianmu. 🚀' });
+    } catch (error) {
+        console.error('Error enroll:', error.message);
+        res.status(500).json({ message: 'Gagal mendaftar kelas.' });
+    }
+};
+
+// Pastikan Anda mengekspor fungsi baru ini!
+module.exports = { getAllCourses, getCourseCurriculum, enrollCourse };
