@@ -1,48 +1,29 @@
 const db = require('../config/db');
 
-// 1. Menambah Kosakata Satuan
-const addVocabulary = async (req, res) => {
-    try {
-        const { kanji, furigana, arti_indonesia, course_id } = req.body;
-        const newVocab = await db.query(
-            'INSERT INTO vocabularies (kanji, furigana, arti_indonesia, course_id) VALUES ($1, $2, $3, $4) RETURNING *',
-            [kanji, furigana, arti_indonesia, course_id || null]
-        );
-        res.status(201).json({ message: 'Kosakata berhasil ditambahkan! 🐿️', vocab: newVocab.rows[0] });
-    } catch (error) {
-        console.error('Error saat menambah kosakata:', error.message);
-        res.status(500).json({ message: 'Gagal menambah kosakata pada server.' });
+// 1. Menambah Kosakata Masal (Bulk Add)
+const addVocabBulk = async (req, res) => {
+    const { vocabularies, course_id } = req.body;
+    
+    if (!vocabularies || vocabularies.length === 0) {
+        return res.status(400).json({ message: 'Data kosakata kosong.' });
     }
-};
 
-// 2. Menambah Ratusan Kosakata Sekaligus (Bulk Insert)
-const addBulkVocabulary = async (req, res) => {
     try {
-        const { vocabularies, course_id } = req.body; 
-        
-        if (!Array.isArray(vocabularies) || vocabularies.length === 0) {
-            return res.status(400).json({ message: 'Data kosong atau format salah.' });
-        }
-
-        let berhasil = 0;
-        
-        for (let v of vocabularies) {
+        // Menyisipkan array kosakata satu per satu ke database
+        for (const v of vocabularies) {
             await db.query(
-                'INSERT INTO vocabularies (kanji, furigana, arti_indonesia, course_id) VALUES ($1, $2, $3, $4)',
-                [v.kanji, v.furigana, v.arti_indonesia, course_id || null]
+                'INSERT INTO vocabularies (course_id, kanji, furigana, arti_indonesia) VALUES ($1, $2, $3, $4)',
+                [course_id, v.kanji, v.furigana, v.arti_indonesia]
             );
-            berhasil++;
         }
-
-        res.status(201).json({ message: `Luar biasa! ${berhasil} Kosakata berhasil dimasukkan ke katalog! 🚀` });
-        
+        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan ke database! 📚' });
     } catch (error) {
-        console.error('Bulk insert error:', error.message);
-        res.status(500).json({ message: 'Gagal menambah kosakata masal.' });
+        console.error('Error tambah kosakata masal:', error.message);
+        res.status(500).json({ message: `Gagal: ${error.message}` });
     }
 };
 
-// Mengambil Daftar Kosakata Berdasarkan Kelas (Untuk Dropdown Edit)
+// 2. Mengambil Daftar Kosakata Berdasarkan Kelas (Untuk Dropdown Edit)
 const getVocabsByCourse = async (req, res) => {
     try {
         const { course_id } = req.params;
@@ -53,7 +34,7 @@ const getVocabsByCourse = async (req, res) => {
     }
 };
 
-// Menyimpan Perubahan Edit Kosakata
+// 3. Menyimpan Perubahan Edit Kosakata
 const editVocab = async (req, res) => {
     const { id } = req.params;
     const { kanji, furigana, arti_indonesia } = req.body;
@@ -68,11 +49,5 @@ const editVocab = async (req, res) => {
     }
 };
 
-// Pastikan untuk mengekspor kedua fungsi baru ini di baris paling bawah module.exports
-
-module.exports = { 
-    addVocabulary, 
-    addVocabBulk, 
-    getVocabsByCourse, 
-    editVocab 
-};
+// Pastikan ketiga nama ini persis diekspor
+module.exports = { addVocabBulk, getVocabsByCourse, editVocab };
