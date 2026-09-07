@@ -91,16 +91,49 @@ const getModulesByCourse = async (req, res) => {
     } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-// 7. [BARU] Menambah Materi (Lesson) Baru
+// 7. Menambah Materi (Lesson) Baru dengan Deskripsi
 const addLesson = async (req, res) => {
-    const { module_id, judul_materi, konten_url, tipe_lesson, urutan_lesson } = req.body;
+    // Tambahkan 'deskripsi' di penerima body
+    const { module_id, judul_materi, deskripsi, konten_url, tipe_lesson, urutan_lesson } = req.body;
     try {
         await db.query(
-            'INSERT INTO lessons (module_id, judul_materi, konten_url, tipe_lesson, urutan_lesson) VALUES ($1, $2, $3, $4, $5)',
-            [module_id, judul_materi, konten_url, tipe_lesson, urutan_lesson]
+            'INSERT INTO lessons (module_id, judul_materi, deskripsi, konten_url, tipe_lesson, urutan_lesson) VALUES ($1, $2, $3, $4, $5, $6)',
+            [module_id, judul_materi, deskripsi, konten_url, tipe_lesson, urutan_lesson]
         );
         res.status(201).json({ message: 'Materi Video berhasil diunggah ke kurikulum!' });
     } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson };
+// 8. [BARU] Mengambil Daftar Lesson berdasarkan Modul (Untuk dropdown Edit)
+const getLessonsByModule = async (req, res) => {
+    try {
+        const result = await db.query('SELECT id, judul_materi FROM lessons WHERE module_id = $1 ORDER BY urutan_lesson ASC', [req.params.id]);
+        res.json({ lessons: result.rows });
+    } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+// 9. [BARU] Mengedit Modul
+const editModule = async (req, res) => {
+    const { id } = req.params;
+    const { judul_modul, urutan_modul } = req.body;
+    try {
+        await db.query('UPDATE modules SET judul_modul = $1, urutan_modul = $2 WHERE id = $3', [judul_modul, urutan_modul, id]);
+        res.json({ message: 'Modul berhasil diperbarui! ✅' });
+    } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+// 10. [BARU] Mengedit Lesson & Deskripsi
+const editLesson = async (req, res) => {
+    const { id } = req.params;
+    const { judul_materi, deskripsi, konten_url, tipe_lesson, urutan_lesson } = req.body;
+    try {
+        await db.query(
+            'UPDATE lessons SET judul_materi = $1, deskripsi = $2, konten_url = $3, tipe_lesson = $4, urutan_lesson = $5 WHERE id = $6',
+            [judul_materi, deskripsi, konten_url, tipe_lesson, urutan_lesson, id]
+        );
+        res.json({ message: 'Materi & Deskripsi berhasil diperbarui! ✅' });
+    } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+// JANGAN LUPA PERBARUI BARIS EXPORTS INI DI PALING BAWAH:
+module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson };

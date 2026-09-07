@@ -13,154 +13,78 @@
             --korisu-white: #ffffff;
         }
         
-        body { 
-            background-color: #fafafa; 
-            color: var(--korisu-black); 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            overflow-x: hidden; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        body { background-color: #fafafa; color: var(--korisu-black); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        .navbar-custom { background-color: var(--korisu-orange); padding: 15px 0; }
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 25px; border: none; transition: all 0.2s; }
+        .btn-nav-outline:hover { background-color: #f8f9fa; transform: translateY(-2px); }
 
-        /* Navigasi Atas (Solid Orange) */
-        .navbar-custom { 
-            background-color: var(--korisu-orange); 
-            padding: 15px 0;
-        }
-        .btn-nav-outline {
-            background-color: var(--korisu-white);
-            color: var(--korisu-orange);
-            font-weight: bold;
-            border-radius: 25px;
-            padding: 8px 25px;
-            border: none;
-            transition: all 0.2s;
-        }
-        .btn-nav-outline:hover {
-            background-color: #f8f9fa;
-            transform: translateY(-2px);
-        }
-
-        /* Area Konten Utama (Dotted Grid Background) */
-        .content-section {
-            flex: 1;
-            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
-            background-size: 30px 30px;
-            padding: 40px 0 60px 0;
-        }
-
-        /* Kartu Pemutar (Soft Shadow, Rounded) */
-        .card-modern {
-            background-color: var(--korisu-white);
-            border: 1px solid #f0f0f0;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
-            padding: 30px;
-        }
-
-        /* Container Video YouTube */
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%; /* Rasio 16:9 */
-            height: 0;
-            overflow: hidden;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            background-color: #000;
-        }
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        /* Area Tugas & Tombol */
-        .task-box {
-            background-color: #fffaf5;
-            border: 1px solid #ffe8d6;
-            border-radius: 16px;
-            padding: 20px;
-        }
+        .content-section { flex: 1; background-image: radial-gradient(#e0e0e0 2px, transparent 2px); background-size: 30px 30px; padding: 40px 0 60px 0; }
         
-        .btn-selesai-modern { 
-            background-color: #198754; 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-weight: 800; 
-            padding: 12px 25px; 
-            transition: all 0.3s;
-            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2);
-        }
-        .btn-selesai-modern:hover:not(:disabled) { 
-            background-color: #146c43; 
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(25, 135, 84, 0.3);
-        }
-        .btn-selesai-modern:disabled {
-            background-color: #6c757d;
-            box-shadow: none;
-        }
+        /* Area Video Kanan */
+        .card-modern { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 30px; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); background-color: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
+        /* Area Deskripsi Baru */
+        .desc-box { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 16px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .desc-text { white-space: pre-line; line-height: 1.7; font-size: 1.05rem; color: #444; }
 
-        /* Badge Kecil */
-        .badge-kategori {
-            display: inline-block;
-            background-color: #fffaf5;
-            color: var(--korisu-orange);
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 6px 14px;
-            border-radius: 20px;
-            margin-bottom: 15px;
-            border: 1px solid #ffe8d6;
-        }
+        .task-box { background-color: #fffaf5; border: 1px solid #ffe8d6; border-radius: 16px; padding: 20px; }
+        .btn-selesai-modern { background-color: #198754; color: white; border: none; border-radius: 12px; font-weight: 800; padding: 12px 25px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2); }
+        .btn-selesai-modern:hover:not(:disabled) { background-color: #146c43; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(25, 135, 84, 0.3); }
+        .btn-selesai-modern:disabled { background-color: #6c757d; box-shadow: none; }
+        .badge-kategori { display: inline-block; background-color: #fffaf5; color: var(--korisu-orange); font-weight: 700; font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #ffe8d6; }
 
-        /* Styling Modal Sukses */
-        .modal-content-modern {
-            border: none;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-        }
-        .btn-korisu-solid { 
-            background-color: var(--korisu-orange); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            padding: 12px 20px; 
-            transition: all 0.3s; 
-        }
-        .btn-korisu-solid:hover { 
-            background-color: #e67300; 
-            color: white; 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); 
-        }
+        /* Sidebar Kurikulum Kiri */
+        .sidebar-wrapper { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 20px; height: 100%; max-height: 85vh; overflow-y: auto; }
+        .sidebar-wrapper::-webkit-scrollbar { width: 6px; }
+        .sidebar-wrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px;}
+        .sidebar-wrapper::-webkit-scrollbar-thumb { background: #ffcd99; border-radius: 10px; }
+        .sidebar-wrapper::-webkit-scrollbar-thumb:hover { background: var(--korisu-orange); }
+
+        .accordion-item { border: 1px solid #f0f0f0; border-radius: 16px !important; margin-bottom: 10px; overflow: hidden; }
+        .accordion-button { font-weight: 700; font-size: 1rem; background-color: var(--korisu-white); color: var(--korisu-black); padding: 15px; border: none; box-shadow: none !important; }
+        .accordion-button:not(.collapsed) { background-color: #fffaf5; color: var(--korisu-orange); }
+        
+        .lesson-item-side { padding: 15px 20px; border-top: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; transition: all 0.2s ease; font-size: 0.95rem; }
+        .lesson-item-side:hover { background-color: #fffaf5; padding-left: 25px; color: var(--korisu-orange); }
+        .lesson-item-side.active { background-color: #fff0e5; border-left: 4px solid var(--korisu-orange); font-weight: bold; color: var(--korisu-orange); padding-left: 20px; }
+
+        .modal-content-modern { border: none; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 20px; transition: all 0.3s; }
+        .btn-korisu-solid:hover { background-color: #e67300; color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
     </style>
 </head>
 <body>
 
-    <!-- Navigasi Atas Minimalis -->
     <nav class="navbar navbar-expand-lg navbar-custom shadow-sm sticky-top">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="kelas.html">
+        <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="#" onclick="kembaliKeKelas(); return false;">
                 <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
-                <span class="d-none d-sm-inline">Ruang Putar Video</span>
+                <span class="d-none d-sm-inline" id="nav-course-title">Ruang Putar Video</span>
             </a>
-            <button class="btn-nav-outline" onclick="window.location.href='kelas.html'">🔙 Kembali ke Kurikulum</button>
+            <button class="btn-nav-outline" onclick="kembaliKeKelas()">🔙 Kembali ke Halaman Kelas</button>
         </div>
     </nav>
 
-    <!-- Konten Pemutar Video -->
     <div class="content-section">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-9">
-                    
+        <div class="container-fluid px-4">
+            <div class="row">
+                
+                <!-- KOLOM KIRI: Daftar Kurikulum -->
+                <div class="col-lg-4 mb-4 order-2 order-lg-1">
+                    <div class="sidebar-wrapper">
+                        <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
+                            <h5 class="fw-bold mb-0">Daftar Materi</h5>
+                        </div>
+                        <div class="accordion" id="accordionSidebar">
+                            <div class="text-center text-muted fw-bold py-4">Memuat daftar materi...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KOLOM KANAN: Pemutar Video & Deskripsi -->
+                <div class="col-lg-8 mb-4 order-1 order-lg-2">
                     <div class="card-modern">
                         <span class="badge-kategori">🎥 Video Pembelajaran</span>
                         <h2 class="fw-bold mb-4 text-dark" id="judul-materi">Memuat Video...</h2>
@@ -169,21 +93,27 @@
                             <iframe id="frame-video" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
 
+                        <!-- KOTAK DESKRIPSI (BARU) -->
+                        <div class="desc-box mb-4">
+                            <h5 class="fw-bold text-dark mb-3">📝 Catatan Sensei</h5>
+                            <div id="teks-deskripsi" class="desc-text">Memuat catatan materi...</div>
+                        </div>
+
                         <div class="task-box d-flex flex-column flex-md-row justify-content-between align-items-center">
                             <div class="mb-3 mb-md-0 text-center text-md-start">
                                 <h6 class="fw-bold mb-1" style="color: var(--korisu-orange);">Tugas Kamu:</h6>
-                                <p class="text-muted mb-0">Tonton video ini hingga selesai untuk memahami materi dengan utuh.</p>
+                                <p class="text-muted mb-0">Tonton video ini hingga selesai untuk mendapatkan koin dan EXP.</p>
                             </div>
                             <button id="btn-tandai" class="btn btn-selesai-modern" onclick="tandaiSelesai()">Tandai Selesai & Ambil EXP ✔️</button>
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </div>
     </div>
 
-    <!-- Modal Sukses Animasi Lembut -->
+    <!-- Modal Sukses -->
     <div class="modal fade" id="modalSukses" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-content-modern">
@@ -193,13 +123,12 @@
                     <div class="bg-light border border-success rounded-4 p-3 mx-auto mb-4" style="max-width: 250px;">
                         <h5 class="text-success fw-bold mb-0" id="teks-exp">+10 EXP Didapatkan</h5>
                     </div>
-                    <button type="button" class="btn-korisu-solid w-100 fs-5" onclick="window.location.href='kelas.html'">Kembali ke Kurikulum</button>
+                    <button type="button" class="btn-korisu-solid w-100 fs-5" onclick="kembaliKeKelas()">Lanjutkan Belajar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Script Logika Dipertahankan Utuh -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
@@ -208,9 +137,14 @@
         
         const urlParams = new URLSearchParams(window.location.search);
         const lessonId = urlParams.get('id');
+        const sourceCourseId = urlParams.get('course_id'); 
 
         if (!TOKEN) window.location.href = "auth.html";
-        if (!lessonId) window.location.href = "kelas.html";
+        if (!lessonId || !sourceCourseId) window.location.href = "kelas.html";
+
+        function kembaliKeKelas() {
+            window.location.href = `kelas.html?course_id=${sourceCourseId}`;
+        }
 
         async function muatVideo() {
             try {
@@ -221,13 +155,79 @@
 
                 if (res.ok && data.lesson) {
                     document.getElementById('judul-materi').innerText = data.lesson.judul_materi;
-                    document.getElementById('frame-video').src = data.lesson.konten_url;
+                    
+                    // Render Deskripsi
+                    document.getElementById('teks-deskripsi').innerText = data.lesson.deskripsi || "Sensei belum menambahkan catatan untuk materi ini. Silakan langsung tonton videonya ya!";
+
+                    let urlVideo = data.lesson.konten_url;
+                    let pemisah = urlVideo.includes('?') ? '&' : '?';
+                    let paramKeamanan = "rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0";
+                    document.getElementById('frame-video').src = urlVideo + pemisah + paramKeamanan;
+                    
                 } else {
                     document.getElementById('judul-materi').innerText = "Materi tidak ditemukan.";
+                    document.getElementById('teks-deskripsi').innerText = "-";
                     document.getElementById('btn-tandai').disabled = true;
                 }
             } catch (error) {
                 document.getElementById('judul-materi').innerHTML = "<span class='text-danger'>Gagal memuat video.</span>";
+                document.getElementById('teks-deskripsi').innerText = "Terjadi kesalahan jaringan saat memuat catatan.";
+            }
+        }
+
+        async function muatSidebarKurikulum() {
+            try {
+                const res = await fetch(`${API_URL}/courses/${sourceCourseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+                const data = await res.json();
+
+                if (res.ok && data.course) {
+                    document.getElementById('nav-course-title').innerText = data.course.judul_course;
+                    const wadahSidebar = document.getElementById('accordionSidebar');
+                    wadahSidebar.innerHTML = "";
+
+                    if(data.course.modules.length === 0) {
+                        wadahSidebar.innerHTML = "<div class='text-muted text-center'>Materi belum disiapkan.</div>";
+                        return;
+                    }
+
+                    data.course.modules.forEach((modul, indexModul) => {
+                        let htmlLessons = "";
+                        let isModuleActive = false; 
+
+                        modul.lessons.forEach(lesson => {
+                            let icon = lesson.tipe_lesson.includes('video') ? '🎥' : '📝';
+                            let isActive = (lesson.id == lessonId); 
+                            if (isActive) isModuleActive = true;
+
+                            htmlLessons += `
+                                <div class="lesson-item-side ${isActive ? 'active' : ''}" onclick="window.location.href='video-player.html?id=${lesson.id}&course_id=${sourceCourseId}'">
+                                    <div class="me-3 fs-5">${icon}</div>
+                                    <div class="flex-grow-1">${lesson.judul_materi}</div>
+                                </div>
+                            `;
+                        });
+
+                        const showClass = isModuleActive || indexModul === 0 ? 'show' : '';
+                        const collapsedClass = isModuleActive || indexModul === 0 ? '' : 'collapsed';
+
+                        wadahSidebar.innerHTML += `
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button ${collapsedClass}" type="button" data-bs-toggle="collapse" data-bs-target="#mod-side-${modul.id}">
+                                        ${modul.judul_modul}
+                                    </button>
+                                </h2>
+                                <div id="mod-side-${modul.id}" class="accordion-collapse collapse ${showClass}" data-bs-parent="#accordionSidebar">
+                                    <div class="accordion-body p-0">
+                                        ${htmlLessons || '<div class="p-3 text-muted text-center">Belum ada materi.</div>'}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                document.getElementById('accordionSidebar').innerHTML = "<div class='text-danger text-center'>Gagal memuat kurikulum.</div>";
             }
         }
 
@@ -261,7 +261,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', muatVideo);
+        document.addEventListener('DOMContentLoaded', () => {
+            muatVideo();
+            muatSidebarKurikulum();
+        });
     </script>
 </body>
 </html>
