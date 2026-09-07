@@ -49,5 +49,15 @@ const editVocab = async (req, res) => {
     }
 };
 
-// Pastikan ketiga nama ini persis diekspor
-module.exports = { addVocabBulk, getVocabsByCourse, editVocab };
+// [BARU] Menghapus Kosakata
+const deleteVocab = async (req, res) => {
+    try {
+        await db.query('DELETE FROM vocabularies WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Kosakata berhasil dihapus! 🗑️' });
+    } catch (error) { 
+        res.status(500).json({ message: `Gagal: ${error.message}` }); 
+    }
+};
+
+// Pastikan diekspor
+module.exports = { addVocabBulk, getVocabsByCourse, editVocab, deleteVocab };

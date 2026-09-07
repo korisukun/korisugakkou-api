@@ -120,4 +120,31 @@ const editLesson = async (req, res) => {
     } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson };
+// [BARU] 11. Mengedit Detail Kelas
+const editCourse = async (req, res) => {
+    const { id } = req.params;
+    const { judul_course, thumbnail_url, deskripsi } = req.body;
+    try {
+        await db.query('UPDATE courses SET judul_course = $1, thumbnail_url = $2, deskripsi = $3 WHERE id = $4', [judul_course, thumbnail_url, deskripsi, id]);
+        res.json({ message: 'Informasi Kelas berhasil diperbarui! ✅' });
+    } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+// [BARU] 12. Menghapus Data (Kelas, Modul, Materi)
+const deleteCourse = async (req, res) => {
+    try { await db.query('DELETE FROM courses WHERE id = $1', [req.params.id]); res.json({ message: 'Kelas dan seluruh isinya berhasil dihapus! 🗑️' }); } 
+    catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+const deleteModule = async (req, res) => {
+    try { await db.query('DELETE FROM modules WHERE id = $1', [req.params.id]); res.json({ message: 'Modul berhasil dihapus! 🗑️' }); } 
+    catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+const deleteLesson = async (req, res) => {
+    try { await db.query('DELETE FROM lessons WHERE id = $1', [req.params.id]); res.json({ message: 'Materi berhasil dihapus! 🗑️' }); } 
+    catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
+};
+
+// Pastikan baris export Anda diperbarui menjadi seperti ini:
+module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson, editCourse, deleteCourse, deleteModule, deleteLesson };
