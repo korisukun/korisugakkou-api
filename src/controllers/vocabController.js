@@ -70,4 +70,4 @@ const editVocab = async (req, res) => {
 
 // Pastikan untuk mengekspor kedua fungsi baru ini di baris paling bawah module.exports
 
-module.exports = { addVocabulary, addBulkVocabulary };
+module.exports = { addVocabulary, addBulkVocabulary, getVocabsByCourse, editVocab };
