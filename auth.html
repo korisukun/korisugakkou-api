@@ -8,50 +8,116 @@
     
     <style>
         :root {
-            --korisu-orange: #fd7e14;
-            --korisu-black: #212529;
+            --korisu-orange: #ff7f00;
+            --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
+            --korisu-bg: #fffaf5; /* Warna latar gradasi lembut */
         }
+        
         body {
+            background-color: var(--korisu-bg);
+            background-image: radial-gradient(circle at 80% 20%, #ffe8d6 0%, transparent 40%), 
+                              radial-gradient(circle at 20% 80%, #fff0e5 0%, transparent 40%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasi Atas */
+        .navbar-custom {
             background-color: var(--korisu-orange);
+            padding: 15px 0;
+        }
+        .navbar-custom .nav-link {
+            color: var(--korisu-white) !important;
+            font-weight: 500;
+            margin: 0 10px;
+        }
+        .btn-nav-outline {
+            background-color: var(--korisu-white);
+            color: var(--korisu-orange);
+            font-weight: bold;
+            border-radius: 25px;
+            padding: 8px 25px;
+        }
+
+        /* Area Konten Utama */
+        .hero-section {
+            flex: 1;
             display: flex;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 0;
         }
+        
+        .badge-custom {
+            background-color: #ffecd9;
+            color: var(--korisu-orange);
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .heading-main {
+            font-weight: 900;
+            color: var(--korisu-black);
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        .text-orange {
+            color: var(--korisu-orange);
+        }
+
+        .desc-text {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.6;
+            max-width: 90%;
+        }
+
+        /* Kartu Autentikasi (Diperhalus sesuai referensi) */
         .auth-card {
             background-color: var(--korisu-white);
-            border: 3px solid var(--korisu-black);
-            border-radius: 15px;
-            box-shadow: 8px 8px 0px var(--korisu-black);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            padding: 3rem 2.5rem;
             width: 100%;
-            max-width: 400px;
-            padding: 2.5rem 2rem;
+            border: none; /* Menghilangkan border tebal sebelumnya */
         }
-        .btn-korisu {
-            background-color: var(--korisu-black);
-            color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
-            width: 100%;
-            padding: 10px;
-            margin-top: 15px;
-            transition: all 0.2s;
-        }
-        .btn-korisu:hover {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-black);
-        }
+
         .form-control {
-            border: 2px solid var(--korisu-black);
-            margin-bottom: 15px;
-            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
         }
         .form-control:focus {
             border-color: var(--korisu-orange);
-            box-shadow: 0 0 0 0.25rem rgba(253, 126, 20, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15);
+            background-color: var(--korisu-white);
         }
+
+        .btn-korisu {
+            background-color: var(--korisu-orange);
+            color: var(--korisu-white);
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-korisu:hover {
+            background-color: #e67300;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 127, 0, 0.3);
+        }
+
         .toggle-link {
             color: var(--korisu-orange);
             font-weight: bold;
@@ -60,59 +126,100 @@
         }
         .toggle-link:hover {
             text-decoration: underline;
-            color: var(--korisu-black);
+            color: #e67300;
         }
-        #form-register-container {
-            display: none;
-        }
+
+        #form-register-container { display: none; }
+        
         .alert-custom {
-            border: 2px solid var(--korisu-black);
+            border-radius: 10px;
             font-weight: bold;
-            border-radius: 8px;
+            border: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="auth-card">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold">🐿️ KORISU Gakkou</h2>
-            <p class="text-muted" id="auth-subtitle">Silakan masuk untuk melanjutkan belajar.</p>
-        </div>
-
-        <!-- Pesan Notifikasi -->
-        <div id="auth-alert" class="alert alert-custom d-none text-center" role="alert"></div>
-
-        <!-- FORM LOGIN -->
-        <div id="form-login-container">
-            <form id="form-login">
-                <input type="email" id="login-email" class="form-control" placeholder="Alamat Email" required>
-                <input type="password" id="login-password" class="form-control" placeholder="Kata Sandi" required>
-                <button type="submit" class="btn btn-korisu">MASUK</button>
-            </form>
-            <div class="text-center mt-3">
-                Belum punya akun? <span class="toggle-link" onclick="toggleForm('register')">Daftar di sini</span>
+    <!-- Navigasi -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="#">
+                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+            </a>
+            <div class="d-none d-lg-flex">
+                <a href="#" class="nav-link">Beranda</a>
+                <a href="#" class="nav-link">Kelas ⌄</a>
+                <a href="#" class="nav-link">Layanan ⌄</a>
+                <a href="#" class="nav-link">Blog</a>
+                <a href="#" class="nav-link">Tentang</a>
+                <a href="#" class="nav-link">Kontak</a>
             </div>
+            <a href="#" class="btn btn-nav-outline">Mulai Sekarang</a>
         </div>
+    </nav>
 
-        <!-- FORM REGISTER -->
-        <div id="form-register-container">
-            <form id="form-register">
-                <input type="text" id="reg-nama" class="form-control" placeholder="Nama Lengkap" required>
-                <input type="email" id="reg-email" class="form-control" placeholder="Alamat Email" required>
-                <input type="password" id="reg-password" class="form-control" placeholder="Kata Sandi (Minimal 6 karakter)" required>
-                <button type="submit" class="btn btn-korisu">DAFTAR SEKARANG</button>
-            </form>
-            <div class="text-center mt-3">
-                Sudah punya akun? <span class="toggle-link" onclick="toggleForm('login')">Masuk di sini</span>
+    <!-- Konten Utama (Split Screen) -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                
+                <!-- Kolom Kiri: Copywriting & Motivasi -->
+                <div class="col-lg-6 pe-lg-5 mb-5 mb-lg-0 text-center text-lg-start">
+                    <span class="badge badge-custom mb-4">⭐ EKOSISTEM E-COURSE LENGKAP BAHASA JEPANG</span>
+                    <h1 class="heading-main">
+                        Kuasai Bahasa<br>Jepang <span class="text-orange">Langkah<br>demi Langkah</span>
+                    </h1>
+                    <p class="desc-text mb-4 mx-auto mx-lg-0">
+                        Jangan bingung mulai dari mana. Ikuti Learning Journey terstruktur dari Korisu Gakkou, dirancang khusus untuk membimbingmu dari level nol hingga mahir JLPT.
+                    </p>
+                </div>
+
+                <!-- Kolom Kanan: Area Form Autentikasi -->
+                <div class="col-lg-5 offset-lg-1">
+                    <div class="auth-card">
+                        <div class="text-center mb-4">
+                            <h3 class="fw-bold mb-1">Masuk ke Kelas</h3>
+                            <p class="text-muted" id="auth-subtitle">Silakan masuk untuk melanjutkan belajar.</p>
+                        </div>
+
+                        <!-- Pesan Notifikasi -->
+                        <div id="auth-alert" class="alert alert-custom d-none text-center" role="alert"></div>
+
+                        <!-- FORM LOGIN -->
+                        <div id="form-login-container">
+                            <form id="form-login">
+                                <input type="email" id="login-email" class="form-control" placeholder="Alamat Email" required>
+                                <input type="password" id="login-password" class="form-control" placeholder="Kata Sandi" required>
+                                <button type="submit" class="btn btn-korisu">MASUK SEKARANG</button>
+                            </form>
+                            <div class="text-center mt-4">
+                                Belum punya akun? <span class="toggle-link" onclick="toggleForm('register')">Daftar di sini</span>
+                            </div>
+                        </div>
+
+                        <!-- FORM REGISTER -->
+                        <div id="form-register-container">
+                            <form id="form-register">
+                                <input type="text" id="reg-nama" class="form-control" placeholder="Nama Lengkap" required>
+                                <input type="email" id="reg-email" class="form-control" placeholder="Alamat Email" required>
+                                <input type="password" id="reg-password" class="form-control" placeholder="Kata Sandi (Minimal 6 karakter)" required>
+                                <button type="submit" class="btn btn-korisu">BUAT AKUN BARU</button>
+                            </form>
+                            <div class="text-center mt-4">
+                                Sudah punya akun? <span class="toggle-link" onclick="toggleForm('login')">Masuk di sini</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
+    <!-- Menjaga seluruh logika JavaScript tetap utuh -->
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
 
-        // Fungsi Animasi Pergantian Form
         function toggleForm(mode) {
             const loginContainer = document.getElementById('form-login-container');
             const regContainer = document.getElementById('form-register-container');
@@ -132,20 +239,18 @@
             }
         }
 
-        // Fungsi Menampilkan Notifikasi
         function showNotif(pesan, isSuccess) {
             const alertBox = document.getElementById('auth-alert');
             alertBox.innerText = pesan;
             alertBox.classList.remove('d-none', 'alert-success', 'alert-danger', 'bg-warning');
             
             if(isSuccess) {
-                alertBox.classList.add('alert-success');
+                alertBox.classList.add('alert-success', 'bg-success', 'text-white');
             } else {
-                alertBox.classList.add('alert-danger');
+                alertBox.classList.add('alert-danger', 'bg-danger', 'text-white');
             }
         }
 
-        // Logika Pendaftaran (Register)
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = e.target.querySelector('button');
@@ -160,7 +265,7 @@
                 const res = await fetch(`${API_URL}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nama_lengkap: nama, email: email, password: password }) // Role otomatis 'murid' di DB
+                    body: JSON.stringify({ nama_lengkap: nama, email: email, password: password }) 
                 });
                 
                 const data = await res.json();
@@ -175,12 +280,11 @@
             } catch (error) {
                 showNotif("Gagal terhubung ke server.", false);
             } finally {
-                btnSubmit.innerText = "DAFTAR SEKARANG";
+                btnSubmit.innerText = "BUAT AKUN BARU";
                 btnSubmit.disabled = false;
             }
         });
 
-        // Logika Masuk (Login)
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = e.target.querySelector('button');
@@ -200,7 +304,6 @@
                 const data = await res.json();
 
                 if(res.ok) {
-                    // Simpan data tiket dan profil (termasuk stats) ke memori browser
                     localStorage.setItem('korisu_token', data.token);
                     localStorage.setItem('korisu_user', JSON.stringify(data.user));
                     
@@ -215,7 +318,7 @@
             } catch (error) {
                 showNotif("Gagal terhubung ke server.", false);
             } finally {
-                btnSubmit.innerText = "MASUK";
+                btnSubmit.innerText = "MASUK SEKARANG";
                 btnSubmit.disabled = false;
             }
         });

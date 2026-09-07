@@ -77,5 +77,29 @@ const enrollCourse = async (req, res) => {
     }
 };
 
-// INI ADALAH BARIS YANG MEMBUAT ERROR SEBELUMNYA JIKA TERLEWAT
-module.exports = { getAllCourses, getCourseCurriculum, enrollCourse };
+// 4. [BARU] Menambah Kelas Baru (Khusus Sensei)
+const addCourse = async (req, res) => {
+    const { judul_course, thumbnail_url, deskripsi } = req.body;
+    
+    try {
+        // Buat produk baru di tabel products (harga default 0 karena gratis/sistem enroll)
+        const newProduct = await db.query(
+            "INSERT INTO products (nama_produk, tipe_produk, harga_asli, is_active) VALUES ($1, 'course', 0, true) RETURNING id",
+            [judul_course]
+        );
+        const productId = newProduct.rows[0].id;
+
+        // Masukkan detail kelas ke tabel courses menggunakan product_id yang baru dibuat
+        await db.query(
+            "INSERT INTO courses (product_id, judul_course, deskripsi, thumbnail_url) VALUES ($1, $2, $3, $4)",
+            [productId, judul_course, deskripsi, thumbnail_url]
+        );
+
+        res.status(201).json({ message: 'Kelas berhasil diterbitkan! 🎓' });
+    } catch (error) {
+        console.error('Error tambah kelas:', error.message);
+        res.status(500).json({ message: 'Gagal menambah kelas ke database.' });
+    }
+};
+
+module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse };

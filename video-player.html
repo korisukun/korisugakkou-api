@@ -8,25 +8,65 @@
     
     <style>
         :root {
-            --korisu-orange: #fd7e14;
-            --korisu-black: #212529;
+            --korisu-orange: #ff7f00;
+            --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
         }
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
-        .navbar-korisu { background-color: var(--korisu-orange); border-bottom: 3px solid var(--korisu-black); }
-        .card-custom {
-            background-color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            border-radius: 10px;
-            box-shadow: 4px 4px 0px var(--korisu-black);
+        
+        body { 
+            background-color: #fafafa; 
+            color: var(--korisu-black); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            overflow-x: hidden; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+
+        /* Navigasi Atas (Solid Orange) */
+        .navbar-custom { 
+            background-color: var(--korisu-orange); 
+            padding: 15px 0;
+        }
+        .btn-nav-outline {
+            background-color: var(--korisu-white);
+            color: var(--korisu-orange);
+            font-weight: bold;
+            border-radius: 25px;
+            padding: 8px 25px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-nav-outline:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        /* Area Konten Utama (Dotted Grid Background) */
+        .content-section {
+            flex: 1;
+            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
+            background-size: 30px 30px;
+            padding: 40px 0 60px 0;
+        }
+
+        /* Kartu Pemutar (Soft Shadow, Rounded) */
+        .card-modern {
+            background-color: var(--korisu-white);
+            border: 1px solid #f0f0f0;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
+            padding: 30px;
+        }
+
+        /* Container Video YouTube */
         .video-container {
             position: relative;
             padding-bottom: 56.25%; /* Rasio 16:9 */
             height: 0;
             overflow: hidden;
-            border-radius: 8px;
-            border: 2px solid var(--korisu-black);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
             background-color: #000;
         }
         .video-container iframe {
@@ -35,39 +75,107 @@
             left: 0;
             width: 100%;
             height: 100%;
+            border: none;
         }
-        .btn-korisu { background-color: var(--korisu-black); color: white; border: 2px solid var(--korisu-black); font-weight: bold; }
-        .btn-korisu:hover { background-color: var(--korisu-orange); color: var(--korisu-black); }
-        .btn-selesai { background-color: #198754; color: white; border: 2px solid var(--korisu-black); font-weight: bold; }
-        .btn-selesai:hover { background-color: #146c43; color: white; }
+
+        /* Area Tugas & Tombol */
+        .task-box {
+            background-color: #fffaf5;
+            border: 1px solid #ffe8d6;
+            border-radius: 16px;
+            padding: 20px;
+        }
+        
+        .btn-selesai-modern { 
+            background-color: #198754; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: 800; 
+            padding: 12px 25px; 
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2);
+        }
+        .btn-selesai-modern:hover:not(:disabled) { 
+            background-color: #146c43; 
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(25, 135, 84, 0.3);
+        }
+        .btn-selesai-modern:disabled {
+            background-color: #6c757d;
+            box-shadow: none;
+        }
+
+        /* Badge Kecil */
+        .badge-kategori {
+            display: inline-block;
+            background-color: #fffaf5;
+            color: var(--korisu-orange);
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #ffe8d6;
+        }
+
+        /* Styling Modal Sukses */
+        .modal-content-modern {
+            border: none;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+        .btn-korisu-solid { 
+            background-color: var(--korisu-orange); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            padding: 12px 20px; 
+            transition: all 0.3s; 
+        }
+        .btn-korisu-solid:hover { 
+            background-color: #e67300; 
+            color: white; 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); 
+        }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark navbar-korisu shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="kelas.html">🔙 Kembali ke Kurikulum</a>
-            <span class="text-white fw-bold d-none d-md-block">📺 Ruang Putar KORISU Gakkou</span>
+    <!-- Navigasi Atas Minimalis -->
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="kelas.html">
+                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                <span class="d-none d-sm-inline">Ruang Putar Video</span>
+            </a>
+            <button class="btn-nav-outline" onclick="window.location.href='kelas.html'">🔙 Kembali ke Kurikulum</button>
         </div>
     </nav>
 
-    <div class="container mt-4 mb-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-9">
-                <div class="card card-custom p-3 p-md-4">
+    <!-- Konten Pemutar Video -->
+    <div class="content-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-9">
                     
-                    <h3 class="fw-bold mb-3" id="judul-materi">Memuat Video...</h3>
-                    
-                    <div class="video-container mb-4">
-                        <iframe id="frame-video" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center bg-light p-3 border border-dark rounded">
-                        <div class="mb-3 mb-md-0 text-center text-md-start">
-                            <h6 class="fw-bold mb-1">Tugas Kamu:</h6>
-                            <small class="text-muted">Tonton video hingga selesai untuk memahami materi.</small>
+                    <div class="card-modern">
+                        <span class="badge-kategori">🎥 Video Pembelajaran</span>
+                        <h2 class="fw-bold mb-4 text-dark" id="judul-materi">Memuat Video...</h2>
+                        
+                        <div class="video-container mb-4">
+                            <iframe id="frame-video" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
-                        <button id="btn-tandai" class="btn btn-selesai px-4 py-2" onclick="tandaiSelesai()">Tandai Selesai & Ambil EXP ✔️</button>
+
+                        <div class="task-box d-flex flex-column flex-md-row justify-content-between align-items-center">
+                            <div class="mb-3 mb-md-0 text-center text-md-start">
+                                <h6 class="fw-bold mb-1" style="color: var(--korisu-orange);">Tugas Kamu:</h6>
+                                <p class="text-muted mb-0">Tonton video ini hingga selesai untuk memahami materi dengan utuh.</p>
+                            </div>
+                            <button id="btn-tandai" class="btn btn-selesai-modern" onclick="tandaiSelesai()">Tandai Selesai & Ambil EXP ✔️</button>
+                        </div>
                     </div>
 
                 </div>
@@ -75,27 +183,29 @@
         </div>
     </div>
 
-    <!-- Modal Sukses -->
+    <!-- Modal Sukses Animasi Lembut -->
     <div class="modal fade" id="modalSukses" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border: 3px solid var(--korisu-black); border-radius: 15px;">
-                <div class="modal-body text-center p-4">
-                    <h1 class="mb-3">🎉</h1>
-                    <h4 class="fw-bold mb-2">Materi Selesai!</h4>
-                    <p class="text-success fw-bold mb-4" id="teks-exp">+10 EXP Didapatkan</p>
-                    <button type="button" class="btn btn-korisu w-100" onclick="window.location.href='kelas.html'">Kembali ke Kurikulum</button>
+            <div class="modal-content modal-content-modern">
+                <div class="modal-body text-center p-5">
+                    <h1 class="mb-3" style="font-size: 4rem;">🎉</h1>
+                    <h3 class="fw-bold mb-2 text-dark">Materi Selesai!</h3>
+                    <div class="bg-light border border-success rounded-4 p-3 mx-auto mb-4" style="max-width: 250px;">
+                        <h5 class="text-success fw-bold mb-0" id="teks-exp">+10 EXP Didapatkan</h5>
+                    </div>
+                    <button type="button" class="btn-korisu-solid w-100 fs-5" onclick="window.location.href='kelas.html'">Kembali ke Kurikulum</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Script Logika Dipertahankan Utuh -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN = localStorage.getItem('korisu_token');
         let USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
         
-        // Mengambil ID dari URL (Contoh: video-player.html?id=2)
         const urlParams = new URLSearchParams(window.location.search);
         const lessonId = urlParams.get('id');
 
@@ -134,7 +244,6 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    // Update EXP di memori browser
                     USER.exp = (USER.exp || 0) + data.exp_didapat;
                     localStorage.setItem('korisu_user', JSON.stringify(USER));
 

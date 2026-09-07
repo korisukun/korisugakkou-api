@@ -17,7 +17,6 @@ const buyItem = async (req, res) => {
     const { item_id, harga_koin, nama_item } = req.body;
 
     try {
-        // A. Cek isi dompet murid
         const checkWallet = await db.query('SELECT koin_dimiliki FROM user_statistics WHERE murid_id = $1', [murid_id]);
         const koinSekarang = checkWallet.rows.length > 0 ? checkWallet.rows[0].koin_dimiliki : 0;
 
@@ -25,29 +24,21 @@ const buyItem = async (req, res) => {
             return res.status(400).json({ message: 'Koin Tupai kamu belum cukup! Yuk rajin kuis lagi 🐿️' });
         }
 
-        // B. Cek Tipe Item (Makanan / Aksesoris) dari database
         const itemData = await db.query('SELECT tipe_item FROM shop_items WHERE id = $1', [item_id]);
         if(itemData.rows.length === 0) return res.status(404).json({ message: 'Barang tidak ditemukan.' });
         
         const tipeItem = itemData.rows[0].tipe_item;
-
-        // C. Potong koin
         const sisaKoin = koinSekarang - harga_koin;
         await db.query('UPDATE user_statistics SET koin_dimiliki = $1 WHERE murid_id = $2', [sisaKoin, murid_id]);
 
-        // D. LOGIKA MASKOT BERDASARKAN ERD V.1.0
-        // Pastikan murid memiliki data maskot, jika belum buatkan
         const cekMaskot = await db.query('SELECT id FROM user_mascots WHERE murid_id = $1', [murid_id]);
         if (cekMaskot.rows.length === 0) {
             await db.query('INSERT INTO user_mascots (murid_id, level_mascot, status_mood) VALUES ($1, 1, 100)', [murid_id]);
         }
 
-        // Terapkan efek pembelian
         if (tipeItem === 'aksesoris' || tipeItem === 'background') {
-            // Langsung pakaikan (Equip) item tersebut
             await db.query('UPDATE user_mascots SET item_sedang_dipakai = $1 WHERE murid_id = $2', [item_id, murid_id]);
         } else if (tipeItem === 'makanan') {
-            // Tambahkan mood +20, mentok di angka 100 (LEAST akan memilih angka terkecil)
             await db.query('UPDATE user_mascots SET status_mood = LEAST(status_mood + 20, 100) WHERE murid_id = $1', [murid_id]);
         }
 
@@ -62,7 +53,7 @@ const buyItem = async (req, res) => {
     }
 };
 
-// 3. FUNGSI BARU: Mengirim data Maskot ke Dashboard
+// 3. Mengirim data Maskot ke Dashboard
 const getMascot = async (req, res) => {
     const murid_id = req.user.id;
     try {
@@ -83,7 +74,6 @@ const getMascot = async (req, res) => {
                 }
             });
         } else {
-            // Jika belum punya maskot, berikan nilai awal (Default)
             res.json({ mascot: { level_mascot: 1, status_mood: 100, item_dipakai: null } });
         }
     } catch (error) {
@@ -92,4 +82,20 @@ const getMascot = async (req, res) => {
     }
 };
 
-module.exports = { getItems, buyItem, getMascot };
+// 4. [BARU] Menambah Item Toko Baru (Khusus Sensei)
+const addItem = async (req, res) => {
+    const { nama_item, tipe_item, harga_koin, image_url } = req.body;
+    
+    try {
+        await db.query(
+            'INSERT INTO shop_items (nama_item, tipe_item, harga_koin, image_url) VALUES ($1, $2, $3, $4)',
+            [nama_item, tipe_item, harga_koin, image_url]
+        );
+        res.status(201).json({ message: 'Item berhasil ditambahkan ke etalase! 🏪' });
+    } catch (error) {
+        console.error('Error tambah item toko:', error.message);
+        res.status(500).json({ message: 'Gagal menambah item ke database.' });
+    }
+};
+
+module.exports = { getItems, buyItem, getMascot, addItem };

@@ -8,77 +8,178 @@
     
     <style>
         :root {
-            --korisu-orange: #fd7e14;
-            --korisu-black: #212529;
+            --korisu-orange: #ff7f00;
+            --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
         }
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-korisu { background-color: var(--korisu-orange); border-bottom: 3px solid var(--korisu-black);}
-        .card-custom {
-            background-color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            border-radius: 10px;
-            box-shadow: 4px 4px 0px var(--korisu-black);
-            transition: transform 0.2s;
+        
+        body { 
+            background-color: #fafafa; 
+            color: var(--korisu-black); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            overflow-x: hidden; 
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        .card-custom:hover { transform: translateY(-5px); }
-        .btn-beli {
-            background-color: var(--korisu-black);
+
+        /* Navigasi Atas (Solid Orange) */
+        .navbar-custom { 
+            background-color: var(--korisu-orange); 
+            padding: 15px 0;
+        }
+        .btn-nav-outline {
+            background-color: var(--korisu-white);
+            color: var(--korisu-orange);
+            font-weight: bold;
+            border-radius: 25px;
+            padding: 8px 20px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-nav-outline:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        .coin-badge-nav {
+            background: rgba(255, 255, 255, 0.2);
             color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
-        }
-        .btn-beli:hover {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-black);
-        }
-        .coin-badge {
-            background-color: #ffc107;
-            color: #000;
-            font-size: 1.1rem;
-            padding: 5px 15px;
+            font-weight: 700;
+            padding: 8px 16px;
             border-radius: 20px;
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
+            backdrop-filter: blur(5px);
         }
-        .item-icon {
-            font-size: 4rem;
+
+        /* Area Konten Utama (Dotted Grid Background) */
+        .content-section {
+            flex: 1;
+            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
+            background-size: 30px 30px;
+            padding-bottom: 60px;
+        }
+
+        /* Header Universal */
+        .header-section {
+            background-color: var(--korisu-white);
+            padding: 50px 0;
             text-align: center;
-            margin: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
+        .badge-atas {
+            display: inline-block;
+            background-color: #fffaf5;
+            color: var(--korisu-orange);
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ffe8d6;
+        }
+        .heading-main {
+            font-weight: 900;
+            font-size: 3rem;
+            letter-spacing: -1px;
+            color: var(--korisu-black);
+            margin-bottom: 15px;
+        }
+
+        /* Kartu Etalase Toko (Soft Shadow, Rounded) */
+        .card-toko {
+            background-color: var(--korisu-white);
+            border: 1px solid #f0f0f0;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-toko:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border-color: #ffe8d6;
+        }
+        
+        .item-icon {
+            font-size: 5.5rem;
+            margin: 15px 0 25px 0;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            transition: transform 0.3s;
+        }
+        .card-toko:hover .item-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
         .badge-tipe {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+        .badge-makanan { background-color: #d1e7dd; color: #0f5132; }
+        .badge-aksesoris { background-color: #cfe2ff; color: #084298; }
+        .badge-background { background-color: #e0cffc; color: #5320a9; }
+
+        /* Tombol Beli */
+        .btn-beli-solid { 
+            background-color: var(--korisu-black); 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: bold; 
+            padding: 12px 15px; 
+            transition: all 0.3s; 
+            width: 100%;
+        }
+        .btn-beli-solid:hover { 
+            background-color: var(--korisu-orange); 
+            color: white; 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); 
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark navbar-korisu shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="dashboard.html">🏪 Toko Koin Tupai</a>
-            <div class="d-flex align-items-center flex-wrap gap-2">
-                <span class="coin-badge" id="dompet-header">🪙 Memuat...</span>
-                <button class="btn btn-sm btn-light border-dark fw-bold" onclick="kembali()">Kembali</button>
+    <!-- Navigasi Atas Minimalis -->
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                <span class="d-none d-sm-inline">Toko KORISU</span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="coin-badge-nav" id="dompet-header">🪙 Memuat...</span>
+                <button class="btn-nav-outline" onclick="window.location.href='dashboard.html'">Kembali</button>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-5 mb-5">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Manjakan Maskot Tupaimu!</h2>
-            <p class="text-muted">Gunakan Koin Tupai yang kamu kumpulkan untuk membeli item dan makanan.</p>
+    <!-- Header Section -->
+    <div class="header-section mt-0">
+        <div class="container">
+            <div class="badge-atas">🏪 Layanan Toko</div>
+            <h1 class="heading-main">Manjakan <span style="color: var(--korisu-orange);">Maskot Tupaimu</span></h1>
+            <p class="text-muted fs-5 mx-auto" style="max-width: 650px;">Gunakan Koin Tupai yang kamu kumpulkan dari kuis untuk membeli makanan lezat atau aksesoris keren.</p>
         </div>
+    </div>
 
-        <div class="row" id="etalase-toko">
-            <!-- Barang dari database akan dimunculkan di sini -->
-            <div class="col-12 text-center" id="loading-text">
-                <h5 class="fw-bold text-muted">Menyiapkan etalase...</h5>
+    <!-- Area Etalase -->
+    <div class="content-section">
+        <div class="container">
+            <div class="row" id="etalase-toko">
+                <!-- Barang dari database akan dimunculkan di sini -->
+                <div class="col-12 text-center py-5">
+                    <h5 class="fw-bold text-muted">Menyiapkan etalase toko...</h5>
+                </div>
             </div>
         </div>
     </div>
@@ -93,8 +194,6 @@
         // Pasang saldo koin saat ini
         document.getElementById('dompet-header').innerText = `🪙 ${USER.koin || 0} Koin`;
 
-        function kembali() { window.location.href = "dashboard.html"; }
-
         // Ambil barang dari server
         async function muatToko() {
             try {
@@ -104,31 +203,42 @@
                 const data = await res.json();
                 
                 const etalase = document.getElementById('etalase-toko');
-                etalase.innerHTML = ""; // Bersihkan loading text
+                etalase.innerHTML = ""; 
                 
                 if (res.ok && data.items.length > 0) {
                     data.items.forEach(item => {
-                        // Tentukan warna badge berdasarkan tipe
-                        const badgeColor = item.tipe_item === 'makanan' ? 'bg-success' : 'bg-primary';
+                        // Tentukan gaya badge yang sesuai
+                        let badgeClass = 'badge-makanan';
+                        if(item.tipe_item === 'aksesoris') badgeClass = 'badge-aksesoris';
+                        if(item.tipe_item === 'background') badgeClass = 'badge-background';
                         
                         etalase.innerHTML += `
-                            <div class="col-md-4 col-lg-3 mb-4">
-                                <div class="card card-custom p-3 h-100 position-relative">
-                                    <span class="badge ${badgeColor} badge-tipe text-uppercase">${item.tipe_item}</span>
+                            <div class="col-6 col-md-4 col-lg-3 mb-4">
+                                <div class="card-toko">
+                                    <div class="text-start">
+                                        <span class="badge-tipe ${badgeClass}">${item.tipe_item}</span>
+                                    </div>
                                     <div class="item-icon">${item.image_url}</div>
-                                    <h5 class="fw-bold text-center mt-2">${item.nama_item}</h5>
-                                    <h4 class="fw-bold text-danger text-center mb-3 mt-auto">🪙 ${item.harga_koin}</h4>
-                                    <button class="btn btn-beli w-100" onclick="beliBarang(${item.id}, ${item.harga_koin}, '${item.nama_item}')">BELI</button>
+                                    <h5 class="fw-bold mb-1">${item.nama_item}</h5>
+                                    <div class="mt-auto pt-3">
+                                        <h4 class="fw-bold mb-3" style="color: var(--korisu-orange);">🪙 ${item.harga_koin}</h4>
+                                        <button class="btn-beli-solid" onclick="beliBarang(${item.id}, ${item.harga_koin}, '${item.nama_item.replace(/'/g, "\\'")}')">BELI ITEM</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
                     });
                 } else {
-                    etalase.innerHTML = "<h5 class='text-center text-muted'>Toko sedang kosong hari ini.</h5>";
+                    etalase.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <h5 class="text-muted fw-bold">Toko sedang kosong hari ini.</h5>
+                        </div>`;
                 }
             } catch (error) {
-                console.error("Gagal memuat etalase.");
-                document.getElementById('etalase-toko').innerHTML = "<h5 class='text-center text-danger'>Gagal terhubung ke toko.</h5>";
+                document.getElementById('etalase-toko').innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <h5 class="text-danger fw-bold">Gagal terhubung ke toko.</h5>
+                    </div>`;
             }
         }
 
@@ -145,17 +255,16 @@
                     const hasil = await res.json();
 
                     if (res.ok) {
-                        // Update koin di layar dan memori browser
                         USER.koin = hasil.sisa_koin;
                         localStorage.setItem('korisu_user', JSON.stringify(USER));
                         document.getElementById('dompet-header').innerText = `🪙 ${USER.koin} Koin`;
 
                         alert(hasil.message);
                     } else {
-                        alert(hasil.message); // Notifikasi jika koin tidak cukup
+                        alert(hasil.message); 
                     }
                 } catch (error) {
-                    alert("Terjadi kesalahan jaringan.");
+                    alert("Terjadi kesalahan jaringan saat memproses pembelian.");
                 }
             }
         }

@@ -3,134 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kuis SRS 6 Arah (Pilihan Ganda) - KORISU Gakkou</title>
+    <title>Kuis SRS 6 Arah - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <style>
         :root {
-            --korisu-orange: #fd7e14;
-            --korisu-black: #212529;
+            --korisu-orange: #ff7f00;
+            --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
         }
-        body {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-black);
-            font-family: 'Segoe UI', sans-serif;
+        
+        body { 
+            background-color: #fafafa; 
+            color: var(--korisu-black); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasi Atas (Solid Orange) */
+        .navbar-custom { 
+            background-color: var(--korisu-orange); 
+            padding: 15px 0;
+        }
+        .btn-nav-outline {
+            background-color: var(--korisu-white);
+            color: var(--korisu-orange);
+            font-weight: bold;
+            border-radius: 25px;
+            padding: 8px 25px;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-nav-outline:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        /* Area Konten dengan Dotted Grid Background */
+        .content-section {
+            flex: 1;
+            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
+            background-size: 30px 30px;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 40px 15px;
         }
-        .flashcard {
+
+        /* Kartu Kuis Utama (Clean, Soft Shadow, Rounded) */
+        .flashcard-modern {
             background-color: var(--korisu-white);
-            border: 3px solid var(--korisu-black);
-            border-radius: 15px;
-            box-shadow: 8px 8px 0px var(--korisu-black);
+            border: 1px solid #f0f0f0;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04);
             width: 100%;
-            max-width: 550px;
-            padding: 2rem;
+            max-width: 600px;
+            padding: 2.5rem;
             text-align: center;
-            margin: 1rem;
+            transition: transform 0.3s ease;
+        }
+
+        /* Header Kuis (Timer & Misi) */
+        .badge-atas {
+            display: inline-block;
+            background-color: #fffaf5;
+            color: var(--korisu-orange);
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #ffe8d6;
+        }
+        .badge-timer {
+            background-color: #fff0f0;
+            color: #dc3545;
+            border: 1px solid #ffdcdc;
+        }
+
+        /* Teks Soal */
+        .teks-bantuan {
+            font-size: 0.95rem;
+            color: #888;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
         .teks-utama {
             font-size: 3.5rem;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 900;
+            color: var(--korisu-black);
+            margin-bottom: 30px;
             line-height: 1.2;
             word-wrap: break-word;
         }
-        .teks-bantuan {
-            font-size: 1.1rem;
-            color: var(--korisu-orange);
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+
+        /* Tombol Pilihan Ganda */
         .btn-pilihan {
             background-color: var(--korisu-white);
             color: var(--korisu-black);
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
+            border: 1.5px solid #e0e0e0;
+            font-weight: 600;
             font-size: 1.1rem;
             width: 100%;
-            padding: 12px 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            transition: all 0.2s;
+            padding: 15px 12px;
+            margin-bottom: 15px;
+            border-radius: 16px;
+            transition: all 0.2s ease;
             text-align: center;
             white-space: normal;
             word-wrap: break-word;
         }
         .btn-pilihan:hover:not(:disabled) {
-            background-color: var(--korisu-orange);
-            color: var(--korisu-white);
+            border-color: var(--korisu-orange);
+            color: var(--korisu-orange);
+            background-color: #fffaf5;
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,127,0,0.08);
         }
+        
+        /* State Benar / Salah Lembut */
         .btn-pilihan.benar {
-            background-color: #198754 !important;
-            color: white !important;
-            border-color: #146c43 !important;
+            background-color: #d1e7dd !important;
+            color: #0f5132 !important;
+            border-color: #198754 !important;
+            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.15);
         }
         .btn-pilihan.salah {
-            background-color: #dc3545 !important;
-            color: white !important;
-            border-color: #b02a37 !important;
+            background-color: #f8d7da !important;
+            color: #842029 !important;
+            border-color: #dc3545 !important;
         }
-        .btn-submit {
-            background-color: var(--korisu-black);
-            color: var(--korisu-white);
-            border: 2px solid var(--korisu-black);
-            font-weight: bold;
-            font-size: 1.2rem;
+
+        /* Tombol Aksi */
+        .btn-korisu-solid { 
+            background-color: var(--korisu-orange); 
+            color: white; 
+            border: none; 
+            border-radius: 15px; 
+            font-weight: bold; 
+            font-size: 1.1rem;
+            padding: 14px 20px; 
+            transition: all 0.3s; 
             width: 100%;
             margin-top: 15px;
-            padding: 10px;
         }
-        .btn-submit:hover { background-color: var(--korisu-orange); color: var(--korisu-black); }
+        .btn-korisu-solid:hover { 
+            background-color: #e67300; 
+            color: white; 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); 
+        }
         
-        #hasil-notif { display: none; margin-top: 20px; padding: 20px; border: 2px solid var(--korisu-black); border-radius: 10px; }
-        .jawaban-lengkap { background-color: #f8f9fa; border: 1px dashed var(--korisu-black); border-radius: 8px; padding: 10px; margin-bottom: 15px;}
+        /* Area Notifikasi & Review */
+        #hasil-notif { 
+            display: none; 
+            margin-top: 15px; 
+            animation: fadeIn 0.4s ease;
+        }
+        .jawaban-lengkap { 
+            background-color: #fafafa; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="flashcard">
-        <!-- Header Progress & Timer -->
-        <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
-            <span class="fw-bold fs-5">Misi: <span id="progress-text">0 / 0</span></span>
-            <span class="fw-bold text-danger fs-5" id="teks-timer">0 Detik ⏱️</span>
+    <!-- Navigasi Atas Minimalis -->
+    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                <span class="d-none d-sm-inline">KORISU Gakkou</span>
+            </a>
+            <button class="btn-nav-outline" onclick="window.location.href='dashboard.html'">Kembali ke Dasbor</button>
         </div>
+    </nav>
 
-        <!-- Area Soal Dinamis -->
-        <div id="area-soal">
-            <p class="teks-bantuan" id="instruksi-soal">Memuat instruksi...</p>
-            <h1 class="teks-utama mb-4" id="soal-ditampilkan">...</h1>
+    <!-- Area Kuis -->
+    <div class="content-section">
+        <div class="flashcard-modern">
             
-            <!-- Area Pilihan Ganda -->
-            <div class="row" id="area-pilihan-ganda">
-                <!-- Tombol-tombol akan dimunculkan di sini oleh JS -->
+            <!-- Header Progress & Timer -->
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
+                <span class="badge-atas">Misi: <span id="progress-text">0 / 0</span></span>
+                <span class="badge-atas badge-timer" id="teks-timer">0 Detik ⏱️</span>
             </div>
-        </div>
 
-        <!-- Area Hasil Pop-up -->
-        <div id="hasil-notif">
-            <h3 id="status-jawaban" class="fw-bold mb-2">...</h3>
+            <!-- Area Soal Dinamis -->
+            <div id="area-soal">
+                <p class="teks-bantuan" id="instruksi-soal">Memuat instruksi...</p>
+                <h1 class="teks-utama" id="soal-ditampilkan">...</h1>
+                
+                <!-- Area Pilihan Ganda -->
+                <div class="row mt-4" id="area-pilihan-ganda">
+                    <!-- Tombol-tombol akan dimunculkan di sini oleh JS -->
+                </div>
+            </div>
+
+            <!-- Area Hasil Pop-up (Kartu Penjelasan) -->
+            <div id="hasil-notif">
+                <h3 id="status-jawaban" class="fw-bold mb-4">...</h3>
+                
+                <div class="jawaban-lengkap text-start">
+                    <small class="text-orange d-block mb-2 fw-bold text-uppercase letter-spacing-1">KARTU KOSAKATA LENGKAP</small>
+                    <div class="fs-5 mb-2">🇯🇵 <strong>Kanji:</strong> <span id="info-kanji" class="fw-medium text-dark"></span></div>
+                    <div class="fs-5 mb-2">🗣️ <strong>Baca:</strong> <span id="info-furi" class="fw-medium text-dark"></span></div>
+                    <div class="fs-5">🇮🇩 <strong>Arti:</strong> <span id="info-arti" class="fw-medium text-dark"></span></div>
+                </div>
+
+                <div class="bg-light border border-success rounded-4 p-3 mb-4">
+                    <h5 class="text-success fw-bold mb-0" id="reward-text">...</h5>
+                </div>
+                <button class="btn-korisu-solid" id="btn-lanjut" onclick="lanjutSoal()">Lanjutkan Misi ➔</button>
+            </div>
             
-            <div class="jawaban-lengkap text-start">
-                <small class="text-muted d-block mb-1 fw-bold">KARTU KOSAKATA:</small>
-                <div class="fs-5">🇯🇵 Kanji: <strong id="info-kanji"></strong></div>
-                <div class="fs-5">🗣️ Baca: <strong id="info-furi"></strong></div>
-                <div class="fs-5">🇮🇩 Arti: <strong id="info-arti"></strong></div>
-            </div>
-
-            <div class="bg-white border border-dark rounded p-2 mb-3">
-                <h5 class="text-success fw-bold mb-0" id="reward-text">...</h5>
-            </div>
-            <button class="btn btn-submit" id="btn-lanjut" onclick="lanjutSoal()">Lanjut ➔</button>
         </div>
     </div>
 
+    <!-- Script Logika Dipertahankan Utuh -->
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
@@ -156,15 +257,15 @@
                     antreanSoal = data.data;
                     tampilkanSoal(0);
                 } else {
-                    document.querySelector('.flashcard').innerHTML = `
-                        <h1 class="mb-3">🎉</h1>
-                        <h3 class="fw-bold mb-3">Misi Selesai!</h3>
-                        <p class="text-muted mb-4">Kamu sudah menyelesaikan seluruh review hari ini!</p>
-                        <button onclick="window.location.href='dashboard.html'" class="btn btn-submit">Ke Dashboard</button>
+                    document.querySelector('.flashcard-modern').innerHTML = `
+                        <h1 class="mb-3" style="font-size: 5rem;">🎉</h1>
+                        <h3 class="fw-bold mb-3 text-dark">Misi Selesai!</h3>
+                        <p class="text-muted fs-5 mb-4">Kamu telah menuntaskan seluruh review kosakata hari ini. Istirahatlah sejenak!</p>
+                        <button onclick="window.location.href='dashboard.html'" class="btn-korisu-solid">Kembali ke Dasbor</button>
                     `;
                 }
             } catch (error) {
-                document.querySelector('.flashcard').innerHTML = "<h4 class='text-danger'>Gagal terhubung ke server.</h4>";
+                document.querySelector('.flashcard-modern').innerHTML = "<h4 class='text-danger'>Gagal terhubung ke server.</h4>";
             }
         }
 
@@ -173,49 +274,46 @@
             vocabSaatIni = antreanSoal[indeks];
             document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
             
-            // Logika Acak 1 sampai 6
             const modeKuis = Math.floor(Math.random() * 6) + 1;
-            
             let soalTeks = "";
             let instruksi = "";
-            let fieldTarget = ""; // Untuk menentukan data apa yang dijadikan pilihan (A, B, C, D)
+            let fieldTarget = ""; 
 
-            // Mencegah error jika furigana kosong
             const furiganaAman = vocabSaatIni.furigana ? vocabSaatIni.furigana : vocabSaatIni.kanji;
 
             switch(modeKuis) {
-                case 1: // Kanji -> Hiragana
+                case 1: 
                     instruksi = "Pilih Cara Bacanya";
                     soalTeks = vocabSaatIni.kanji;
                     kunciJawabanSaatIni = furiganaAman;
                     fieldTarget = "furigana";
                     break;
-                case 2: // Kanji -> Arti
-                    instruksi = "Pilih Arti dari Kanji ini";
+                case 2: 
+                    instruksi = "Pilih Arti Bahasa Indonesianya";
                     soalTeks = vocabSaatIni.kanji;
                     kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
                     fieldTarget = "arti_indonesia";
                     break;
-                case 3: // Hiragana -> Arti
+                case 3: 
                     instruksi = "Pilih Arti dari kata ini";
                     soalTeks = furiganaAman;
                     kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
                     fieldTarget = "arti_indonesia";
                     break;
-                case 4: // Hiragana -> Kanji
+                case 4: 
                     instruksi = "Pilih Kanjinya";
                     soalTeks = furiganaAman;
                     kunciJawabanSaatIni = vocabSaatIni.kanji;
                     fieldTarget = "kanji";
                     break;
-                case 5: // Arti -> Kanji
-                    instruksi = "Pilih Kanjinya";
+                case 5: 
+                    instruksi = "Pilih Bahasa Jepangnya (Kanji)";
                     soalTeks = vocabSaatIni.arti_indonesia;
                     kunciJawabanSaatIni = vocabSaatIni.kanji;
                     fieldTarget = "kanji";
                     break;
-                case 6: // Arti -> Hiragana
-                    instruksi = "Pilih Bahasa Jepangnya";
+                case 6: 
+                    instruksi = "Pilih Bahasa Jepangnya (Hiragana)";
                     soalTeks = vocabSaatIni.arti_indonesia;
                     kunciJawabanSaatIni = furiganaAman;
                     fieldTarget = "furigana";
@@ -225,15 +323,12 @@
             document.getElementById('instruksi-soal').innerText = instruksi;
             document.getElementById('soal-ditampilkan').innerText = soalTeks;
             
-            // Isi kartu info lengkap untuk halaman hasil
             document.getElementById('info-kanji').innerText = vocabSaatIni.kanji;
             document.getElementById('info-furi').innerText = furiganaAman;
             document.getElementById('info-arti').innerText = vocabSaatIni.arti_indonesia;
 
-            // Generate Pilihan Ganda
             buatPilihanGanda(fieldTarget, kunciJawabanSaatIni);
 
-            // Reset UI
             document.getElementById('area-soal').style.display = "block";
             document.getElementById('hasil-notif').style.display = "none";
             
@@ -247,28 +342,22 @@
             }, 1000);
         }
 
-        // ALGORITMA DISTRAKTOR PINTAR (MENGECOH)
+        // Algoritma Distraktor Pintar
         function buatPilihanGanda(fieldTarget, kunci) {
             let pilihanSet = new Set();
-            pilihanSet.add(kunci); // Masukkan jawaban benar
+            pilihanSet.add(kunci); 
 
-            // Analisis Kunci Jawaban untuk pengecoh yang setara
             let hasComma = kunci.includes(',');
             let lastChar = kunci.slice(-1);
 
-            // Filter antreanSoal untuk mencari pengecoh yang mirip
             let poolPengecoh = antreanSoal.filter(v => {
                 let val = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
-                if (val === kunci) return false; // Jangan masukkan kunci yang sama
-
-                // Aturan Mengecoh: Samakan koma, atau samakan akhiran hiragana (seperti く, る)
+                if (val === kunci) return false; 
                 if (fieldTarget === 'arti_indonesia' && hasComma && !val.includes(',')) return false;
                 if ((fieldTarget === 'furigana' || fieldTarget === 'kanji') && val.slice(-1) !== lastChar) return false;
-                
                 return true;
             });
 
-            // Jika pengecoh pintar kurang dari 3, ambil dari seluruh soal N5
             if (poolPengecoh.length < 3) {
                 poolPengecoh = antreanSoal.filter(v => {
                     let val = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
@@ -276,7 +365,6 @@
                 });
             }
 
-            // Ambil acak hingga genap 4 pilihan
             let limitLoop = 0;
             while(pilihanSet.size < 4 && limitLoop < 100) {
                 let randomIndex = Math.floor(Math.random() * poolPengecoh.length);
@@ -288,22 +376,18 @@
                 limitLoop++;
             }
 
-            // Acak urutan (Shuffle)
             let arrayPilihan = Array.from(pilihanSet);
             for (let i = arrayPilihan.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [arrayPilihan[i], arrayPilihan[j]] = [arrayPilihan[j], arrayPilihan[i]];
             }
 
-            // Render ke HTML
             const wadah = document.getElementById('area-pilihan-ganda');
             wadah.innerHTML = "";
             arrayPilihan.forEach((teksPilihan, idx) => {
-                // Konversi kutip agar tidak merusak HTML string
                 const teksAman = teksPilihan.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-                
                 wadah.innerHTML += `
-                    <div class="col-6">
+                    <div class="col-sm-6">
                         <button class="btn btn-pilihan" id="btn-pil-${idx}" onclick="cekJawaban('${teksAman}', this.id)">
                             ${teksPilihan}
                         </button>
@@ -312,32 +396,27 @@
             });
         }
 
-        // 3. Evaluasi Jawaban Terpilih
+        // 3. Evaluasi Jawaban
         async function cekJawaban(jawabanUser, btnId) {
             clearInterval(timerInterval);
             const detikDihabiskan = Math.round((Date.now() - waktuMulai) / 1000);
             const vocabId = vocabSaatIni.vocab_id;
-            
             const isBenar = (jawabanUser === kunciJawabanSaatIni);
 
-            // Kunci semua tombol agar tidak diklik dua kali
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
             semuaTombol.forEach(btn => btn.disabled = true);
 
-            // Beri warna pada tombol yang diklik
             const tombolDipilih = document.getElementById(btnId);
             if (isBenar) {
                 tombolDipilih.classList.add('benar');
             } else {
                 tombolDipilih.classList.add('salah');
-                // Highlight mana jawaban yang sebenarnya benar
                 semuaTombol.forEach(btn => {
                     if (btn.innerText === kunciJawabanSaatIni) btn.classList.add('benar');
                 });
             }
 
             try {
-                // Kirim ke Backend
                 const res = await fetch(`${API_URL}/srs/submit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_SAYA}` },
@@ -346,18 +425,15 @@
                 
                 const hasilBackend = await res.json();
                 
-                // Tunda 1 detik agar murid sempat melihat warna hijau/merah di pilihan gandanya
                 setTimeout(() => {
                     document.getElementById('area-soal').style.display = "none";
                     const notifBox = document.getElementById('hasil-notif');
                     notifBox.style.display = "block";
 
                     if(isBenar) {
-                        notifBox.style.backgroundColor = "#d1e7dd"; 
-                        notifBox.style.borderColor = "#0f5132";
                         document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${detikDihabiskan}s)`;
                         document.getElementById('status-jawaban').className = "fw-bold mb-3 text-success";
-                        document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP | +${hasilBackend.reward.koin} Koin 🐿️`;
+                        document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP  •  +${hasilBackend.reward.koin} Koin 🐿️`;
                         
                         let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
                         if (userSekarang) {
@@ -366,15 +442,13 @@
                             localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
                         }
                     } else {
-                        notifBox.style.backgroundColor = "#f8d7da"; 
-                        notifBox.style.borderColor = "#842029";
-                        document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat!`;
+                        document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat`;
                         document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
                         document.getElementById('reward-text').innerText = `Tidak apa-apa, kita review lagi nanti!`;
                     }
                     
-                    document.getElementById('btn-lanjut').focus(); // Fokus ke tombol lanjut agar bisa dienter
-                }, 1000); // Jeda 1 detik
+                    document.getElementById('btn-lanjut').focus(); 
+                }, 1000); 
                 
             } catch (error) {
                 alert("Terjadi kesalahan jaringan.");
@@ -385,7 +459,7 @@
         function lanjutSoal() {
             indeksSaatIni++;
             if (indeksSaatIni < antreanSoal.length) tampilkanSoal(indeksSaatIni);
-            else mulaiSesiSRS(); // Refresh antrean dari server
+            else mulaiSesiSRS(); 
         }
 
         document.addEventListener('DOMContentLoaded', mulaiSesiSRS);
