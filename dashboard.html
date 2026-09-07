@@ -238,15 +238,16 @@
             <div class="row">
                 <!-- KARTU 2 & 3: Evaluasi dan EXP (Kiri) -->
                 <div class="col-lg-7">
-                    <!-- Kartu Evaluasi SRS -->
+                    <!-- PERBAIKAN LOGIKA: Kartu Evaluasi SRS -->
                     <div class="card-blog-style p-4 p-md-5 h-100">
-                        <div class="meta-text">🧠 EVALUASI MEMORI</div>
-                        <h2 class="card-title-main">Jadwal Review Kosakata (SRS)</h2>
-                        <p class="text-muted fs-5 mb-4">
-                            Ada <span id="jumlah-antrean" class="fw-bold text-danger fs-3 mx-1">0</span> kosakata yang menunggu untuk direview hari ini agar menempel di memori jangka panjang.
+                        <div class="meta-text">🧠 PENGINGAT MEMORI</div>
+                        <h2 class="card-title-main">Status Review (SRS)</h2>
+                        <p class="text-muted fs-5 mb-4" id="teks-srs-status">
+                            Menghitung total kosakata yang perlu direview...
                         </p>
                         <div class="mt-auto">
-                            <button class="btn-korisu-solid w-100 fs-5" onclick="mulaiKuis()">Mulai Kuis Sekarang</button>
+                            <!-- Tombol ini sekarang mengarah ke Katalog Kelas agar murid memilih kelas mana yg mau di-review -->
+                            <button id="btn-aksi-srs" class="btn-korisu-solid w-100 fs-5" onclick="window.location.href='kelas.html'">Buka Katalog Kelas</button>
                         </div>
                     </div>
                 </div>
@@ -280,7 +281,7 @@
         </div>
     </div>
 
-    <!-- Script Logika Utuh (Sesuai ERD dan Konfigurasi Server) -->
+    <!-- Script Logika -->
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
@@ -310,7 +311,7 @@
                     }
                 }
             } catch (error) {
-                console.log("Menunggu backend API Maskot disiapkan...");
+                console.log("Gagal memuat maskot");
             }
         }
 
@@ -325,15 +326,29 @@
             } catch (error) {}
         }
 
+        // PERBAIKAN LOGIKA: Memuat Total Antrean Global (Tanpa ID Kelas)
         async function muatAntreanSRS() {
             try {
                 const respons = await fetch(`${API_URL}/srs/today`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }});
                 const data = await respons.json();
-                if(respons.ok) document.getElementById('jumlah-antrean').innerText = data.jumlah_antrean || 0;
-            } catch (error) {}
+                
+                const teksStatus = document.getElementById('teks-srs-status');
+                const btnAksi = document.getElementById('btn-aksi-srs');
+
+                if(respons.ok && data.jumlah_antrean > 0) {
+                    teksStatus.innerHTML = `Ada <span class="fw-bold text-danger fs-3 mx-1">${data.jumlah_antrean}</span> evaluasi dari seluruh kelas yang kamu ikuti. Masuk ke halaman Kelas untuk menyelesaikannya satu per satu.`;
+                    btnAksi.innerText = "Buka Halaman Kelas";
+                    btnAksi.className = "btn-korisu-solid w-100 fs-5";
+                } else {
+                    teksStatus.innerHTML = `<span class="fw-bold text-success fs-5">Luar Biasa! ✅</span><br>Tidak ada jadwal review dari kelas mana pun hari ini. Ingatanmu sudah kuat!`;
+                    btnAksi.innerText = "Lanjut Tonton Materi Video";
+                    btnAksi.className = "btn btn-outline-dark w-100 fw-bold fs-5 rounded-3 py-3";
+                }
+            } catch (error) {
+                document.getElementById('teks-srs-status').innerText = "Gagal memuat data antrean.";
+            }
         }
 
-        function mulaiKuis() { window.location.href = "kuis.html"; }
         function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
 
         document.addEventListener('DOMContentLoaded', () => {

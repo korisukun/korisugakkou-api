@@ -247,6 +247,7 @@
         }
 
         let antreanSoal = [];
+        let kamusDistraktor = []; // Bank Kata lengkap yang disuntikkan backend
         let indeksSaatIni = 0;
         let waktuMulai = 0;
         let timerInterval;
@@ -255,30 +256,50 @@
         let kunciJawabanSaatIni = ""; 
         let vocabSaatIni = null;
 
-        // 1. Ambil Antrean Soal KHUSUS KELAS INI
         async function mulaiSesiSRS() {
             try {
                 const res = await fetch(`${API_URL}/srs/today?course_id=${targetCourseId}`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` } });
+                
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => null);
+                    throw new Error(errData ? errData.message : `HTTP Error: ${res.status}`);
+                }
+
                 const data = await res.json();
                 
                 if(data.data && data.data.length > 0) {
                     antreanSoal = data.data;
+                    kamusDistraktor = data.kamus_distraktor || data.data; // Tangkap bank kosakata
                     indeksSaatIni = 0; 
-                    tampilkanSoal(0);
                 } else {
                     document.querySelector('.flashcard-modern').innerHTML = `
                         <h1 class="mb-3" style="font-size: 5rem;">🎉</h1>
                         <h3 class="fw-bold mb-3 text-dark">Luar Biasa!</h3>
                         <p class="text-muted fs-5 mb-4">Tidak ada review tersisa untuk kelas ini sekarang. Kosakatamu sudah menempel di otak!</p>
-                        <button onclick="window.location.href='kelas.html?course_id=${targetCourseId}'" class="btn-korisu-solid">Kembali ke Kurikulum</button>
+                        <button onclick="kembaliKeKelas()" class="btn-korisu-solid">Kembali ke Kurikulum</button>
                     `;
+                    return; 
                 }
             } catch (error) {
-                document.querySelector('.flashcard-modern').innerHTML = "<h4 class='text-danger'>Gagal terhubung ke server.</h4>";
+                document.querySelector('.flashcard-modern').innerHTML = `
+                    <h4 class='text-danger mb-3'>⚠️ Gagal Memuat Kuis</h4>
+                    <div class='alert alert-danger fs-6 text-start'><strong>Sistem Terkendala:</strong> ${error.message}</div>
+                    <button onclick="window.location.reload()" class="btn btn-outline-dark px-5 py-2 fw-bold rounded-pill">Coba Lagi</button>
+                `;
+                return; 
+            }
+
+            try {
+                tampilkanSoal(0);
+            } catch (e) {
+                document.querySelector('.flashcard-modern').innerHTML = `
+                    <h4 class='text-danger mb-3'>⚠️ Error Data Kosakata</h4>
+                    <div class='alert alert-danger fs-6 text-start'><strong>Detail:</strong> ${e.message}</div>
+                    <button onclick="kembaliKeKelas()" class="btn btn-outline-dark mt-3 px-4">Kembali</button>
+                `;
             }
         }
 
-        // 2. Tampilkan Soal (Arah sesuai database)
         function tampilkanSoal(indeks) {
             vocabSaatIni = antreanSoal[indeks];
             document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
@@ -291,54 +312,19 @@
             const furiganaAman = vocabSaatIni.furigana ? vocabSaatIni.furigana : vocabSaatIni.kanji;
 
             switch(modeKuis) {
-                case 1: 
-                    instruksi = "Pilih Cara Bacanya";
-                    soalTeks = vocabSaatIni.kanji;
-                    kunciJawabanSaatIni = furiganaAman;
-                    fieldTarget = "furigana";
-                    break;
-                case 2: 
-                    instruksi = "Pilih Arti Bahasa Indonesianya";
-                    soalTeks = vocabSaatIni.kanji;
-                    kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
-                    fieldTarget = "arti_indonesia";
-                    break;
-                case 3: 
-                    instruksi = "Pilih Arti dari kata ini";
-                    soalTeks = furiganaAman;
-                    kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
-                    fieldTarget = "arti_indonesia";
-                    break;
-                case 4: 
-                    instruksi = "Pilih Kanjinya";
-                    soalTeks = furiganaAman;
-                    kunciJawabanSaatIni = vocabSaatIni.kanji;
-                    fieldTarget = "kanji";
-                    break;
-                case 5: 
-                    instruksi = "Pilih Bahasa Jepangnya (Kanji)";
-                    soalTeks = vocabSaatIni.arti_indonesia;
-                    kunciJawabanSaatIni = vocabSaatIni.kanji;
-                    fieldTarget = "kanji";
-                    break;
-                case 6: 
-                    instruksi = "Pilih Bahasa Jepangnya (Hiragana)";
-                    soalTeks = vocabSaatIni.arti_indonesia;
-                    kunciJawabanSaatIni = furiganaAman;
-                    fieldTarget = "furigana";
-                    break;
-                default: 
-                    instruksi = "Pilih Arti Bahasa Indonesianya";
-                    soalTeks = vocabSaatIni.kanji;
-                    kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
-                    fieldTarget = "arti_indonesia";
+                case 1: instruksi = "Pilih Cara Bacanya"; soalTeks = vocabSaatIni.kanji; kunciJawabanSaatIni = furiganaAman; fieldTarget = "furigana"; break;
+                case 2: instruksi = "Pilih Arti Bahasa Indonesianya"; soalTeks = vocabSaatIni.kanji; kunciJawabanSaatIni = vocabSaatIni.arti_indonesia; fieldTarget = "arti_indonesia"; break;
+                case 3: instruksi = "Pilih Arti dari kata ini"; soalTeks = furiganaAman; kunciJawabanSaatIni = vocabSaatIni.arti_indonesia; fieldTarget = "arti_indonesia"; break;
+                case 4: instruksi = "Pilih Kanjinya"; soalTeks = furiganaAman; kunciJawabanSaatIni = vocabSaatIni.kanji; fieldTarget = "kanji"; break;
+                case 5: instruksi = "Pilih Bahasa Jepangnya (Kanji)"; soalTeks = vocabSaatIni.arti_indonesia; kunciJawabanSaatIni = vocabSaatIni.kanji; fieldTarget = "kanji"; break;
+                case 6: instruksi = "Pilih Bahasa Jepangnya (Hiragana)"; soalTeks = vocabSaatIni.arti_indonesia; kunciJawabanSaatIni = furiganaAman; fieldTarget = "furigana"; break;
+                default: instruksi = "Pilih Arti Bahasa Indonesianya"; soalTeks = vocabSaatIni.kanji; kunciJawabanSaatIni = vocabSaatIni.arti_indonesia; fieldTarget = "arti_indonesia";
             }
 
             document.getElementById('instruksi-soal').innerText = instruksi;
             document.getElementById('soal-ditampilkan').innerText = soalTeks;
             
             let statInfo = `📈 Level Kekuatan: ${vocabSaatIni.srs_level || 0} | ⏱️ Avg: ${vocabSaatIni.avg_waktu_detik || 0}s`;
-            
             document.getElementById('info-kanji').innerHTML = `${vocabSaatIni.kanji} <br><small class="text-muted fw-normal">${statInfo}</small>`;
             document.getElementById('info-furi').innerText = furiganaAman;
             document.getElementById('info-arti').innerText = vocabSaatIni.arti_indonesia;
@@ -358,40 +344,66 @@
             }, 1000);
         }
 
-        // Algoritma Distraktor Pintar
         function buatPilihanGanda(fieldTarget, kunci) {
+            let safeKunci = String(kunci || "Tidak diketahui");
             let pilihanSet = new Set();
-            pilihanSet.add(kunci); 
+            pilihanSet.add(safeKunci); 
 
-            let hasComma = kunci.includes(',');
-            let lastChar = kunci.slice(-1);
+            let hasComma = safeKunci.includes(',');
+            let lastChar = safeKunci.slice(-1);
 
-            let poolPengecoh = antreanSoal.filter(v => {
-                let val = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
-                if (val === kunci) return false; 
-                if (fieldTarget === 'arti_indonesia' && hasComma && !val.includes(',')) return false;
-                if ((fieldTarget === 'furigana' || fieldTarget === 'kanji') && val.slice(-1) !== lastChar) return false;
+            // TAHAP 1: Filter Pengecoh Tingkat Tinggi (Sesuai kesamaan huruf akhir & koma)
+            let poolPengecoh = kamusDistraktor.filter(v => {
+                let rawVal = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
+                let safeVal = String(rawVal || ""); 
+                
+                if (!safeVal || safeVal === safeKunci) return false; 
+                if (fieldTarget === 'arti_indonesia' && hasComma && !safeVal.includes(',')) return false;
+                if ((fieldTarget === 'furigana' || fieldTarget === 'kanji') && safeVal.slice(-1) !== lastChar) return false;
                 return true;
             });
 
+            // TAHAP 2: Jika saringan di atas terlalu ketat dan hasil < 3, ambil kata acak yang asli dari kelas ini
             if (poolPengecoh.length < 3) {
-                poolPengecoh = antreanSoal.filter(v => {
-                    let val = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
-                    return val !== kunci;
+                let poolCadangan = kamusDistraktor.filter(v => {
+                    let rawVal = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
+                    let safeVal = String(rawVal || "");
+                    
+                    // Hindari kata yang sama dengan kunci dan hindari duplikasi dengan pool yang sudah ada
+                    return safeVal !== "" && safeVal !== safeKunci && !poolPengecoh.some(p => {
+                        let pVal = fieldTarget === 'furigana' ? (p.furigana || p.kanji) : p[fieldTarget];
+                        return String(pVal || "") === safeVal;
+                    });
                 });
+
+                // Mengacak kumpulan cadangan agar tidak monoton
+                for (let i = poolCadangan.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [poolCadangan[i], poolCadangan[j]] = [poolCadangan[j], poolCadangan[i]];
+                }
+
+                // Masukkan kata acak ke keranjang pengecoh utama sampai memenuhi kuota
+                for(let i = 0; i < poolCadangan.length; i++) {
+                    if (poolPengecoh.length >= 3) break;
+                    poolPengecoh.push(poolCadangan[i]);
+                }
             }
 
-            let limitLoop = 0;
-            while(pilihanSet.size < 4 && limitLoop < 100) {
-                let randomIndex = Math.floor(Math.random() * poolPengecoh.length);
-                let randomVal = fieldTarget === 'furigana' 
-                    ? (poolPengecoh[randomIndex].furigana || poolPengecoh[randomIndex].kanji) 
-                    : poolPengecoh[randomIndex][fieldTarget];
-                
-                pilihanSet.add(randomVal);
-                limitLoop++;
+            // Mengacak urutan akhir di keranjang pengecoh
+            for (let i = poolPengecoh.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [poolPengecoh[i], poolPengecoh[j]] = [poolPengecoh[j], poolPengecoh[i]];
             }
 
+            // Memasukkan pengecoh ke dalam tombol Set (untuk memastikan semuanya unik)
+            for (let i = 0; i < poolPengecoh.length; i++) {
+                if (pilihanSet.size >= 4) break;
+                let item = poolPengecoh[i];
+                let rawRandomVal = fieldTarget === 'furigana' ? (item.furigana || item.kanji) : item[fieldTarget];
+                pilihanSet.add(String(rawRandomVal));
+            }
+
+            // Merender Set menjadi tombol di layar (diacak lagi agar jawaban benar tidak selalu di atas)
             let arrayPilihan = Array.from(pilihanSet);
             for (let i = arrayPilihan.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -412,13 +424,13 @@
             });
         }
 
-        // 3. Evaluasi Jawaban & Kirim Data Arah ke Server
         async function cekJawaban(jawabanUser, btnId) {
             clearInterval(timerInterval);
             const detikDihabiskan = Math.round((Date.now() - waktuMulai) / 1000);
             const vocabId = vocabSaatIni.vocab_id;
             const arahSpesifik = vocabSaatIni.arah_kuis; 
-            const isBenar = (jawabanUser === kunciJawabanSaatIni);
+            
+            const isBenar = (jawabanUser === String(kunciJawabanSaatIni || "Tidak diketahui"));
 
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
             semuaTombol.forEach(btn => btn.disabled = true);
@@ -429,7 +441,7 @@
             } else {
                 tombolDipilih.classList.add('salah');
                 semuaTombol.forEach(btn => {
-                    if (btn.innerText === kunciJawabanSaatIni) btn.classList.add('benar');
+                    if (btn.innerText === String(kunciJawabanSaatIni || "Tidak diketahui")) btn.classList.add('benar');
                 });
             }
 
@@ -445,6 +457,7 @@
                     })
                 });
                 
+                if (!res.ok) throw new Error("Gagal menyimpan progres.");
                 const hasilBackend = await res.json();
                 
                 setTimeout(() => {
@@ -473,7 +486,7 @@
                 }, 1000); 
                 
             } catch (error) {
-                alert("Terjadi kesalahan jaringan.");
+                alert("Sistem terkendala saat menyimpan progres kuis: " + error.message);
                 semuaTombol.forEach(btn => btn.disabled = false);
             }
         }
