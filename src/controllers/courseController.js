@@ -30,32 +30,47 @@ const getCourseCurriculum = async (req, res) => {
     } catch (error) { res.status(500).json({ message: 'Gagal memuat kurikulum kelas.' }); }
 };
 
+// 3. Murid Mendaftar Kelas (Sistem SRS 6 Arah)
 const enrollCourse = async (req, res) => {
     const courseId = req.params.id;
     const muridId = req.user.id; 
 
     try {
+        // Cek apakah murid sudah terdaftar di kelas ini
         const cekSrs = await db.query(
             'SELECT id FROM srs_reviews WHERE murid_id = $1 AND vocab_id IN (SELECT id FROM vocabularies WHERE course_id = $2) LIMIT 1', 
             [muridId, courseId]
         );
 
-        if (cekSrs.rows.length > 0) return res.status(400).json({ message: 'Kamu sudah mengikuti kelas ini!' });
-
-        await db.query(`
-            INSERT INTO srs_reviews (murid_id, vocab_id, srs_level, next_review_date, kategori_terakhir)
-            SELECT $1, id, 0, CURRENT_TIMESTAMP, 'again' FROM vocabularies WHERE course_id = $2 ON CONFLICT (murid_id, vocab_id) DO NOTHING
-        `, [muridId, courseId]);
-
-        const courseData = await db.query('SELECT product_id FROM courses WHERE id = $1', [courseId]);
-        if(courseData.rows.length > 0) {
-            await db.query(`INSERT INTO user_access (murid_id, product_id, tipe_akses) VALUES ($1, $2, 'lifetime')`, [muridId, courseData.rows[0].product_id]);
+        if (cekSrs.rows.length > 0) {
+            return res.status(400).json({ message: 'Kamu sudah mengikuti kelas ini! Kosakata sudah ada di kurikulummu.' });
         }
 
-        res.json({ message: 'Pendaftaran Berhasil! Kosakata kelas ini telah ditambahkan ke Kuis SRS harianmu. 🚀' });
-    } catch (error) { res.status(500).json({ message: 'Gagal mendaftar kelas.' }); }
-};
+        // SUNTIKAN SUPER: Memasukkan kosakata sekaligus menggandakannya menjadi 6 arah kuis menggunakan CROSS JOIN
+        await db.query(`
+            INSERT INTO srs_reviews (murid_id, vocab_id, arah_kuis, srs_level, next_review_date, kategori_terakhir)
+            SELECT $1, v.id, d.arah, 0, CURRENT_TIMESTAMP, 'again'
+            FROM vocabularies v
+            CROSS JOIN (VALUES (1),(2),(3),(4),(5),(6)) AS d(arah)
+            WHERE v.course_id = $2
+            ON CONFLICT (murid_id, vocab_id, arah_kuis) DO NOTHING
+        `, [muridId, courseId]);
 
+        // Memberikan akses kelas seumur hidup
+        const courseData = await db.query('SELECT product_id FROM courses WHERE id = $1', [courseId]);
+        if(courseData.rows.length > 0) {
+            await db.query(`
+                INSERT INTO user_access (murid_id, product_id, tipe_akses)
+                VALUES ($1, $2, 'lifetime')
+            `, [muridId, courseData.rows[0].product_id]);
+        }
+
+        res.json({ message: 'Pendaftaran Berhasil! Seluruh kosakata kelas ini (6 Arah Kuis) telah dibuka. 🚀' });
+    } catch (error) {
+        console.error('Error enroll:', error.message);
+        res.status(500).json({ message: 'Gagal mendaftar kelas.' });
+    }
+};
 const addCourse = async (req, res) => {
     const { judul_course, thumbnail_url, deskripsi } = req.body;
     try {
