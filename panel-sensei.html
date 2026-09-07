@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Sensei - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- LIBRARY EDITOR TEKS (QUILL.JS) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
     <style>
         :root {
             --korisu-orange: #ff7f00;
@@ -29,6 +32,12 @@
         .btn-korisu-solid:hover:not(:disabled) { background-color: var(--korisu-orange); color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
         .btn-edit-mode { background-color: #084298; color: white; }
         .btn-edit-mode:hover:not(:disabled) { background-color: #052c65; box-shadow: 0 8px 20px rgba(8, 66, 152, 0.25); }
+
+        /* Styling Khusus Editor Teks Quill */
+        .ql-toolbar.ql-snow { border: 1px solid #dee2e6; border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f8f9fa; }
+        .ql-container.ql-snow { border: 1px solid #dee2e6; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; }
+        .ql-editor { min-height: 120px; }
+        .ql-editor:focus { background-color: var(--korisu-white); border-color: var(--korisu-orange); }
     </style>
 </head>
 <body>
@@ -99,7 +108,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Form Tambah Materi / Lesson -->
+                <!-- 3. Form Tambah Materi / Lesson (DILENGKAPI EDITOR TEKS) -->
                 <div class="col-lg-6 mb-4">
                     <div class="card-panel">
                         <h4 class="fw-bold mb-4 text-dark">🎥 3. Unggah Materi Baru</h4>
@@ -120,10 +129,15 @@
                                 <label class="form-label fw-bold text-dark">Judul Materi</label>
                                 <input type="text" id="l-judul" class="form-control" placeholder="Contoh: Tata Cara..." required>
                             </div>
+                            
+                            <!-- AREA EDITOR TEKS (BARU) -->
                             <div class="mb-3">
-                                <label class="form-label fw-bold text-dark">Deskripsi / Catatan Sensei</label>
-                                <textarea id="l-desc" class="form-control" rows="2" placeholder="Catatan di bawah video..."></textarea>
+                                <label class="form-label fw-bold text-dark">Catatan / Rangkuman Sensei</label>
+                                <div>
+                                    <div id="l-desc-editor"></div>
+                                </div>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">URL Konten (Embed YouTube)</label>
                                 <input type="text" id="l-url" class="form-control" placeholder="https://www.youtube.com/embed/... " required>
@@ -146,7 +160,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Form EDIT MATERI (BARU) -->
+                <!-- 4. Form EDIT MATERI (DILENGKAPI EDITOR TEKS) -->
                 <div class="col-lg-6 mb-4">
                     <div class="card-panel border-primary" style="border-width: 2px;">
                         <h4 class="fw-bold mb-4 text-primary">✏️ 4. Edit Materi & Deskripsi</h4>
@@ -169,17 +183,20 @@
                                     <option value="">Pilih modul dulu...</option>
                                 </select>
                             </div>
-                            
                             <hr class="mb-3">
-                            
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">Revisi Judul Materi</label>
                                 <input type="text" id="el-judul" class="form-control" required>
                             </div>
+                            
+                            <!-- AREA EDITOR TEKS (BARU) -->
                             <div class="mb-3">
-                                <label class="form-label fw-bold text-dark">Revisi Deskripsi / Catatan</label>
-                                <textarea id="el-desc" class="form-control" rows="3" placeholder="Tambahkan penjelasan tambahan untuk murid..."></textarea>
+                                <label class="form-label fw-bold text-dark">Revisi Catatan / Rangkuman</label>
+                                <div>
+                                    <div id="el-desc-editor"></div>
+                                </div>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">Revisi URL Konten</label>
                                 <input type="text" id="el-url" class="form-control" required>
@@ -202,7 +219,7 @@
                     </div>
                 </div>
 
-                <!-- 5. Form EDIT MODUL (BARU) -->
+                <!-- 5. Form EDIT MODUL -->
                 <div class="col-lg-6 mb-4">
                     <div class="card-panel border-primary" style="border-width: 2px;">
                         <h4 class="fw-bold mb-4 text-primary">✏️ 5. Revisi Nama Modul</h4>
@@ -252,13 +269,24 @@
         </div>
     </div>
 
-    <!-- Script Logika Utuh -->
+    <!-- PANGGIL LIBRARY SCRIPT QUILL.JS -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN = localStorage.getItem('korisu_token');
         const USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
 
         if (!TOKEN || USER.role !== 'sensei') window.location.href = "dashboard.html";
+
+        // MENGAKTIFKAN EDITOR TEKS
+        const opsiEditor = [
+            ['bold', 'italic', 'underline'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            ['clean']
+        ];
+        
+        const editorMateriBaru = new Quill('#l-desc-editor', { theme: 'snow', modules: { toolbar: opsiEditor }, placeholder: 'Ketik materi di sini...' });
+        const editorMateriLama = new Quill('#el-desc-editor', { theme: 'snow', modules: { toolbar: opsiEditor }, placeholder: 'Revisi materi di sini...' });
 
         // Fungsi Universal: Memuat Dropdown Kelas
         async function muatDropdownKatalogUniversal() {
@@ -307,7 +335,7 @@
             } catch (error) { selectLesson.innerHTML = '<option value="">Gagal memuat</option>'; }
         }
 
-        // Fungsi Dinamis: Menarik Data Lama ke dalam Form Edit Materi
+        // Fungsi Dinamis: Menarik Data Lama ke dalam Form Edit Materi (TERMASUK EDITOR)
         async function tarikDataLesson(lessonId) {
             if(!lessonId) return;
             try {
@@ -315,10 +343,12 @@
                 const data = await res.json();
                 if(res.ok && data.lesson) {
                     document.getElementById('el-judul').value = data.lesson.judul_materi;
-                    document.getElementById('el-desc').value = data.lesson.deskripsi || '';
                     document.getElementById('el-url').value = data.lesson.konten_url;
                     document.getElementById('el-tipe').value = data.lesson.tipe_lesson;
                     document.getElementById('el-urutan').value = data.lesson.urutan_lesson;
+                    
+                    // Memasukkan teks lama ke dalam Editor Teks
+                    editorMateriLama.root.innerHTML = data.lesson.deskripsi || '';
                 }
             } catch (error) { alert("Gagal menarik data materi lama dari server."); }
         }
@@ -329,20 +359,23 @@
             const lesId = document.getElementById('el-lesson-id').value;
             if(!lesId) return alert("Harap pilih materi yang ingin diedit terlebih dahulu.");
             
+            let deskripsiKonten = editorMateriLama.root.innerHTML;
+            if (deskripsiKonten === '<p><br></p>') deskripsiKonten = '';
+
             const btn = document.getElementById('btn-submit-edit-lesson'); btn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}/courses/lessons/${lesId}/edit`, {
                     method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
                     body: JSON.stringify({ 
                         judul_materi: document.getElementById('el-judul').value, 
-                        deskripsi: document.getElementById('el-desc').value,
+                        deskripsi: deskripsiKonten,
                         konten_url: document.getElementById('el-url').value, 
                         tipe_lesson: document.getElementById('el-tipe').value, 
                         urutan_lesson: parseInt(document.getElementById('el-urutan').value) 
                     })
                 });
                 const result = await res.json();
-                if(res.ok) { alert(result.message); document.getElementById('form-edit-lesson').reset(); } else alert(result.message);
+                if(res.ok) { alert(result.message); document.getElementById('form-edit-lesson').reset(); editorMateriLama.root.innerHTML = ''; } else alert(result.message);
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
         });
 
@@ -377,17 +410,28 @@
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
         });
 
-        // -- SUBMIT MATERI BARU --
+        // -- SUBMIT MATERI BARU (DENGAN EDITOR TEKS) --
         document.getElementById('form-lesson').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            let deskripsiKonten = editorMateriBaru.root.innerHTML;
+            if (deskripsiKonten === '<p><br></p>') deskripsiKonten = '';
+
             const btn = document.getElementById('btn-submit-lesson'); btn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}/courses/lessons/add`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify({ module_id: document.getElementById('l-module-id').value, judul_materi: document.getElementById('l-judul').value, deskripsi: document.getElementById('l-desc').value, konten_url: document.getElementById('l-url').value, tipe_lesson: document.getElementById('l-tipe').value, urutan_lesson: parseInt(document.getElementById('l-urutan').value) })
+                    body: JSON.stringify({ 
+                        module_id: document.getElementById('l-module-id').value, 
+                        judul_materi: document.getElementById('l-judul').value, 
+                        deskripsi: deskripsiKonten, 
+                        konten_url: document.getElementById('l-url').value, 
+                        tipe_lesson: document.getElementById('l-tipe').value, 
+                        urutan_lesson: parseInt(document.getElementById('l-urutan').value) 
+                    })
                 });
                 const result = await res.json();
-                if(res.ok) { alert("✅ " + result.message); document.getElementById('form-lesson').reset(); } else alert(result.message);
+                if(res.ok) { alert("✅ " + result.message); document.getElementById('form-lesson').reset(); editorMateriBaru.root.innerHTML = ''; } else alert(result.message);
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
         });
 

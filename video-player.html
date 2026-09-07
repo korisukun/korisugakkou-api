@@ -20,14 +20,15 @@
 
         .content-section { flex: 1; background-image: radial-gradient(#e0e0e0 2px, transparent 2px); background-size: 30px 30px; padding: 40px 0 60px 0; }
         
-        /* Area Video Kanan */
         .card-modern { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 30px; }
         .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); background-color: #000; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
-        /* Area Deskripsi Baru */
+        /* Area Deskripsi (Mendukung Rich Text) */
         .desc-box { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 16px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
-        .desc-text { white-space: pre-line; line-height: 1.7; font-size: 1.05rem; color: #444; }
+        .desc-text { line-height: 1.7; font-size: 1.05rem; color: #444; }
+        .desc-text ul, .desc-text ol { margin-left: 20px; margin-bottom: 15px; }
+        .desc-text p { margin-bottom: 10px; }
 
         .task-box { background-color: #fffaf5; border: 1px solid #ffe8d6; border-radius: 16px; padding: 20px; }
         .btn-selesai-modern { background-color: #198754; color: white; border: none; border-radius: 12px; font-weight: 800; padding: 12px 25px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2); }
@@ -35,7 +36,7 @@
         .btn-selesai-modern:disabled { background-color: #6c757d; box-shadow: none; }
         .badge-kategori { display: inline-block; background-color: #fffaf5; color: var(--korisu-orange); font-weight: 700; font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #ffe8d6; }
 
-        /* Sidebar Kurikulum Kiri */
+        /* Sidebar Kurikulum */
         .sidebar-wrapper { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 20px; height: 100%; max-height: 85vh; overflow-y: auto; }
         .sidebar-wrapper::-webkit-scrollbar { width: 6px; }
         .sidebar-wrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px;}
@@ -93,9 +94,10 @@
                             <iframe id="frame-video" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
 
-                        <!-- KOTAK DESKRIPSI (BARU) -->
+                        <!-- KOTAK DESKRIPSI -->
                         <div class="desc-box mb-4">
                             <h5 class="fw-bold text-dark mb-3">📝 Catatan Sensei</h5>
+                            <!-- PERBAIKAN: Menggunakan .innerHTML via JS -->
                             <div id="teks-deskripsi" class="desc-text">Memuat catatan materi...</div>
                         </div>
 
@@ -156,8 +158,8 @@
                 if (res.ok && data.lesson) {
                     document.getElementById('judul-materi').innerText = data.lesson.judul_materi;
                     
-                    // Render Deskripsi
-                    document.getElementById('teks-deskripsi').innerText = data.lesson.deskripsi || "Sensei belum menambahkan catatan untuk materi ini. Silakan langsung tonton videonya ya!";
+                    // PERBAIKAN FATAL: Gunakan .innerHTML agar format tebal/poin/miring bisa tampil
+                    document.getElementById('teks-deskripsi').innerHTML = data.lesson.deskripsi || "Sensei belum menambahkan catatan untuk materi ini. Silakan langsung tonton videonya ya!";
 
                     let urlVideo = data.lesson.konten_url;
                     let pemisah = urlVideo.includes('?') ? '&' : '?';
@@ -166,12 +168,12 @@
                     
                 } else {
                     document.getElementById('judul-materi').innerText = "Materi tidak ditemukan.";
-                    document.getElementById('teks-deskripsi').innerText = "-";
+                    document.getElementById('teks-deskripsi').innerHTML = "-";
                     document.getElementById('btn-tandai').disabled = true;
                 }
             } catch (error) {
                 document.getElementById('judul-materi').innerHTML = "<span class='text-danger'>Gagal memuat video.</span>";
-                document.getElementById('teks-deskripsi').innerText = "Terjadi kesalahan jaringan saat memuat catatan.";
+                document.getElementById('teks-deskripsi').innerHTML = "Terjadi kesalahan jaringan saat memuat catatan.";
             }
         }
 
