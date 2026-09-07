@@ -77,19 +77,19 @@ const enrollCourse = async (req, res) => {
     }
 };
 
-// 4. [BARU] Menambah Kelas Baru (Khusus Sensei)
+// 4. Menambah Kelas Baru (Khusus Sensei) dengan log error akurat
 const addCourse = async (req, res) => {
     const { judul_course, thumbnail_url, deskripsi } = req.body;
     
     try {
-        // Buat produk baru di tabel products (harga default 0 karena gratis/sistem enroll)
+        // Buat produk baru di tabel products (harga default 0 karena gratis/sistem enroll)[cite: 11]
         const newProduct = await db.query(
             "INSERT INTO products (nama_produk, tipe_produk, harga_asli, is_active) VALUES ($1, 'course', 0, true) RETURNING id",
             [judul_course]
         );
         const productId = newProduct.rows[0].id;
 
-        // Masukkan detail kelas ke tabel courses menggunakan product_id yang baru dibuat
+        // Masukkan detail kelas ke tabel courses menggunakan product_id yang baru dibuat[cite: 11]
         await db.query(
             "INSERT INTO courses (product_id, judul_course, deskripsi, thumbnail_url) VALUES ($1, $2, $3, $4)",
             [productId, judul_course, deskripsi, thumbnail_url]
@@ -98,7 +98,8 @@ const addCourse = async (req, res) => {
         res.status(201).json({ message: 'Kelas berhasil diterbitkan! 🎓' });
     } catch (error) {
         console.error('Error tambah kelas:', error.message);
-        res.status(500).json({ message: 'Gagal menambah kelas ke database.' });
+        // PERBAIKAN: Mengirimkan detail error dari database langsung ke Panel Sensei
+        res.status(500).json({ message: `Gagal: ${error.message}` });
     }
 };
 
