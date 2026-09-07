@@ -42,4 +42,32 @@ const addBulkVocabulary = async (req, res) => {
     }
 };
 
+// Mengambil Daftar Kosakata Berdasarkan Kelas (Untuk Dropdown Edit)
+const getVocabsByCourse = async (req, res) => {
+    try {
+        const { course_id } = req.params;
+        const result = await db.query('SELECT * FROM vocabularies WHERE course_id = $1 ORDER BY id ASC', [course_id]);
+        res.json({ vocabularies: result.rows });
+    } catch (error) { 
+        res.status(500).json({ message: 'Gagal memuat kosakata.' }); 
+    }
+};
+
+// Menyimpan Perubahan Edit Kosakata
+const editVocab = async (req, res) => {
+    const { id } = req.params;
+    const { kanji, furigana, arti_indonesia } = req.body;
+    try {
+        await db.query(
+            'UPDATE vocabularies SET kanji = $1, furigana = $2, arti_indonesia = $3 WHERE id = $4', 
+            [kanji, furigana, arti_indonesia, id]
+        );
+        res.json({ message: 'Kosakata berhasil diperbarui! ✅' });
+    } catch (error) { 
+        res.status(500).json({ message: `Gagal: ${error.message}` }); 
+    }
+};
+
+// Pastikan untuk mengekspor kedua fungsi baru ini di baris paling bawah module.exports
+
 module.exports = { addVocabulary, addBulkVocabulary };

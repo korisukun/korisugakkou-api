@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Sensei - KORISU Gakkou</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- LIBRARY EDITOR TEKS (QUILL.JS) -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     
     <style>
@@ -33,7 +32,6 @@
         .btn-edit-mode { background-color: #084298; color: white; }
         .btn-edit-mode:hover:not(:disabled) { background-color: #052c65; box-shadow: 0 8px 20px rgba(8, 66, 152, 0.25); }
 
-        /* Styling Khusus Editor Teks Quill */
         .ql-toolbar.ql-snow { border: 1px solid #dee2e6; border-top-left-radius: 12px; border-top-right-radius: 12px; background-color: #f8f9fa; }
         .ql-container.ql-snow { border: 1px solid #dee2e6; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 1rem; }
         .ql-editor { min-height: 120px; }
@@ -56,7 +54,7 @@
         <div class="container">
             <div class="badge-atas">⚙️ Pusat Kendali Admin</div>
             <h2 class="fw-bold text-dark mb-2">Panel <span style="color: var(--korisu-orange);">Sensei</span></h2>
-            <p class="text-muted">Kelola kurikulum, revisi materi, dan lengkapi deskripsi video dari satu tempat.</p>
+            <p class="text-muted">Kelola kurikulum, revisi materi, bank kosakata, dan gamifikasi dari satu tempat.</p>
         </div>
     </div>
 
@@ -108,7 +106,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Form Tambah Materi / Lesson (DILENGKAPI EDITOR TEKS) -->
+                <!-- 3. Form Tambah Materi / Lesson -->
                 <div class="col-lg-6 mb-4">
                     <div class="card-panel">
                         <h4 class="fw-bold mb-4 text-dark">🎥 3. Unggah Materi Baru</h4>
@@ -129,15 +127,10 @@
                                 <label class="form-label fw-bold text-dark">Judul Materi</label>
                                 <input type="text" id="l-judul" class="form-control" placeholder="Contoh: Tata Cara..." required>
                             </div>
-                            
-                            <!-- AREA EDITOR TEKS (BARU) -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">Catatan / Rangkuman Sensei</label>
-                                <div>
-                                    <div id="l-desc-editor"></div>
-                                </div>
+                                <div><div id="l-desc-editor"></div></div>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">URL Konten (Embed YouTube)</label>
                                 <input type="text" id="l-url" class="form-control" placeholder="https://www.youtube.com/embed/... " required>
@@ -160,7 +153,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Form EDIT MATERI (DILENGKAPI EDITOR TEKS) -->
+                <!-- 4. Form EDIT MATERI -->
                 <div class="col-lg-6 mb-4">
                     <div class="card-panel border-primary" style="border-width: 2px;">
                         <h4 class="fw-bold mb-4 text-primary">✏️ 4. Edit Materi & Deskripsi</h4>
@@ -188,15 +181,10 @@
                                 <label class="form-label fw-bold text-dark">Revisi Judul Materi</label>
                                 <input type="text" id="el-judul" class="form-control" required>
                             </div>
-                            
-                            <!-- AREA EDITOR TEKS (BARU) -->
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">Revisi Catatan / Rangkuman</label>
-                                <div>
-                                    <div id="el-desc-editor"></div>
-                                </div>
+                                <div><div id="el-desc-editor"></div></div>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">Revisi URL Konten</label>
                                 <input type="text" id="el-url" class="form-control" required>
@@ -252,15 +240,108 @@
                     <div class="card-panel">
                         <h4 class="fw-bold mb-3 text-dark">📚 6. Tambah Kosakata Masal</h4>
                         <form id="form-vocab-bulk" class="d-flex flex-column flex-grow-1">
+                            <div class="instruksi-box mb-4 fw-bold text-muted">
+                                Format 1 baris: Kanji, Furigana, Arti<br>
+                                <span class="text-orange" style="color: var(--korisu-orange);">Contoh:</span><br>
+                                車椅子, くるまいす, Kursi roda
+                            </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold text-dark">Pilih Kelas Target</label>
                                 <select id="v-course-id" class="form-select fw-medium dropdown-kelas" required></select>
                             </div>
                             <div class="mb-4 flex-grow-1 d-flex flex-column">
-                                <label class="form-label fw-bold text-dark">Data Kosakata (Kanji, Furigana, Arti)</label>
+                                <label class="form-label fw-bold text-dark">Data Kosakata</label>
                                 <textarea id="v-bulk-input" class="form-control flex-grow-1" style="min-height: 120px;" placeholder="食べる, たべる, Makan" required></textarea>
                             </div>
                             <button type="submit" id="btn-submit-vocab" class="btn-korisu-solid mt-auto">SIMPAN KOSAKATA</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 7. Form EDIT KOSAKATA CEPAT (BARU) -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel border-primary" style="border-width: 2px;">
+                        <h4 class="fw-bold mb-4 text-primary">✏️ 7. Edit Kosakata Cepat</h4>
+                        <form id="form-edit-vocab" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">1. Pilih Kelas Target</label>
+                                <select id="ev-course-id" class="form-select fw-medium dropdown-kelas" onchange="muatDropdownKosakata(this.value, 'ev-vocab-id')" required></select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">2. Pilih Kosakata</label>
+                                <select id="ev-vocab-id" class="form-select fw-medium border-primary" onchange="tarikDataKosakata(this.value)" required>
+                                    <option value="">Pilih kelas dulu...</option>
+                                </select>
+                            </div>
+                            <hr class="mb-3">
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Revisi Kanji / Kata</label>
+                                    <input type="text" id="ev-kanji" class="form-control" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Revisi Furigana</label>
+                                    <input type="text" id="ev-furigana" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Revisi Arti Indonesia</label>
+                                <input type="text" id="ev-arti" class="form-control" required>
+                            </div>
+                            <button type="submit" id="btn-submit-edit-vocab" class="btn-korisu-solid btn-edit-mode mt-auto">UPDATE KOSAKATA</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 8. Form Tambah Item Toko -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel">
+                        <h4 class="fw-bold mb-4 text-dark">🏪 8. Tambah Item Toko</h4>
+                        <form id="form-shop" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Nama Item</label>
+                                <input type="text" id="s-nama" class="form-control" placeholder="Contoh: Dorayaki Coklat" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Tipe Item</label>
+                                    <select id="s-tipe" class="form-select" required>
+                                        <option value="makanan">Makanan (+Mood)</option>
+                                        <option value="aksesoris">Aksesoris Maskot</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Harga (Koin)</label>
+                                    <input type="number" id="s-harga" class="form-control" placeholder="15" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Ikon Emoji</label>
+                                <input type="text" id="s-ikon" class="form-control" placeholder="Contoh: 🥞" required>
+                            </div>
+                            <button type="submit" id="btn-submit-shop" class="btn-korisu-solid mt-auto">MASUKKAN KE ETALASE</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 9. Form Tambah Quote -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel">
+                        <h4 class="fw-bold mb-4 text-dark">🌸 9. Tambah Pepatah</h4>
+                        <form id="form-quote" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Teks Jepang</label>
+                                <input type="text" id="q-teks" class="form-control" placeholder="頑張って" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Cara Baca Romaji</label>
+                                <input type="text" id="q-baca" class="form-control" placeholder="Ganbatte">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Arti Indonesia</label>
+                                <input type="text" id="q-arti" class="form-control" placeholder="Semangat!" required>
+                            </div>
+                            <button type="submit" id="btn-submit-quote" class="btn-korisu-solid mt-auto">SIMPAN PEPATAH</button>
                         </form>
                     </div>
                 </div>
@@ -269,7 +350,6 @@
         </div>
     </div>
 
-    <!-- PANGGIL LIBRARY SCRIPT QUILL.JS -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
@@ -278,17 +358,12 @@
 
         if (!TOKEN || USER.role !== 'sensei') window.location.href = "dashboard.html";
 
-        // MENGAKTIFKAN EDITOR TEKS
-        const opsiEditor = [
-            ['bold', 'italic', 'underline'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            ['clean']
-        ];
-        
+        const opsiEditor = [['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']];
         const editorMateriBaru = new Quill('#l-desc-editor', { theme: 'snow', modules: { toolbar: opsiEditor }, placeholder: 'Ketik materi di sini...' });
         const editorMateriLama = new Quill('#el-desc-editor', { theme: 'snow', modules: { toolbar: opsiEditor }, placeholder: 'Revisi materi di sini...' });
 
-        // Fungsi Universal: Memuat Dropdown Kelas
+        let vocabsCache = []; // Tempat simpan sementara untuk penarikan data kosakata instan
+
         async function muatDropdownKatalogUniversal() {
             try {
                 const res = await fetch(`${API_URL}/courses`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
@@ -303,11 +378,9 @@
             } catch (error) { console.error(error); }
         }
 
-        // Fungsi Dinamis: Memuat Modul ke Target Dropdown Spesifik
         async function muatDropdownModul(courseId, targetId) {
             const selectModul = document.getElementById(targetId);
             if(!courseId) { selectModul.innerHTML = '<option value="">Pilih kelas dulu...</option>'; return; }
-            
             selectModul.innerHTML = '<option value="">⏳ Memuat...</option>';
             try {
                 const res = await fetch(`${API_URL}/courses/${courseId}/modules`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
@@ -319,11 +392,9 @@
             } catch (error) { selectModul.innerHTML = '<option value="">Gagal memuat</option>'; }
         }
 
-        // Fungsi Dinamis: Memuat Lesson untuk Form Edit
         async function muatDropdownLesson(moduleId, targetId) {
             const selectLesson = document.getElementById(targetId);
             if(!moduleId) { selectLesson.innerHTML = '<option value="">Pilih modul dulu...</option>'; return; }
-            
             selectLesson.innerHTML = '<option value="">⏳ Memuat...</option>';
             try {
                 const res = await fetch(`${API_URL}/courses/modules/${moduleId}/lessons`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
@@ -335,7 +406,6 @@
             } catch (error) { selectLesson.innerHTML = '<option value="">Gagal memuat</option>'; }
         }
 
-        // Fungsi Dinamis: Menarik Data Lama ke dalam Form Edit Materi (TERMASUK EDITOR)
         async function tarikDataLesson(lessonId) {
             if(!lessonId) return;
             try {
@@ -346,53 +416,61 @@
                     document.getElementById('el-url').value = data.lesson.konten_url;
                     document.getElementById('el-tipe').value = data.lesson.tipe_lesson;
                     document.getElementById('el-urutan').value = data.lesson.urutan_lesson;
-                    
-                    // Memasukkan teks lama ke dalam Editor Teks
                     editorMateriLama.root.innerHTML = data.lesson.deskripsi || '';
                 }
-            } catch (error) { alert("Gagal menarik data materi lama dari server."); }
+            } catch (error) { alert("Gagal menarik data materi lama."); }
         }
 
-        // -- SUBMIT EDIT MATERI --
-        document.getElementById('form-edit-lesson').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const lesId = document.getElementById('el-lesson-id').value;
-            if(!lesId) return alert("Harap pilih materi yang ingin diedit terlebih dahulu.");
-            
-            let deskripsiKonten = editorMateriLama.root.innerHTML;
-            if (deskripsiKonten === '<p><br></p>') deskripsiKonten = '';
-
-            const btn = document.getElementById('btn-submit-edit-lesson'); btn.disabled = true;
+        // [FUNGSI BARU] Mengambil Daftar Kosakata Berdasarkan Kelas
+        async function muatDropdownKosakata(courseId, targetId) {
+            const selectVocab = document.getElementById(targetId);
+            if(!courseId) { selectVocab.innerHTML = '<option value="">Pilih kelas dulu...</option>'; return; }
+            selectVocab.innerHTML = '<option value="">⏳ Memuat...</option>';
             try {
-                const res = await fetch(`${API_URL}/courses/lessons/${lesId}/edit`, {
+                const res = await fetch(`${API_URL}/vocabulary/course/${courseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+                const data = await res.json();
+                selectVocab.innerHTML = '<option value="">-- Pilih Kosakata --</option>';
+                if(res.ok && data.vocabularies && data.vocabularies.length > 0) {
+                    vocabsCache = data.vocabularies; // Simpan di memori lokal agar perpindahan cepat
+                    data.vocabularies.forEach(v => {
+                        selectVocab.innerHTML += `<option value="${v.id}">${v.kanji} (${v.arti_indonesia})</option>`;
+                    });
+                } else selectVocab.innerHTML = '<option value="">Belum ada kosakata</option>';
+            } catch (error) { selectVocab.innerHTML = '<option value="">Gagal memuat</option>'; }
+        }
+
+        // [FUNGSI BARU] Menarik Data Kosakata Instan Tanpa Loading
+        function tarikDataKosakata(vocabId) {
+            if(!vocabId) return;
+            const vocab = vocabsCache.find(v => v.id == vocabId);
+            if(vocab) {
+                document.getElementById('ev-kanji').value = vocab.kanji;
+                document.getElementById('ev-furigana').value = vocab.furigana;
+                document.getElementById('ev-arti').value = vocab.arti_indonesia;
+            }
+        }
+
+        // -- SUBMIT EDIT KOSAKATA (BARU) --
+        document.getElementById('form-edit-vocab').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const vocabId = document.getElementById('ev-vocab-id').value;
+            if(!vocabId) return alert("Pilih kosakata yang ingin diedit!");
+            const btn = document.getElementById('btn-submit-edit-vocab'); btn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/vocabulary/${vocabId}/edit`, {
                     method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify({ 
-                        judul_materi: document.getElementById('el-judul').value, 
-                        deskripsi: deskripsiKonten,
-                        konten_url: document.getElementById('el-url').value, 
-                        tipe_lesson: document.getElementById('el-tipe').value, 
-                        urutan_lesson: parseInt(document.getElementById('el-urutan').value) 
+                    body: JSON.stringify({
+                        kanji: document.getElementById('ev-kanji').value,
+                        furigana: document.getElementById('ev-furigana').value,
+                        arti_indonesia: document.getElementById('ev-arti').value
                     })
                 });
                 const result = await res.json();
-                if(res.ok) { alert(result.message); document.getElementById('form-edit-lesson').reset(); editorMateriLama.root.innerHTML = ''; } else alert(result.message);
-            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
-        });
-
-        // -- SUBMIT EDIT MODUL --
-        document.getElementById('form-edit-module').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const modId = document.getElementById('em-module-id').value;
-            if(!modId) return alert("Harap pilih modul yang ingin direvisi terlebih dahulu.");
-
-            const btn = document.getElementById('btn-submit-edit-module'); btn.disabled = true;
-            try {
-                const res = await fetch(`${API_URL}/courses/modules/${modId}/edit`, {
-                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify({ judul_modul: document.getElementById('em-judul').value, urutan_modul: parseInt(document.getElementById('em-urutan').value) })
-                });
-                const result = await res.json();
-                if(res.ok) { alert(result.message); document.getElementById('form-edit-module').reset(); } else alert(result.message);
+                if(res.ok) {
+                    alert(result.message);
+                    document.getElementById('form-edit-vocab').reset();
+                    muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id'); // Segarkan daftar
+                } else alert(result.message);
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
         });
 
@@ -410,31 +488,6 @@
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
         });
 
-        // -- SUBMIT MATERI BARU (DENGAN EDITOR TEKS) --
-        document.getElementById('form-lesson').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            let deskripsiKonten = editorMateriBaru.root.innerHTML;
-            if (deskripsiKonten === '<p><br></p>') deskripsiKonten = '';
-
-            const btn = document.getElementById('btn-submit-lesson'); btn.disabled = true;
-            try {
-                const res = await fetch(`${API_URL}/courses/lessons/add`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                    body: JSON.stringify({ 
-                        module_id: document.getElementById('l-module-id').value, 
-                        judul_materi: document.getElementById('l-judul').value, 
-                        deskripsi: deskripsiKonten, 
-                        konten_url: document.getElementById('l-url').value, 
-                        tipe_lesson: document.getElementById('l-tipe').value, 
-                        urutan_lesson: parseInt(document.getElementById('l-urutan').value) 
-                    })
-                });
-                const result = await res.json();
-                if(res.ok) { alert("✅ " + result.message); document.getElementById('form-lesson').reset(); editorMateriBaru.root.innerHTML = ''; } else alert(result.message);
-            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
-        });
-
         // -- SUBMIT MODUL BARU --
         document.getElementById('form-module').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -449,6 +502,56 @@
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
         });
 
+        // -- SUBMIT MATERI BARU --
+        document.getElementById('form-lesson').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let deskripsiKonten = editorMateriBaru.root.innerHTML;
+            if (deskripsiKonten === '<p><br></p>') deskripsiKonten = '';
+            const btn = document.getElementById('btn-submit-lesson'); btn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/courses/lessons/add`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                    body: JSON.stringify({ module_id: document.getElementById('l-module-id').value, judul_materi: document.getElementById('l-judul').value, deskripsi: deskripsiKonten, konten_url: document.getElementById('l-url').value, tipe_lesson: document.getElementById('l-tipe').value, urutan_lesson: parseInt(document.getElementById('l-urutan').value) })
+                });
+                const result = await res.json();
+                if(res.ok) { alert("✅ " + result.message); document.getElementById('form-lesson').reset(); editorMateriBaru.root.innerHTML = ''; } else alert(result.message);
+            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
+        });
+
+        // -- SUBMIT EDIT MATERI --
+        document.getElementById('form-edit-lesson').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const lesId = document.getElementById('el-lesson-id').value;
+            if(!lesId) return alert("Pilih materi yang diedit!");
+            let deskripsiKonten = editorMateriLama.root.innerHTML;
+            if (deskripsiKonten === '<p><br></p>') deskripsiKonten = '';
+            const btn = document.getElementById('btn-submit-edit-lesson'); btn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/courses/lessons/${lesId}/edit`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                    body: JSON.stringify({ judul_materi: document.getElementById('el-judul').value, deskripsi: deskripsiKonten, konten_url: document.getElementById('el-url').value, tipe_lesson: document.getElementById('el-tipe').value, urutan_lesson: parseInt(document.getElementById('el-urutan').value) })
+                });
+                const result = await res.json();
+                if(res.ok) { alert(result.message); document.getElementById('form-edit-lesson').reset(); editorMateriLama.root.innerHTML = ''; } else alert(result.message);
+            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
+        });
+
+        // -- SUBMIT EDIT MODUL --
+        document.getElementById('form-edit-module').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const modId = document.getElementById('em-module-id').value;
+            if(!modId) return alert("Pilih modul yang direvisi!");
+            const btn = document.getElementById('btn-submit-edit-module'); btn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/courses/modules/${modId}/edit`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                    body: JSON.stringify({ judul_modul: document.getElementById('em-judul').value, urutan_modul: parseInt(document.getElementById('em-urutan').value) })
+                });
+                const result = await res.json();
+                if(res.ok) { alert(result.message); document.getElementById('form-edit-module').reset(); } else alert(result.message);
+            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
+        });
+
         // -- SUBMIT KOSAKATA MASAL --
         document.getElementById('form-vocab-bulk').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -459,7 +562,6 @@
                 const k = b.split(','); return k.length >= 3 ? { kanji: k[0].trim(), furigana: k[1].trim(), arti_indonesia: k[2].trim() } : null;
             });
             if(arrayKosakata.includes(null)) return alert("Format salah. Harus dipisah koma!");
-            
             const btn = document.getElementById('btn-submit-vocab'); btn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}/vocabulary/bulk-add`, {
@@ -468,6 +570,25 @@
                 });
                 if(res.ok) { alert("✅ Kosakata disimpan!"); document.getElementById('v-bulk-input').value = ""; }
             } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; }
+        });
+
+        // -- SUBMIT SHOP & QUOTE --
+        document.getElementById('form-shop').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`${API_URL}/shop/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                body: JSON.stringify({ nama_item: document.getElementById('s-nama').value, tipe_item: document.getElementById('s-tipe').value, harga_koin: parseInt(document.getElementById('s-harga').value), image_url: document.getElementById('s-ikon').value }) });
+                if(res.ok) { alert("✅ Item toko ditambahkan!"); document.getElementById('form-shop').reset(); }
+            } catch(e){}
+        });
+
+        document.getElementById('form-quote').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`${API_URL}/quotes/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                body: JSON.stringify({ teks_jepang: document.getElementById('q-teks').value, cara_baca: document.getElementById('q-baca').value, arti_indonesia: document.getElementById('q-arti').value, sumber_tokoh: "Sensei", kategori_fokus: "motivasi" }) });
+                if(res.ok) { alert("✅ Quote ditambahkan!"); document.getElementById('form-quote').reset(); }
+            } catch(e){}
         });
 
         document.addEventListener('DOMContentLoaded', muatDropdownKatalogUniversal);

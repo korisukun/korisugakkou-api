@@ -8,5 +8,8 @@ router.post('/add', protect, isSensei, addVocabulary);
 
 // [BARU] Rute untuk menangkap data masal
 router.post('/bulk-add', protect, isSensei, addBulkVocabulary);
+// Tambahkan 2 rute ini di bawah rute bulk-add yang sudah ada sebelumnya
+router.get('/course/:course_id', protect, isSensei, getVocabsByCourse);
+router.put('/:id/edit', protect, isSensei, editVocab);
 
 module.exports = router;
