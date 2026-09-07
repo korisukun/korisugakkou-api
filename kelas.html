@@ -156,39 +156,40 @@
                     const wadah = document.getElementById('kurikulum-accordion');
                     wadah.innerHTML = "";
 
-                    // [BARU] INJEKSI UI SRS KHUSUS KELAS INI
-                    try {
-                        const srsRes = await fetch(`${API_URL}/srs/today?course_id=${courseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
-                        const srsData = await srsRes.json();
+                    // [PERBAIKAN LOGIKA SRS] Cek apakah backend mengatakan murid sudah daftar
+                    if (course.is_enrolled) {
+                        btnEnroll.style.display = 'none'; // Sembunyikan karena sudah ikut!
                         
-                        if (srsRes.ok && srsData.data) {
-                            btnEnroll.style.display = 'none'; 
+                        try {
+                            const srsRes = await fetch(`${API_URL}/srs/today?course_id=${courseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                            const srsData = await srsRes.json();
                             
-                            const jumlahAntrean = srsData.jumlah_antrean;
-                            let htmlSrsInfo = "";
-                            
-                            if (jumlahAntrean > 0) {
-                                htmlSrsInfo = `
-                                    <div class="alert alert-warning border border-warning rounded-4 shadow-sm mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
-                                        <div class="mb-3 mb-md-0 text-center text-md-start">
-                                            <h5 class="fw-bold mb-1" style="color: var(--korisu-orange);">🔥 Waktunya Mempertajam Memori!</h5>
-                                            <p class="mb-0 text-dark">Ada <strong>${jumlahAntrean} evaluasi 6-Arah</strong> menunggu untuk direview.</p>
+                            if (srsRes.ok) {
+                                const jumlahAntrean = srsData.jumlah_antrean || 0;
+                                let htmlSrsInfo = "";
+                                
+                                if (jumlahAntrean > 0) {
+                                    htmlSrsInfo = `
+                                        <div class="alert alert-warning border border-warning rounded-4 shadow-sm mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+                                            <div class="mb-3 mb-md-0 text-center text-md-start">
+                                                <h5 class="fw-bold mb-1" style="color: var(--korisu-orange);">🔥 Waktunya Mempertajam Memori!</h5>
+                                                <p class="mb-0 text-dark">Ada <strong>${jumlahAntrean} evaluasi 6-Arah</strong> menunggu untuk direview.</p>
+                                            </div>
+                                            <button class="btn btn-korisu-solid px-4 fs-5" onclick="window.location.href='kuis.html?course_id=${courseId}'">Mulai Kuis 🚀</button>
                                         </div>
-                                        <button class="btn btn-korisu-solid px-4 fs-5" onclick="window.location.href='kuis.html?course_id=${courseId}'">Mulai Kuis 🚀</button>
-                                    </div>
-                                `;
-                            } else {
-                                htmlSrsInfo = `
-                                    <div class="alert alert-success border border-success rounded-4 shadow-sm mb-4 text-center text-md-start">
-                                        <h5 class="fw-bold mb-1 text-success">✅ Memori Kelas Ini Aman!</h5>
-                                        <p class="mb-0 text-dark">Tidak ada jadwal evaluasi kosakata sekarang. Silakan lanjut menonton video materi.</p>
-                                    </div>
-                                `;
+                                    `;
+                                } else {
+                                    htmlSrsInfo = `
+                                        <div class="alert alert-success border border-success rounded-4 shadow-sm mb-4 text-center text-md-start">
+                                            <h5 class="fw-bold mb-1 text-success">✅ Memori Kelas Ini Aman!</h5>
+                                            <p class="mb-0 text-dark">Tidak ada jadwal evaluasi kosakata sekarang. Silakan lanjut menonton video materi.</p>
+                                        </div>
+                                    `;
+                                }
+                                wadah.innerHTML = htmlSrsInfo;
                             }
-                            wadah.innerHTML = htmlSrsInfo;
-                        }
-                    } catch (e) { console.log("Gagal memuat info SRS"); }
-                    // [AKHIR INJEKSI SRS]
+                        } catch (e) { console.log("Gagal memuat info SRS"); }
+                    }
 
                     if(course.modules.length === 0) {
                         wadah.innerHTML += "<div class='alert alert-warning border-0 fw-bold text-center rounded-4 p-4'>Materi untuk kelas ini sedang disiapkan oleh Sensei.</div>";
@@ -249,7 +250,7 @@
                     btn.innerText = "✅ Kelas Sudah Diikuti";
                     btn.classList.remove('btn-enroll-success');
                     btn.classList.add('btn-secondary'); 
-                    setTimeout(() => bukaKurikulum(activeCourseId), 1000); // Reload kelas setelah daftar agar muncul SRS
+                    setTimeout(() => bukaKurikulum(activeCourseId), 1000); 
                 } else {
                     btn.innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
                     btn.disabled = false;
