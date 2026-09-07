@@ -1,116 +1,98 @@
 const db = require('../config/db');
 
-// Array urutan interval hari. Index = Level SRS.
-// Contoh: Level 3 artinya 7 hari lagi. Level 5 artinya 30 hari lagi.
-const SRS_INTERVALS = [0, 1, 3, 7, 14, 30, 90, 180];
-
-const submitAnswer = async (req, res) => {
-    try {
-        const murid_id = req.user.id;
-        const { vocab_id, waktu_jawab_detik, is_correct } = req.body;
-
-        // 1 s.d 4 (Logika interval hari sama seperti sebelumnya)
-        let kategori_terakhir = 'again';
-        if (is_correct) {
-            if (waktu_jawab_detik < 5) kategori_terakhir = 'easy';
-            else if (waktu_jawab_detik <= 10) kategori_terakhir = 'medium';
-            else if (waktu_jawab_detik <= 15) kategori_terakhir = 'hard';
-            else kategori_terakhir = 'very_hard';
-        }
-
-        const check = await db.query('SELECT * FROM srs_reviews WHERE murid_id = $1 AND vocab_id = $2', [murid_id, vocab_id]);
-        let current_level = check.rows.length > 0 ? check.rows[0].srs_level : 0;
-
-        let new_level = current_level;
-        const SRS_INTERVALS = [0, 1, 3, 7, 14, 30, 90, 180];
-        
-        if (kategori_terakhir === 'easy') new_level += 2;
-        else if (kategori_terakhir === 'medium') new_level += 1;
-        else if (kategori_terakhir === 'hard') new_level += 0;
-        else if (kategori_terakhir === 'very_hard') new_level = Math.max(0, new_level - 1);
-        else if (kategori_terakhir === 'again') new_level = 0;
-
-        new_level = Math.min(new_level, SRS_INTERVALS.length - 1);
-        let interval_hari = SRS_INTERVALS[new_level];
-        if (kategori_terakhir === 'hard') interval_hari = 1;
-
-        const next_review_date = new Date();
-        next_review_date.setDate(next_review_date.getDate() + interval_hari);
-
-        // 5. Simpan Jadwal Review
-        if (check.rows.length > 0) {
-            await db.query('UPDATE srs_reviews SET srs_level = $1, next_review_date = $2, kategori_terakhir = $3 WHERE murid_id = $4 AND vocab_id = $5', [new_level, next_review_date, kategori_terakhir, murid_id, vocab_id]);
-        } else {
-            await db.query('INSERT INTO srs_reviews (murid_id, vocab_id, srs_level, next_review_date, kategori_terakhir) VALUES ($1, $2, $3, $4, $5)', [murid_id, vocab_id, new_level, next_review_date, kategori_terakhir]);
-        }
-
-        // 6. [BARU] LOGIKA GAMIFIKASI (MEMBERIKAN EXP & KOIN)
-        let exp_didapat = 0;
-        let koin_didapat = 0;
-
-        if (is_correct) {
-            // Reward turun jika menjawabnya lambat
-            if (kategori_terakhir === 'easy') { exp_didapat = 15; koin_didapat = 5; }
-            else if (kategori_terakhir === 'medium') { exp_didapat = 10; koin_didapat = 3; }
-            else if (kategori_terakhir === 'hard') { exp_didapat = 5; koin_didapat = 1; }
-            else if (kategori_terakhir === 'very_hard') { exp_didapat = 2; koin_didapat = 0; }
-
-            // PostgreSQL "ON CONFLICT": Jika dompet belum ada, buat baru. Jika sudah ada, tambahkan saldonya.
-            await db.query(`
-                INSERT INTO user_statistics (murid_id, total_exp_points, koin_dimiliki) 
-                VALUES ($1, $2, $3)
-                ON CONFLICT (murid_id) 
-                DO UPDATE SET 
-                    total_exp_points = user_statistics.total_exp_points + EXCLUDED.total_exp_points,
-                    koin_dimiliki = user_statistics.koin_dimiliki + EXCLUDED.koin_dimiliki
-            `, [murid_id, exp_didapat, koin_didapat]);
-        }
-
-        res.json({
-            message: 'Jawaban SRS berhasil dikirim!',
-            evaluasi_sistem: kategori_terakhir,
-            level_sekarang: new_level,
-            reward: {
-                exp: exp_didapat,
-                koin: koin_didapat
-            }
-        });
-
-    } catch (error) {
-        console.error('Error submitAnswer:', error.message);
-        res.status(500).json({ message: 'Gagal memproses SRS.' });
-    }
-};
-
-// Fungsi Mengambil Daftar Kosakata yang Harus Direview Hari Ini
+// 1. Mengambil Antrean Review (Mendukung filter per kelas dan perhitungan total untuk Dasbor)
 const getTodayReviews = async (req, res) => {
+    const muridId = req.user.id;
+    const courseId = req.query.course_id; 
+
     try {
-        const murid_id = req.user.id; // Diambil dari token JWT
+        if (courseId) {
+            // JIKA DIPANGGIL DARI DALAM KELAS: Ambil detail 50 kartu antrean teratas untuk kelas spesifik ini
+            const result = await db.query(`
+                SELECT sr.vocab_id, sr.arah_kuis, sr.srs_level, sr.avg_waktu_detik,
+                       v.kanji, v.furigana, v.arti_indonesia
+                FROM srs_reviews sr
+                JOIN vocabularies v ON sr.vocab_id = v.id
+                WHERE sr.murid_id = $1 
+                  AND v.course_id = $2
+                  AND sr.next_review_date <= CURRENT_TIMESTAMP
+                ORDER BY sr.next_review_date ASC
+                LIMIT 50
+            `, [muridId, courseId]);
 
-        // Menggabungkan tabel vocabularies dan srs_reviews
-        // Syarat: Milik murid ini, dan tanggal reviewnya sudah lewat atau sama dengan detik ini
-        const query = `
-            SELECT v.id AS vocab_id, v.kanji, v.furigana, v.arti_indonesia, 
-                   s.srs_level, s.next_review_date, s.kategori_terakhir
-            FROM vocabularies v
-            JOIN srs_reviews s ON v.id = s.vocab_id
-            WHERE s.murid_id = $1 AND s.next_review_date <= NOW()
-            ORDER BY s.next_review_date ASC
-        `;
-
-        const result = await db.query(query, [murid_id]);
-
-        res.status(200).json({
-            message: 'Berhasil memuat antrean SRS hari ini 🐿️',
-            jumlah_antrean: result.rows.length,
-            data: result.rows
-        });
-
+            res.json({ jumlah_antrean: result.rows.length, data: result.rows });
+        } else {
+            // JIKA DIPANGGIL DARI DASBOR (Tanpa course_id): Hanya hitung total jumlah review dari semua kelas
+            const result = await db.query(`
+                SELECT count(sr.id) as total
+                FROM srs_reviews sr
+                WHERE sr.murid_id = $1 AND sr.next_review_date <= CURRENT_TIMESTAMP
+            `, [muridId]);
+            res.json({ jumlah_antrean: parseInt(result.rows[0].total) });
+        }
     } catch (error) {
-        console.error('Error getTodayReviews:', error.message);
-        res.status(500).json({ message: 'Gagal mengambil daftar review.' });
+        console.error('Error muat SRS:', error.message);
+        res.status(500).json({ message: 'Gagal memuat antrean kuis.' });
     }
 };
 
-// PENTING: Update baris ekspor menjadi seperti ini:
-module.exports = { submitAnswer, getTodayReviews };
+// 2. Menerima Jawaban Murid dan Menghitung Rata-Rata Waktu per Arah
+const submitReview = async (req, res) => {
+    const muridId = req.user.id;
+    const { vocab_id, arah_kuis, is_correct, waktu_jawab_detik } = req.body;
+
+    try {
+        // Ambil data progres spesifik untuk 1 arah kuis
+        const currentSrs = await db.query(
+            'SELECT srs_level, total_review, avg_waktu_detik FROM srs_reviews WHERE murid_id = $1 AND vocab_id = $2 AND arah_kuis = $3',
+            [muridId, vocab_id, arah_kuis]
+        );
+
+        if (currentSrs.rows.length === 0) return res.status(404).json({ message: 'Data SRS tidak ditemukan.' });
+
+        let { srs_level, total_review, avg_waktu_detik } = currentSrs.rows[0];
+        
+        // Kalkulasi Cerdas: Memperbarui Rata-rata Waktu Menjawab
+        let newTotalReview = total_review + 1;
+        let newAvgWaktu = ((parseFloat(avg_waktu_detik) * total_review) + waktu_jawab_detik) / newTotalReview;
+
+        let intervalMinutes = 0;
+        let statusCat = 'again';
+        let expReward = 0;
+        let koinReward = 0;
+
+        if (is_correct) {
+            srs_level += 1;
+            statusCat = 'good';
+            expReward = 5 + srs_level; // EXP bertambah seiring tingginya level memori
+            koinReward = 2; // Koin lebih kecil karena 1 kata dipecah jadi 6 arah
+
+            // Algoritma Interval (10m, 12j, 1h, 3h, 7h, 15h, 30h)
+            const intervals = [0, 10, 720, 1440, 4320, 10080, 21600, 43200]; 
+            intervalMinutes = srs_level < intervals.length ? intervals[srs_level] : 43200; 
+        } else {
+            srs_level = Math.max(0, srs_level - 1);
+            intervalMinutes = 1; // Turun level, ulangi 1 menit lagi
+            expReward = 1; 
+            koinReward = 0;
+        }
+
+        // Simpan pembaruan progres spesifik untuk arah ini
+        await db.query(`
+            UPDATE srs_reviews 
+            SET srs_level = $1, 
+                next_review_date = CURRENT_TIMESTAMP + ($2 || ' minutes')::interval,
+                kategori_terakhir = $3,
+                total_review = $4,
+                avg_waktu_detik = $5
+            WHERE murid_id = $6 AND vocab_id = $7 AND arah_kuis = $8
+        `, [srs_level, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
+
+        res.json({ message: 'Progres arah kuis disimpan.', reward: { exp: expReward, koin: koinReward } });
+    } catch (error) {
+        console.error('Error submit SRS:', error.message);
+        res.status(500).json({ message: 'Gagal menyimpan hasil review.' });
+    }
+};
+
+module.exports = { getTodayReviews, submitReview };

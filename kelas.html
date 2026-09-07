@@ -133,7 +133,6 @@
             document.getElementById('view-kurikulum').style.display = 'block';
             window.scrollTo(0, 0); 
             
-            // Tambahkan param ke URL secara visual agar murid merasa di halaman yang spesifik
             window.history.pushState(null, '', `kelas.html?course_id=${courseId}`);
 
             document.getElementById('kurikulum-accordion').innerHTML = "<div class='text-center fw-bold py-5'>Menyinkronkan data kurikulum...</div>";
@@ -152,12 +151,47 @@
                     btnEnroll.disabled = false;
                     btnEnroll.classList.remove('btn-secondary');
                     btnEnroll.classList.add('btn-enroll-success');
+                    btnEnroll.style.display = 'inline-block'; 
 
                     const wadah = document.getElementById('kurikulum-accordion');
                     wadah.innerHTML = "";
 
+                    // [BARU] INJEKSI UI SRS KHUSUS KELAS INI
+                    try {
+                        const srsRes = await fetch(`${API_URL}/srs/today?course_id=${courseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                        const srsData = await srsRes.json();
+                        
+                        if (srsRes.ok && srsData.data) {
+                            btnEnroll.style.display = 'none'; 
+                            
+                            const jumlahAntrean = srsData.jumlah_antrean;
+                            let htmlSrsInfo = "";
+                            
+                            if (jumlahAntrean > 0) {
+                                htmlSrsInfo = `
+                                    <div class="alert alert-warning border border-warning rounded-4 shadow-sm mb-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
+                                        <div class="mb-3 mb-md-0 text-center text-md-start">
+                                            <h5 class="fw-bold mb-1" style="color: var(--korisu-orange);">🔥 Waktunya Mempertajam Memori!</h5>
+                                            <p class="mb-0 text-dark">Ada <strong>${jumlahAntrean} evaluasi 6-Arah</strong> menunggu untuk direview.</p>
+                                        </div>
+                                        <button class="btn btn-korisu-solid px-4 fs-5" onclick="window.location.href='kuis.html?course_id=${courseId}'">Mulai Kuis 🚀</button>
+                                    </div>
+                                `;
+                            } else {
+                                htmlSrsInfo = `
+                                    <div class="alert alert-success border border-success rounded-4 shadow-sm mb-4 text-center text-md-start">
+                                        <h5 class="fw-bold mb-1 text-success">✅ Memori Kelas Ini Aman!</h5>
+                                        <p class="mb-0 text-dark">Tidak ada jadwal evaluasi kosakata sekarang. Silakan lanjut menonton video materi.</p>
+                                    </div>
+                                `;
+                            }
+                            wadah.innerHTML = htmlSrsInfo;
+                        }
+                    } catch (e) { console.log("Gagal memuat info SRS"); }
+                    // [AKHIR INJEKSI SRS]
+
                     if(course.modules.length === 0) {
-                        wadah.innerHTML = "<div class='alert alert-warning border-0 fw-bold text-center rounded-4 p-4'>Materi untuk kelas ini sedang disiapkan oleh Sensei.</div>";
+                        wadah.innerHTML += "<div class='alert alert-warning border-0 fw-bold text-center rounded-4 p-4'>Materi untuk kelas ini sedang disiapkan oleh Sensei.</div>";
                         return;
                     }
 
@@ -165,7 +199,6 @@
                         let htmlLessons = "";
                         modul.lessons.forEach(lesson => {
                             let icon = lesson.tipe_lesson.includes('video') ? '🎥' : '📝';
-                            // PERBAIKAN: Tambahkan course_id ke link video player
                             htmlLessons += `
                                 <div class="lesson-item" onclick="window.location.href='video-player.html?id=${lesson.id}&course_id=${course.id}'">
                                     <div class="lesson-icon">${icon}</div>
@@ -216,6 +249,7 @@
                     btn.innerText = "✅ Kelas Sudah Diikuti";
                     btn.classList.remove('btn-enroll-success');
                     btn.classList.add('btn-secondary'); 
+                    setTimeout(() => bukaKurikulum(activeCourseId), 1000); // Reload kelas setelah daftar agar muncul SRS
                 } else {
                     btn.innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
                     btn.disabled = false;
@@ -230,12 +264,11 @@
         function kembaliKeKatalog() {
             document.getElementById('view-kurikulum').style.display = 'none';
             document.getElementById('view-katalog').style.display = 'block';
-            window.history.pushState(null, '', 'kelas.html'); // Bersihkan URL
+            window.history.pushState(null, '', 'kelas.html'); 
         }
 
-        // PERBAIKAN: Deteksi otomatis apakah ada course_id di URL saat pertama dibuka
         document.addEventListener('DOMContentLoaded', () => {
-            muatKatalog(); // Muat katalog di background
+            muatKatalog(); 
             const urlParams = new URLSearchParams(window.location.search);
             const autoCourseId = urlParams.get('course_id');
             if (autoCourseId) {

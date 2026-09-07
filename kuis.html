@@ -186,7 +186,7 @@
                 <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
                 <span class="d-none d-sm-inline">KORISU Gakkou</span>
             </a>
-            <button class="btn-nav-outline" onclick="window.location.href='dashboard.html'">Kembali ke Dasbor</button>
+            <button class="btn-nav-outline" onclick="kembaliKeKelas()">Kembali ke Kelas</button>
         </div>
     </nav>
 
@@ -236,7 +236,15 @@
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetCourseId = urlParams.get('course_id');
+
         if (!TOKEN_SAYA) window.location.href = "auth.html";
+        if (!targetCourseId) window.location.href = "kelas.html";
+
+        function kembaliKeKelas() {
+            window.location.href = `kelas.html?course_id=${targetCourseId}`;
+        }
 
         let antreanSoal = [];
         let indeksSaatIni = 0;
@@ -247,21 +255,22 @@
         let kunciJawabanSaatIni = ""; 
         let vocabSaatIni = null;
 
-        // 1. Ambil Antrean Soal
+        // 1. Ambil Antrean Soal KHUSUS KELAS INI
         async function mulaiSesiSRS() {
             try {
-                const res = await fetch(`${API_URL}/srs/today`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` } });
+                const res = await fetch(`${API_URL}/srs/today?course_id=${targetCourseId}`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` } });
                 const data = await res.json();
                 
                 if(data.data && data.data.length > 0) {
                     antreanSoal = data.data;
+                    indeksSaatIni = 0; 
                     tampilkanSoal(0);
                 } else {
                     document.querySelector('.flashcard-modern').innerHTML = `
                         <h1 class="mb-3" style="font-size: 5rem;">🎉</h1>
-                        <h3 class="fw-bold mb-3 text-dark">Misi Selesai!</h3>
-                        <p class="text-muted fs-5 mb-4">Kamu telah menuntaskan seluruh review kosakata hari ini. Istirahatlah sejenak!</p>
-                        <button onclick="window.location.href='dashboard.html'" class="btn-korisu-solid">Kembali ke Dasbor</button>
+                        <h3 class="fw-bold mb-3 text-dark">Luar Biasa!</h3>
+                        <p class="text-muted fs-5 mb-4">Tidak ada review tersisa untuk kelas ini sekarang. Kosakatamu sudah menempel di otak!</p>
+                        <button onclick="window.location.href='kelas.html?course_id=${targetCourseId}'" class="btn-korisu-solid">Kembali ke Kurikulum</button>
                     `;
                 }
             } catch (error) {
@@ -269,12 +278,12 @@
             }
         }
 
-        // 2. Tampilkan Soal (Diacak 6 Arah)
+        // 2. Tampilkan Soal (Arah sesuai database)
         function tampilkanSoal(indeks) {
             vocabSaatIni = antreanSoal[indeks];
             document.getElementById('progress-text').innerText = `${indeks + 1} / ${antreanSoal.length}`;
             
-            const modeKuis = Math.floor(Math.random() * 6) + 1;
+            const modeKuis = parseInt(vocabSaatIni.arah_kuis);
             let soalTeks = "";
             let instruksi = "";
             let fieldTarget = ""; 
@@ -318,12 +327,19 @@
                     kunciJawabanSaatIni = furiganaAman;
                     fieldTarget = "furigana";
                     break;
+                default: 
+                    instruksi = "Pilih Arti Bahasa Indonesianya";
+                    soalTeks = vocabSaatIni.kanji;
+                    kunciJawabanSaatIni = vocabSaatIni.arti_indonesia;
+                    fieldTarget = "arti_indonesia";
             }
 
             document.getElementById('instruksi-soal').innerText = instruksi;
             document.getElementById('soal-ditampilkan').innerText = soalTeks;
             
-            document.getElementById('info-kanji').innerText = vocabSaatIni.kanji;
+            let statInfo = `📈 Level Kekuatan: ${vocabSaatIni.srs_level || 0} | ⏱️ Avg: ${vocabSaatIni.avg_waktu_detik || 0}s`;
+            
+            document.getElementById('info-kanji').innerHTML = `${vocabSaatIni.kanji} <br><small class="text-muted fw-normal">${statInfo}</small>`;
             document.getElementById('info-furi').innerText = furiganaAman;
             document.getElementById('info-arti').innerText = vocabSaatIni.arti_indonesia;
 
@@ -396,11 +412,12 @@
             });
         }
 
-        // 3. Evaluasi Jawaban
+        // 3. Evaluasi Jawaban & Kirim Data Arah ke Server
         async function cekJawaban(jawabanUser, btnId) {
             clearInterval(timerInterval);
             const detikDihabiskan = Math.round((Date.now() - waktuMulai) / 1000);
             const vocabId = vocabSaatIni.vocab_id;
+            const arahSpesifik = vocabSaatIni.arah_kuis; 
             const isBenar = (jawabanUser === kunciJawabanSaatIni);
 
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
@@ -420,7 +437,12 @@
                 const res = await fetch(`${API_URL}/srs/submit`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_SAYA}` },
-                    body: JSON.stringify({ vocab_id: vocabId, waktu_jawab_detik: detikDihabiskan, is_correct: isBenar })
+                    body: JSON.stringify({ 
+                        vocab_id: vocabId, 
+                        arah_kuis: arahSpesifik, 
+                        waktu_jawab_detik: detikDihabiskan, 
+                        is_correct: isBenar 
+                    })
                 });
                 
                 const hasilBackend = await res.json();
@@ -444,7 +466,7 @@
                     } else {
                         document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat`;
                         document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
-                        document.getElementById('reward-text').innerText = `Tidak apa-apa, kita review lagi nanti!`;
+                        document.getElementById('reward-text').innerText = `Tidak apa-apa, arah memori ini akan direview ulang segera!`;
                     }
                     
                     document.getElementById('btn-lanjut').focus(); 
