@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment, getNotifications, markNotificationsRead } = require('../controllers/communityController');
+const { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment, editComment, deleteComment, getNotifications, markNotificationsRead } = require('../controllers/communityController');
 const { protect } = require('../middlewares/authMiddleware');
 
 router.get('/posts', protect, getPosts);
@@ -12,7 +12,10 @@ router.post('/like', protect, toggleLike);
 router.get('/comments/:post_id', protect, getComments);
 router.post('/comment', protect, addComment);
 
-// [BARU] Rute API Notifikasi
+// [BARU] Rute API Komentar CRUD
+router.put('/comment/:id', protect, editComment);
+router.delete('/comment/:id', protect, deleteComment);
+
 router.get('/notifications', protect, getNotifications);
 router.post('/notifications/read', protect, markNotificationsRead);
 

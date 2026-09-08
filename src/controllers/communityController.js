@@ -63,10 +63,11 @@ const toggleLike = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+// [PERBAIKAN] Tambahkan c.user_id agar frontend tahu siapa penulis komentar ini
 const getComments = async (req, res) => {
     try {
         const result = await db.query(`
-            SELECT c.id, c.parent_id, c.komentar, c.created_at, u.nama_lengkap, u.role
+            SELECT c.id, c.parent_id, c.user_id, c.komentar, c.created_at, u.nama_lengkap, u.role
             FROM community_comments c
             JOIN users u ON c.user_id = u.id
             WHERE c.post_id = $1
@@ -76,37 +77,55 @@ const getComments = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [PERBAIKAN] Deteksi Mention (@) dan Kirim Notifikasi
 const addComment = async (req, res) => {
     const { post_id, komentar, parent_id } = req.body;
     if (!komentar) return res.status(400).json({ message: 'Komentar kosong.' });
     try {
-        await db.query(
-            'INSERT INTO community_comments (post_id, user_id, komentar, parent_id) VALUES ($1, $2, $3, $4)', 
-            [post_id, req.user.id, komentar, parent_id || null]
-        );
-
-        // Mesin Pendeteksi Mention: Mengekstrak nama setelah tanda '@'
+        await db.query('INSERT INTO community_comments (post_id, user_id, komentar, parent_id) VALUES ($1, $2, $3, $4)', [post_id, req.user.id, komentar, parent_id || null]);
+        
         const mentionMatch = komentar.match(/@([a-zA-Z0-9_ ]+)/);
         if (mentionMatch) {
             let namaMention = mentionMatch[1].trim();
-            // Cari ID user yang disebutkan (menggunakan ILIKE untuk kecocokan parsial)
             const userRes = await db.query('SELECT id FROM users WHERE nama_lengkap ILIKE $1 LIMIT 1', [`%${namaMention}%`]);
-            
-            // Jika user ditemukan dan dia tidak mention dirinya sendiri
             if (userRes.rows.length > 0 && userRes.rows[0].id !== req.user.id) {
-                await db.query(
-                    "INSERT INTO notifications (user_id, sender_id, type, post_id, message) VALUES ($1, $2, 'mention', $3, $4)",
-                    [userRes.rows[0].id, req.user.id, post_id, 'membalas dan menyebut Anda di komunitas.']
-                );
+                await db.query("INSERT INTO notifications (user_id, sender_id, type, post_id, message) VALUES ($1, $2, 'mention', $3, $4)", [userRes.rows[0].id, req.user.id, post_id, 'membalas dan menyebut Anda di komunitas.']);
             }
         }
-
         res.status(201).json({ message: 'Komentar dikirim!' });
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [BARU] Mengambil Daftar Notifikasi
+// [BARU] Logika Edit Komentar
+const editComment = async (req, res) => {
+    const { id } = req.params;
+    const { komentar } = req.body;
+    try {
+        const comment = await db.query('SELECT user_id FROM community_comments WHERE id = $1', [id]);
+        if (comment.rows.length === 0) return res.status(404).json({ message: 'Komentar tidak ditemukan.' });
+        if (comment.rows[0].user_id !== req.user.id) return res.status(403).json({ message: 'Akses ditolak.' });
+
+        await db.query('UPDATE community_comments SET komentar = $1 WHERE id = $2', [komentar, id]);
+        res.json({ message: 'Komentar diperbarui! ✅' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+// [BARU] Logika Hapus Komentar
+const deleteComment = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const comment = await db.query('SELECT user_id FROM community_comments WHERE id = $1', [id]);
+        if (comment.rows.length === 0) return res.status(404).json({ message: 'Komentar tidak ditemukan.' });
+        
+        // Hanya penulis atau Admin/Sensei yang boleh menghapus
+        if (comment.rows[0].user_id !== req.user.id && req.user.role !== 'sensei' && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Akses ditolak.' });
+        }
+
+        await db.query('DELETE FROM community_comments WHERE id = $1', [id]);
+        res.json({ message: 'Komentar dihapus! 🗑️' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 const getNotifications = async (req, res) => {
     try {
         const result = await db.query(`
@@ -120,7 +139,6 @@ const getNotifications = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [BARU] Menandai Notifikasi Telah Dibaca
 const markNotificationsRead = async (req, res) => {
     try {
         await db.query('UPDATE notifications SET is_read = true WHERE user_id = $1', [req.user.id]);
@@ -128,4 +146,4 @@ const markNotificationsRead = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-module.exports = { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment, getNotifications, markNotificationsRead };
+module.exports = { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment, editComment, deleteComment, getNotifications, markNotificationsRead };
