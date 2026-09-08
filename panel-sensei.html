@@ -25,7 +25,7 @@
         .btn-korisu-solid { background-color: var(--korisu-black); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 20px; transition: all 0.3s; width: 100%; }
         .btn-korisu-solid:hover:not(:disabled) { background-color: var(--korisu-orange); color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
         
-        /* Tombol Update & Delete */
+        /* Tombol Update & Delete (Posisi Bersebelahan) */
         .btn-edit-mode { background-color: #0d6efd; color: white; flex: 2; }
         .btn-edit-mode:hover:not(:disabled) { background-color: #0b5ed7; box-shadow: 0 8px 20px rgba(13, 110, 253, 0.25); }
         .btn-delete-mode { background-color: #dc3545; color: white; flex: 1; }
@@ -65,44 +65,24 @@
                     <div class="card-panel">
                         <h4 class="fw-bold mb-4 text-dark">🎓 1. Buat Kelas Baru</h4>
                         <form id="form-course" class="d-flex flex-column flex-grow-1">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Judul Kelas</label>
-                                <input type="text" id="c-judul" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Thumbnail (Emoji)</label>
-                                <input type="text" id="c-thumb" class="form-control" required>
-                            </div>
-                            <div class="mb-4 flex-grow-1">
-                                <label class="form-label fw-bold">Deskripsi</label>
-                                <textarea id="c-desc" class="form-control h-100" style="min-height: 80px;" required></textarea>
-                            </div>
+                            <div class="mb-3"><label class="form-label fw-bold">Judul Kelas</label><input type="text" id="c-judul" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Thumbnail (Emoji)</label><input type="text" id="c-thumb" class="form-control" required></div>
+                            <div class="mb-4 flex-grow-1"><label class="form-label fw-bold">Deskripsi</label><textarea id="c-desc" class="form-control h-100" style="min-height: 80px;" required></textarea></div>
                             <button type="submit" id="btn-submit-course" class="btn-korisu-solid mt-auto">TERBITKAN KELAS</button>
                         </form>
                     </div>
                 </div>
 
-                <!-- 2. EDIT / HAPUS KELAS (BARU) -->
+                <!-- 2. EDIT / HAPUS KELAS -->
                 <div class="col-lg-6 mb-4">
                     <div class="card-panel border-primary" style="border-width: 2px;">
                         <h4 class="fw-bold mb-4 text-primary">⚙️ 2. Edit / Hapus Kelas</h4>
                         <form id="form-edit-course" class="d-flex flex-column flex-grow-1">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Pilih Kelas</label>
-                                <select id="ec-course-id" class="form-select border-primary dropdown-kelas" onchange="tarikDataCourse(this.value)" required></select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Revisi Judul</label>
-                                <input type="text" id="ec-judul" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Revisi Thumbnail</label>
-                                <input type="text" id="ec-thumb" class="form-control" required>
-                            </div>
-                            <div class="mb-4 flex-grow-1">
-                                <label class="form-label fw-bold">Revisi Deskripsi</label>
-                                <textarea id="ec-desc" class="form-control h-100" style="min-height: 80px;" required></textarea>
-                            </div>
+                            <div class="mb-3"><label class="form-label fw-bold">Pilih Kelas</label><select id="ec-course-id" class="form-select border-primary dropdown-kelas" onchange="tarikDataCourse(this.value)" required></select></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Revisi Judul</label><input type="text" id="ec-judul" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Revisi Thumbnail</label><input type="text" id="ec-thumb" class="form-control" required></div>
+                            <div class="mb-4 flex-grow-1"><label class="form-label fw-bold">Revisi Deskripsi</label><textarea id="ec-desc" class="form-control h-100" style="min-height: 80px;" required></textarea></div>
+                            
                             <div class="d-flex gap-2 mt-auto">
                                 <button type="submit" id="btn-submit-edit-course" class="btn-korisu-solid btn-edit-mode">UPDATE KELAS</button>
                                 <button type="button" onclick="hapusCourse()" class="btn-korisu-solid btn-delete-mode">HAPUS</button>
@@ -116,18 +96,9 @@
                     <div class="card-panel">
                         <h4 class="fw-bold mb-4 text-dark">📂 3. Tambah Modul</h4>
                         <form id="form-module" class="d-flex flex-column flex-grow-1">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Pilih Kelas</label>
-                                <select id="m-course-id" class="form-select dropdown-kelas" required></select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Judul Modul</label>
-                                <input type="text" id="m-judul" class="form-control" required>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Urutan Modul</label>
-                                <input type="number" id="m-urutan" class="form-control" required>
-                            </div>
+                            <div class="mb-3"><label class="form-label fw-bold">Pilih Kelas</label><select id="m-course-id" class="form-select dropdown-kelas" required></select></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Judul Modul</label><input type="text" id="m-judul" class="form-control" required></div>
+                            <div class="mb-4"><label class="form-label fw-bold">Urutan Modul</label><input type="number" id="m-urutan" class="form-control" required></div>
                             <button type="submit" id="btn-submit-module" class="btn-korisu-solid mt-auto">SIMPAN MODUL</button>
                         </form>
                     </div>
@@ -138,22 +109,11 @@
                     <div class="card-panel border-primary" style="border-width: 2px;">
                         <h4 class="fw-bold mb-4 text-primary">✏️ 4. Edit / Hapus Modul</h4>
                         <form id="form-edit-module" class="d-flex flex-column flex-grow-1">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Pilih Kelas</label>
-                                <select class="form-select dropdown-kelas" onchange="muatDropdownModul(this.value, 'em-module-id')" required></select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Pilih Modul</label>
-                                <select id="em-module-id" class="form-select border-primary" required></select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Revisi Judul</label>
-                                <input type="text" id="em-judul" class="form-control" required>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Revisi Urutan</label>
-                                <input type="number" id="em-urutan" class="form-control" required>
-                            </div>
+                            <div class="mb-3"><label class="form-label fw-bold">Pilih Kelas</label><select class="form-select dropdown-kelas" onchange="muatDropdownModul(this.value, 'em-module-id')" required></select></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Pilih Modul</label><select id="em-module-id" class="form-select border-primary" required></select></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Revisi Judul</label><input type="text" id="em-judul" class="form-control" required></div>
+                            <div class="mb-4"><label class="form-label fw-bold">Revisi Urutan</label><input type="number" id="em-urutan" class="form-control" required></div>
+                            
                             <div class="d-flex gap-2 mt-auto">
                                 <button type="submit" id="btn-submit-edit-module" class="btn-korisu-solid btn-edit-mode">UPDATE MODUL</button>
                                 <button type="button" onclick="hapusModule()" class="btn-korisu-solid btn-delete-mode">HAPUS</button>
@@ -242,6 +202,59 @@
                     </div>
                 </div>
 
+                <!-- 9. TAMBAH ITEM TOKO (YANG SEMPAT HILANG) -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel">
+                        <h4 class="fw-bold mb-4 text-dark">🏪 9. Tambah Item Toko</h4>
+                        <form id="form-shop" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Nama Item</label>
+                                <input type="text" id="s-nama" class="form-control" placeholder="Contoh: Dorayaki Coklat" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Tipe Item</label>
+                                    <select id="s-tipe" class="form-select" required>
+                                        <option value="makanan">Makanan (+Mood)</option>
+                                        <option value="aksesoris">Aksesoris Maskot</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Harga (Koin)</label>
+                                    <input type="number" id="s-harga" class="form-control" placeholder="15" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Ikon Emoji</label>
+                                <input type="text" id="s-ikon" class="form-control" placeholder="Contoh: 🥞" required>
+                            </div>
+                            <button type="submit" id="btn-submit-shop" class="btn-korisu-solid mt-auto">MASUKKAN KE ETALASE</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 10. TAMBAH QUOTE (YANG SEMPAT HILANG) -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel">
+                        <h4 class="fw-bold mb-4 text-dark">🌸 10. Tambah Pepatah</h4>
+                        <form id="form-quote" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Teks Jepang</label>
+                                <input type="text" id="q-teks" class="form-control" placeholder="頑張って" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Cara Baca Romaji</label>
+                                <input type="text" id="q-baca" class="form-control" placeholder="Ganbatte">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Arti Indonesia</label>
+                                <input type="text" id="q-arti" class="form-control" placeholder="Semangat!" required>
+                            </div>
+                            <button type="submit" id="btn-submit-quote" class="btn-korisu-solid mt-auto">SIMPAN PEPATAH</button>
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -272,7 +285,7 @@
                     select.innerHTML = '<option value="">-- Pilih Kelas --</option>';
                     masterKatalog.forEach(course => { select.innerHTML += `<option value="${course.id}">${course.judul_course}</option>`; });
                 });
-            } catch (error) { console.error(error); }
+            } catch (error) {}
         }
 
         async function muatDropdownModul(courseId, targetId) {
@@ -312,7 +325,7 @@
             } catch (error) {}
         }
 
-        // FUNGSI TARIK DATA LAMA
+        // PENARIKAN DATA
         function tarikDataCourse(courseId) {
             if(!courseId) return;
             const course = masterKatalog.find(c => c.id == courseId);
@@ -344,56 +357,42 @@
             }
         }
 
-        // FUNGSI EKSEKUSI UPDATE
-        document.getElementById('form-edit-course').addEventListener('submit', async (e) => {
-            e.preventDefault(); const id = document.getElementById('ec-course-id').value;
-            if(!id) return alert('Pilih kelas!');
-            await jalankanFetch(`${API_URL}/courses/${id}/edit`, 'PUT', { judul_course: document.getElementById('ec-judul').value, thumbnail_url: document.getElementById('ec-thumb').value, deskripsi: document.getElementById('ec-desc').value });
-            muatDropdownKatalogUniversal();
-        });
-        document.getElementById('form-edit-module').addEventListener('submit', async (e) => {
-            e.preventDefault(); const id = document.getElementById('em-module-id').value;
-            await jalankanFetch(`${API_URL}/courses/modules/${id}/edit`, 'PUT', { judul_modul: document.getElementById('em-judul').value, urutan_modul: parseInt(document.getElementById('em-urutan').value) });
-        });
-        document.getElementById('form-edit-lesson').addEventListener('submit', async (e) => {
-            e.preventDefault(); const id = document.getElementById('el-lesson-id').value;
-            let d = editorMateriLama.root.innerHTML; if(d === '<p><br></p>') d = '';
-            await jalankanFetch(`${API_URL}/courses/lessons/${id}/edit`, 'PUT', { judul_materi: document.getElementById('el-judul').value, deskripsi: d, konten_url: document.getElementById('el-url').value, tipe_lesson: document.getElementById('el-tipe').value, urutan_lesson: parseInt(document.getElementById('el-urutan').value) });
-        });
-        document.getElementById('form-edit-vocab').addEventListener('submit', async (e) => {
-            e.preventDefault(); const id = document.getElementById('ev-vocab-id').value;
-            await jalankanFetch(`${API_URL}/vocabulary/${id}/edit`, 'PUT', { kanji: document.getElementById('ev-kanji').value, furigana: document.getElementById('ev-furigana').value, arti_indonesia: document.getElementById('ev-arti').value });
-            muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id');
+        // EKSEKUSI UPDATE
+        document.getElementById('form-edit-course').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('ec-course-id').value; if(!id) return alert('Pilih kelas!'); await jalankanFetch(`${API_URL}/courses/${id}/edit`, 'PUT', { judul_course: document.getElementById('ec-judul').value, thumbnail_url: document.getElementById('ec-thumb').value, deskripsi: document.getElementById('ec-desc').value }); muatDropdownKatalogUniversal(); });
+        document.getElementById('form-edit-module').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('em-module-id').value; await jalankanFetch(`${API_URL}/courses/modules/${id}/edit`, 'PUT', { judul_modul: document.getElementById('em-judul').value, urutan_modul: parseInt(document.getElementById('em-urutan').value) }); });
+        document.getElementById('form-edit-lesson').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('el-lesson-id').value; let d = editorMateriLama.root.innerHTML; if(d === '<p><br></p>') d = ''; await jalankanFetch(`${API_URL}/courses/lessons/${id}/edit`, 'PUT', { judul_materi: document.getElementById('el-judul').value, deskripsi: d, konten_url: document.getElementById('el-url').value, tipe_lesson: document.getElementById('el-tipe').value, urutan_lesson: parseInt(document.getElementById('el-urutan').value) }); });
+        document.getElementById('form-edit-vocab').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('ev-vocab-id').value; await jalankanFetch(`${API_URL}/vocabulary/${id}/edit`, 'PUT', { kanji: document.getElementById('ev-kanji').value, furigana: document.getElementById('ev-furigana').value, arti_indonesia: document.getElementById('ev-arti').value }); muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id'); });
+
+        // EKSEKUSI DELETE
+        async function hapusCourse() { const id = document.getElementById('ec-course-id').value; if(!id) return alert("Pilih kelas dulu!"); if(!confirm('⚠️ Menghapus Kelas otomatis menghapus Modul dan Materi di dalamnya! Yakin?')) return; await jalankanFetch(`${API_URL}/courses/${id}`, 'DELETE'); muatDropdownKatalogUniversal(); }
+        async function hapusModule() { const id = document.getElementById('em-module-id').value; if(!id) return alert("Pilih modul dulu!"); if(!confirm('Yakin menghapus Modul ini beserta isi materinya?')) return; await jalankanFetch(`${API_URL}/courses/modules/${id}`, 'DELETE'); }
+        async function hapusLesson() { const id = document.getElementById('el-lesson-id').value; if(!id) return alert("Pilih materi dulu!"); if(!confirm('Yakin menghapus Materi ini secara permanen?')) return; await jalankanFetch(`${API_URL}/courses/lessons/${id}`, 'DELETE'); }
+        async function hapusVocab() { const id = document.getElementById('ev-vocab-id').value; if(!id) return alert("Pilih kosakata dulu!"); if(!confirm('Yakin menghapus kosakata ini? (Otomatis terhapus dari jadwal murid juga)')) return; await jalankanFetch(`${API_URL}/vocabulary/${id}`, 'DELETE'); muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id'); }
+
+        // EKSEKUSI CREATE (TERMASUK SHOP & QUOTES YANG HILANG)
+        document.getElementById('form-course').addEventListener('submit', async (e) => { e.preventDefault(); await jalankanFetch(`${API_URL}/courses/add`, 'POST', { judul_course: document.getElementById('c-judul').value, thumbnail_url: document.getElementById('c-thumb').value, deskripsi: document.getElementById('c-desc').value }); document.getElementById('form-course').reset(); muatDropdownKatalogUniversal(); });
+        document.getElementById('form-module').addEventListener('submit', async (e) => { e.preventDefault(); await jalankanFetch(`${API_URL}/courses/modules/add`, 'POST', { course_id: document.getElementById('m-course-id').value, judul_modul: document.getElementById('m-judul').value, urutan_modul: parseInt(document.getElementById('m-urutan').value) }); document.getElementById('m-judul').value = ""; document.getElementById('m-urutan').value = ""; });
+        document.getElementById('form-lesson').addEventListener('submit', async (e) => { e.preventDefault(); let d = editorMateriBaru.root.innerHTML; if(d === '<p><br></p>') d = ''; await jalankanFetch(`${API_URL}/courses/lessons/add`, 'POST', { module_id: document.getElementById('l-module-id').value, judul_materi: document.getElementById('l-judul').value, deskripsi: d, konten_url: document.getElementById('l-url').value, tipe_lesson: document.getElementById('l-tipe').value, urutan_lesson: parseInt(document.getElementById('l-urutan').value) }); document.getElementById('form-lesson').reset(); editorMateriBaru.root.innerHTML = ''; });
+        document.getElementById('form-vocab-bulk').addEventListener('submit', async (e) => { e.preventDefault(); const cId = document.getElementById('v-course-id').value; const raw = document.getElementById('v-bulk-input').value; const arr = raw.split('\n').map(b=>b.trim()).filter(b=>b).map(b=>{const k=b.split(','); return k.length>=3?{kanji:k[0].trim(),furigana:k[1].trim(),arti_indonesia:k[2].trim()}:null}); if(arr.includes(null)) return alert("Format baris harus pakai koma!"); await jalankanFetch(`${API_URL}/vocabulary/bulk-add`, 'POST', { vocabularies: arr, course_id: cId }); document.getElementById('v-bulk-input').value = ""; });
+        
+        // KEMBALI DIMASUKKAN
+        document.getElementById('form-shop').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`${API_URL}/shop/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                body: JSON.stringify({ nama_item: document.getElementById('s-nama').value, tipe_item: document.getElementById('s-tipe').value, harga_koin: parseInt(document.getElementById('s-harga').value), image_url: document.getElementById('s-ikon').value }) });
+                if(res.ok) { alert("✅ Item toko ditambahkan!"); document.getElementById('form-shop').reset(); }
+            } catch(e){}
         });
 
-        // FUNGSI EKSEKUSI DELETE
-        async function hapusCourse() {
-            const id = document.getElementById('ec-course-id').value; if(!id) return;
-            if(!confirm('⚠️ PERINGATAN: Menghapus Kelas akan otomatis menghapus SELURUH Modul dan Materi di dalamnya! Yakin?')) return;
-            await jalankanFetch(`${API_URL}/courses/${id}`, 'DELETE'); muatDropdownKatalogUniversal();
-        }
-        async function hapusModule() {
-            const id = document.getElementById('em-module-id').value; if(!id) return;
-            if(!confirm('Yakin ingin menghapus Modul ini beserta isi materinya?')) return;
-            await jalankanFetch(`${API_URL}/courses/modules/${id}`, 'DELETE');
-        }
-        async function hapusLesson() {
-            const id = document.getElementById('el-lesson-id').value; if(!id) return;
-            if(!confirm('Yakin ingin menghapus Materi ini secara permanen?')) return;
-            await jalankanFetch(`${API_URL}/courses/lessons/${id}`, 'DELETE');
-        }
-        async function hapusVocab() {
-            const id = document.getElementById('ev-vocab-id').value; if(!id) return;
-            if(!confirm('Yakin menghapus kosakata ini? (Otomatis terhapus dari SRS murid juga)')) return;
-            await jalankanFetch(`${API_URL}/vocabulary/${id}`, 'DELETE');
-            muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id');
-        }
-
-        // FUNGSI EKSEKUSI CREATE TETAP SAMA SEPERTI SEBELUMNYA
-        document.getElementById('form-course').addEventListener('submit', async (e) => { e.preventDefault(); await jalankanFetch(`${API_URL}/courses/add`, 'POST', { judul_course: document.getElementById('c-judul').value, thumbnail_url: document.getElementById('c-thumb').value, deskripsi: document.getElementById('c-desc').value }); muatDropdownKatalogUniversal(); });
-        document.getElementById('form-module').addEventListener('submit', async (e) => { e.preventDefault(); await jalankanFetch(`${API_URL}/courses/modules/add`, 'POST', { course_id: document.getElementById('m-course-id').value, judul_modul: document.getElementById('m-judul').value, urutan_modul: parseInt(document.getElementById('m-urutan').value) }); });
-        document.getElementById('form-lesson').addEventListener('submit', async (e) => { e.preventDefault(); let d = editorMateriBaru.root.innerHTML; if(d === '<p><br></p>') d = ''; await jalankanFetch(`${API_URL}/courses/lessons/add`, 'POST', { module_id: document.getElementById('l-module-id').value, judul_materi: document.getElementById('l-judul').value, deskripsi: d, konten_url: document.getElementById('l-url').value, tipe_lesson: document.getElementById('l-tipe').value, urutan_lesson: parseInt(document.getElementById('l-urutan').value) }); editorMateriBaru.root.innerHTML = ''; });
-        document.getElementById('form-vocab-bulk').addEventListener('submit', async (e) => { e.preventDefault(); const cId = document.getElementById('v-course-id').value; const raw = document.getElementById('v-bulk-input').value; const arr = raw.split('\n').map(b=>b.trim()).filter(b=>b).map(b=>{const k=b.split(','); return k.length>=3?{kanji:k[0].trim(),furigana:k[1].trim(),arti_indonesia:k[2].trim()}:null}); if(arr.includes(null)) return alert("Format salah!"); await jalankanFetch(`${API_URL}/vocabulary/bulk-add`, 'POST', { vocabularies: arr, course_id: cId }); });
+        document.getElementById('form-quote').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`${API_URL}/quotes/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
+                body: JSON.stringify({ teks_jepang: document.getElementById('q-teks').value, cara_baca: document.getElementById('q-baca').value, arti_indonesia: document.getElementById('q-arti').value, sumber_tokoh: "Sensei", kategori_fokus: "motivasi" }) });
+                if(res.ok) { alert("✅ Quote ditambahkan!"); document.getElementById('form-quote').reset(); }
+            } catch(e){}
+        });
 
         // Helper API Caller
         async function jalankanFetch(url, method, bodyData = null) {
