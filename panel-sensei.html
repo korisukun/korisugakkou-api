@@ -194,7 +194,7 @@
                             <div id="nav-menu-sensei" style="display: none;">
                                 <li><hr class="dropdown-divider"></li>
                                 <li><h6 class="dropdown-header text-primary fw-bold">Administrator</h6></li>
-                                <li><a class="dropdown-item text-primary bg-light" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
+                                <li><a class="dropdown-item text-primary" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
                             </div>
                             
                             <li><hr class="dropdown-divider"></li>
@@ -413,6 +413,79 @@
                     </div>
                 </div>
 
+                <!-- 11. EDIT / HAPUS ITEM TOKO -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel border-primary" style="border-width: 2px;">
+                        <h4 class="fw-bold mb-4 text-primary">✏️ 11. Edit / Hapus Item Toko</h4>
+                        <form id="form-edit-shop" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Pilih Item Toko</label>
+                                <select id="es-item-id" class="form-select border-primary" onchange="tarikDataShop(this.value)" required>
+                                    <option value="">⏳ Memuat Etalase...</option>
+                                </select>
+                            </div>
+                            <hr class="mb-3">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Revisi Nama Item</label>
+                                <input type="text" id="es-nama" class="form-control" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Tipe Item</label>
+                                    <select id="es-tipe" class="form-select" required>
+                                        <option value="makanan">Makanan (+Mood)</option>
+                                        <option value="aksesoris">Aksesoris Maskot</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label fw-bold text-dark">Revisi Harga</label>
+                                    <input type="number" id="es-harga" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Revisi Ikon</label>
+                                <input type="text" id="es-ikon" class="form-control" required>
+                            </div>
+                            <div class="d-flex gap-2 mt-auto">
+                                <button type="submit" id="btn-submit-edit-shop" class="btn-korisu-solid btn-edit-mode">UPDATE ITEM</button>
+                                <button type="button" onclick="hapusShopItem()" class="btn-korisu-solid btn-delete-mode">HAPUS</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- 12. EDIT / HAPUS QUOTE -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card-panel border-primary" style="border-width: 2px;">
+                        <h4 class="fw-bold mb-4 text-primary">✏️ 12. Edit / Hapus Pepatah</h4>
+                        <form id="form-edit-quote" class="d-flex flex-column flex-grow-1">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Pilih Pepatah</label>
+                                <select id="eq-quote-id" class="form-select border-primary" onchange="tarikDataQuote(this.value)" required>
+                                    <option value="">⏳ Memuat Pepatah...</option>
+                                </select>
+                            </div>
+                            <hr class="mb-3">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Revisi Teks Jepang</label>
+                                <input type="text" id="eq-teks" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-dark">Revisi Cara Baca</label>
+                                <input type="text" id="eq-baca" class="form-control">
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark">Revisi Arti</label>
+                                <input type="text" id="eq-arti" class="form-control" required>
+                            </div>
+                            <div class="d-flex gap-2 mt-auto">
+                                <button type="submit" id="btn-submit-edit-quote" class="btn-korisu-solid btn-edit-mode">UPDATE PEPATAH</button>
+                                <button type="button" onclick="hapusQuote()" class="btn-korisu-solid btn-delete-mode">HAPUS</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -458,6 +531,8 @@
             }
 
             muatDropdownKatalogUniversal();
+            muatDropdownShop();
+            muatDropdownQuote();
         });
 
         // Logika Notifikasi
@@ -500,7 +575,7 @@
         function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
 
         // ==========================================
-        // FUNGSI CRUD PANEL SENSEI (TETAP UTUH)
+        // FUNGSI CRUD PANEL SENSEI
         // ==========================================
         const opsiEditor = [['bold', 'italic', 'underline'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']];
         const editorMateriBaru = new Quill('#l-desc-editor', { theme: 'snow', modules: { toolbar: opsiEditor }});
@@ -508,6 +583,8 @@
 
         let masterKatalog = [];
         let vocabsCache = []; 
+        let shopCache = [];
+        let quoteCache = [];
 
         async function muatDropdownKatalogUniversal() {
             try {
@@ -560,6 +637,33 @@
             } catch (error) {}
         }
 
+        // BARU: Muat Dropdown Toko
+        async function muatDropdownShop() {
+            const selectShop = document.getElementById('es-item-id');
+            selectShop.innerHTML = '<option value="">⏳ Memuat...</option>';
+            try {
+                const res = await fetch(`${API_URL}/shop/items`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+                const data = await res.json();
+                selectShop.innerHTML = '<option value="">-- Pilih Item Toko --</option>';
+                shopCache = data.items || [];
+                shopCache.forEach(item => { selectShop.innerHTML += `<option value="${item.id}">${item.image_url} ${item.nama_item}</option>`; });
+            } catch (error) {}
+        }
+
+        // BARU: Muat Dropdown Quote
+        async function muatDropdownQuote() {
+            const selectQuote = document.getElementById('eq-quote-id');
+            selectQuote.innerHTML = '<option value="">⏳ Memuat...</option>';
+            try {
+                const res = await fetch(`${API_URL}/quotes/all`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+                const data = await res.json();
+                selectQuote.innerHTML = '<option value="">-- Pilih Pepatah --</option>';
+                quoteCache = data.quotes || [];
+                quoteCache.forEach(q => { selectQuote.innerHTML += `<option value="${q.id}">${q.teks_jepang} (${q.arti_indonesia})</option>`; });
+            } catch (error) {}
+        }
+
+
         // PENARIKAN DATA
         function tarikDataCourse(courseId) {
             if(!courseId) return;
@@ -591,18 +695,44 @@
                 document.getElementById('ev-arti').value = vocab.arti_indonesia;
             }
         }
+        function tarikDataShop(itemId) {
+            if(!itemId) return;
+            const item = shopCache.find(i => i.id == itemId);
+            if(item) {
+                document.getElementById('es-nama').value = item.nama_item;
+                document.getElementById('es-tipe').value = item.tipe_item;
+                document.getElementById('es-harga').value = item.harga_koin;
+                document.getElementById('es-ikon').value = item.image_url;
+            }
+        }
+        function tarikDataQuote(quoteId) {
+            if(!quoteId) return;
+            const quote = quoteCache.find(q => q.id == quoteId);
+            if(quote) {
+                document.getElementById('eq-teks').value = quote.teks_jepang;
+                document.getElementById('eq-baca').value = quote.cara_baca || '';
+                document.getElementById('eq-arti').value = quote.arti_indonesia;
+            }
+        }
+
 
         // EKSEKUSI UPDATE
         document.getElementById('form-edit-course').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('ec-course-id').value; if(!id) return alert('Pilih kelas!'); await jalankanFetch(`${API_URL}/courses/${id}/edit`, 'PUT', { judul_course: document.getElementById('ec-judul').value, thumbnail_url: document.getElementById('ec-thumb').value, deskripsi: document.getElementById('ec-desc').value }); muatDropdownKatalogUniversal(); });
         document.getElementById('form-edit-module').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('em-module-id').value; await jalankanFetch(`${API_URL}/courses/modules/${id}/edit`, 'PUT', { judul_modul: document.getElementById('em-judul').value, urutan_modul: parseInt(document.getElementById('em-urutan').value) }); });
         document.getElementById('form-edit-lesson').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('el-lesson-id').value; let d = editorMateriLama.root.innerHTML; if(d === '<p><br></p>') d = ''; await jalankanFetch(`${API_URL}/courses/lessons/${id}/edit`, 'PUT', { judul_materi: document.getElementById('el-judul').value, deskripsi: d, konten_url: document.getElementById('el-url').value, tipe_lesson: document.getElementById('el-tipe').value, urutan_lesson: parseInt(document.getElementById('el-urutan').value) }); });
         document.getElementById('form-edit-vocab').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('ev-vocab-id').value; await jalankanFetch(`${API_URL}/vocabulary/${id}/edit`, 'PUT', { kanji: document.getElementById('ev-kanji').value, furigana: document.getElementById('ev-furigana').value, arti_indonesia: document.getElementById('ev-arti').value }); muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id'); });
+        
+        document.getElementById('form-edit-shop').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('es-item-id').value; await jalankanFetch(`${API_URL}/shop/${id}/edit`, 'PUT', { nama_item: document.getElementById('es-nama').value, tipe_item: document.getElementById('es-tipe').value, harga_koin: parseInt(document.getElementById('es-harga').value), image_url: document.getElementById('es-ikon').value }); muatDropdownShop(); });
+        document.getElementById('form-edit-quote').addEventListener('submit', async (e) => { e.preventDefault(); const id = document.getElementById('eq-quote-id').value; await jalankanFetch(`${API_URL}/quotes/${id}/edit`, 'PUT', { teks_jepang: document.getElementById('eq-teks').value, cara_baca: document.getElementById('eq-baca').value, arti_indonesia: document.getElementById('eq-arti').value }); muatDropdownQuote(); });
 
         // EKSEKUSI DELETE
         async function hapusCourse() { const id = document.getElementById('ec-course-id').value; if(!id) return alert("Pilih kelas dulu!"); if(!confirm('⚠️ Menghapus Kelas otomatis menghapus Modul dan Materi di dalamnya! Yakin?')) return; await jalankanFetch(`${API_URL}/courses/${id}`, 'DELETE'); muatDropdownKatalogUniversal(); }
         async function hapusModule() { const id = document.getElementById('em-module-id').value; if(!id) return alert("Pilih modul dulu!"); if(!confirm('Yakin menghapus Modul ini beserta isi materinya?')) return; await jalankanFetch(`${API_URL}/courses/modules/${id}`, 'DELETE'); }
         async function hapusLesson() { const id = document.getElementById('el-lesson-id').value; if(!id) return alert("Pilih materi dulu!"); if(!confirm('Yakin menghapus Materi ini secara permanen?')) return; await jalankanFetch(`${API_URL}/courses/lessons/${id}`, 'DELETE'); }
         async function hapusVocab() { const id = document.getElementById('ev-vocab-id').value; if(!id) return alert("Pilih kosakata dulu!"); if(!confirm('Yakin menghapus kosakata ini? (Otomatis terhapus dari jadwal murid juga)')) return; await jalankanFetch(`${API_URL}/vocabulary/${id}`, 'DELETE'); muatDropdownKosakata(document.getElementById('ev-course-id').value, 'ev-vocab-id'); }
+        async function hapusShopItem() { const id = document.getElementById('es-item-id').value; if(!id) return alert("Pilih item dulu!"); if(!confirm('Yakin menghapus item ini dari toko?')) return; await jalankanFetch(`${API_URL}/shop/${id}`, 'DELETE'); muatDropdownShop(); document.getElementById('form-edit-shop').reset(); }
+        async function hapusQuote() { const id = document.getElementById('eq-quote-id').value; if(!id) return alert("Pilih pepatah dulu!"); if(!confirm('Yakin menghapus pepatah ini?')) return; await jalankanFetch(`${API_URL}/quotes/${id}`, 'DELETE'); muatDropdownQuote(); document.getElementById('form-edit-quote').reset(); }
+
 
         // EKSEKUSI CREATE
         document.getElementById('form-course').addEventListener('submit', async (e) => { e.preventDefault(); await jalankanFetch(`${API_URL}/courses/add`, 'POST', { judul_course: document.getElementById('c-judul').value, thumbnail_url: document.getElementById('c-thumb').value, deskripsi: document.getElementById('c-desc').value }); document.getElementById('form-course').reset(); muatDropdownKatalogUniversal(); });
@@ -612,20 +742,16 @@
         
         document.getElementById('form-shop').addEventListener('submit', async (e) => {
             e.preventDefault();
-            try {
-                const res = await fetch(`${API_URL}/shop/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                body: JSON.stringify({ nama_item: document.getElementById('s-nama').value, tipe_item: document.getElementById('s-tipe').value, harga_koin: parseInt(document.getElementById('s-harga').value), image_url: document.getElementById('s-ikon').value }) });
-                if(res.ok) { alert("✅ Item toko ditambahkan!"); document.getElementById('form-shop').reset(); }
-            } catch(e){}
+            await jalankanFetch(`${API_URL}/shop/add`, 'POST', { nama_item: document.getElementById('s-nama').value, tipe_item: document.getElementById('s-tipe').value, harga_koin: parseInt(document.getElementById('s-harga').value), image_url: document.getElementById('s-ikon').value });
+            document.getElementById('form-shop').reset();
+            muatDropdownShop();
         });
 
         document.getElementById('form-quote').addEventListener('submit', async (e) => {
             e.preventDefault();
-            try {
-                const res = await fetch(`${API_URL}/quotes/add`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
-                body: JSON.stringify({ teks_jepang: document.getElementById('q-teks').value, cara_baca: document.getElementById('q-baca').value, arti_indonesia: document.getElementById('q-arti').value, sumber_tokoh: "Sensei", kategori_fokus: "motivasi" }) });
-                if(res.ok) { alert("✅ Quote ditambahkan!"); document.getElementById('form-quote').reset(); }
-            } catch(e){}
+            await jalankanFetch(`${API_URL}/quotes/add`, 'POST', { teks_jepang: document.getElementById('q-teks').value, cara_baca: document.getElementById('q-baca').value, arti_indonesia: document.getElementById('q-arti').value, sumber_tokoh: "Sensei", kategori_fokus: "motivasi" });
+            document.getElementById('form-quote').reset();
+            muatDropdownQuote();
         });
 
         async function jalankanFetch(url, method, bodyData = null) {

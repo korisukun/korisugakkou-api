@@ -340,6 +340,16 @@
                         <div class="text-muted fs-6 mb-4">
                             <span class="fw-bold text-dark">Item Aktif:</span> <span id="nama-item-dipakai">Belum ada item</span>
                         </div>
+                        
+                        <!-- WADAH LEMARI BARU -->
+                        <div class="mb-4 border-top pt-3">
+                            <span class="fw-bold text-dark fs-6 d-block mb-2">Lemari Aksesoris (Klik untuk Pakai/Lepas):</span>
+                            <div id="lemari-aksesoris" class="d-flex flex-wrap gap-2">
+                                <small class="text-muted">Memuat lemari...</small>
+                            </div>
+                        </div>
+                        <!-- WADAH LEMARI BERAKHIR -->
+
                         <button onclick="window.location.href='toko.html'" class="btn btn-light w-100 fw-bold border">Kunjungi Toko Makanan & Item ➔</button>
                     </div>
                 </div>
@@ -441,6 +451,8 @@
             wadah.innerHTML = html;
         }
 
+        let lemariData = []; // Memori untuk menyimpan seluruh barang dari server
+
         async function muatMaskot() {
             try {
                 const respons = await fetch(`${API_URL}/mascot`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }});
@@ -460,35 +472,87 @@
                     else if(mood < 70) moodBar.className = "progress-bar bg-warning text-dark rounded-pill";
                     else moodBar.className = "progress-bar bg-success rounded-pill";
 
-                    const areaTumpukan = document.getElementById('area-tumpukan-item');
-                    let namaItemDitampilkan = [];
-                    areaTumpukan.innerHTML = '🐿️'; 
-
-                    const posisiStyling = [
-                        "top: -30px; left: 15px; transform: rotate(-10deg); font-size: 4.5rem;", 
-                        "bottom: -5px; right: -25px; transform: rotate(15deg); font-size: 3.5rem;", 
-                        "bottom: -5px; left: -15px; transform: rotate(-15deg); font-size: 3.5rem;", 
-                        "top: 20px; right: -30px; transform: rotate(20deg); font-size: 3rem;"      
-                    ];
-
+                    // Simpan data dari server ke variabel lokal
                     if (data.mascot.items_dipakai && Array.isArray(data.mascot.items_dipakai)) {
-                        data.mascot.items_dipakai.forEach((item, idx) => {
-                            namaItemDitampilkan.push(item.nama_item);
-                            let gayaPosisi = posisiStyling[idx % posisiStyling.length];
-                            areaTumpukan.innerHTML += `<span class="maskot-item-overlay" style="${gayaPosisi} z-index: ${idx+3};">${item.image_url}</span>`;
-                        });
-                    } else if (data.mascot.item_dipakai) { 
-                        namaItemDitampilkan.push(data.mascot.item_dipakai.nama_item);
-                        areaTumpukan.innerHTML += `<span class="maskot-item-overlay" style="${posisiStyling[0]}">${data.mascot.item_dipakai.image_url}</span>`;
+                        lemariData = data.mascot.items_dipakai;
+                    }
+                    
+                    // Jika murid belum punya memori pakaian, atur agar otomatis pakai semua barang lamanya
+                    if (!localStorage.getItem('korisu_equipped')) {
+                        let semuaAksesoris = lemariData.map(i => i.nama_item);
+                        localStorage.setItem('korisu_equipped', JSON.stringify(semuaAksesoris));
                     }
 
-                    if(namaItemDitampilkan.length > 0) {
-                        document.getElementById('nama-item-dipakai').innerText = namaItemDitampilkan.join(', ');
-                    } else {
-                        document.getElementById('nama-item-dipakai').innerText = "Belum menggunakan item";
-                    }
+                    renderPakaianTupai(); // Panggil fungsi perakit visual
                 }
             } catch (error) { console.log("Gagal memuat maskot"); }
+        }
+
+        // FUNGSI BARU: Merakit Visual Pakaian & Tombol Lemari
+        function renderPakaianTupai() {
+            let sedangDipakai = JSON.parse(localStorage.getItem('korisu_equipped') || '[]');
+            
+            const areaTumpukan = document.getElementById('area-tumpukan-item');
+            const lemariWadah = document.getElementById('lemari-aksesoris');
+            let namaItemDitampilkan = [];
+            
+            areaTumpukan.innerHTML = '🐿️'; 
+            lemariWadah.innerHTML = '';
+
+            const koordinatItem = {
+                "Kimono": "bottom: -20px; left: -20px; font-size: 6.5rem; transform: rotate(-5deg); z-index: 3;",
+                "Kacamata Hitam": "top: 15px; left: -120px; font-size: 3.0rem; transform: rotate(10deg); z-index: 4;",
+                "Topi Pesta": "top: -30px; left: -100px; font-size: 4rem; transform: rotate(15deg); z-index: 4;",
+                "Pita": "top: 10px; left: 45px; font-size: 2.5rem; transform: rotate(20deg); z-index: 4;"
+            };
+
+            if (lemariData.length === 0) {
+                lemariWadah.innerHTML = '<small class="text-muted">Lemari kosong. Yuk beli di toko!</small>';
+            }
+
+            lemariData.forEach((item) => {
+                let isDipakai = sedangDipakai.includes(item.nama_item);
+                
+                // 1. Render Tombol Lemari (Bisa Diklik)
+                let btnHtml = `
+                    <button onclick="togglePakaian('${item.nama_item}')" 
+                            class="btn btn-sm ${isDipakai ? 'btn-warning text-dark fw-bold' : 'btn-outline-secondary'} rounded-pill shadow-sm" 
+                            style="font-size: 0.85rem;">
+                        ${item.image_url} ${item.nama_item}
+                    </button>
+                `;
+                lemariWadah.innerHTML += btnHtml;
+
+                // 2. Render Maskot Tupai
+                if (isDipakai) {
+                    namaItemDitampilkan.push(item.nama_item);
+                    let gayaPosisi = koordinatItem[item.nama_item] || "top: -20px; right: -20px; font-size: 3rem; z-index: 5;";
+                    areaTumpukan.innerHTML += `<span class="maskot-item-overlay" style="${gayaPosisi}">${item.image_url}</span>`;
+                }
+            });
+
+            if(namaItemDitampilkan.length > 0) {
+                document.getElementById('nama-item-dipakai').innerText = namaItemDitampilkan.join(', ');
+            } else {
+                document.getElementById('nama-item-dipakai').innerHTML = "<em>Polosan (Tidak pakai apa-apa)</em>";
+            }
+        }
+
+        // FUNGSI BARU: Mekanisme Copot / Pakai Baju
+        function togglePakaian(namaItem) {
+            let sedangDipakai = JSON.parse(localStorage.getItem('korisu_equipped') || '[]');
+            
+            if (sedangDipakai.includes(namaItem)) {
+                // Proses Lepas Baju
+                sedangDipakai = sedangDipakai.filter(i => i !== namaItem);
+            } else {
+                // Proses Pakai Baju
+                sedangDipakai.push(namaItem);
+            }
+            
+            // Simpan ke memori browser lalu render instan!
+            localStorage.setItem('korisu_equipped', JSON.stringify(sedangDipakai));
+            renderPakaianTupai(); 
         }
 
         async function muatQuote() {

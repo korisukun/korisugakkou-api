@@ -107,4 +107,25 @@ const addItem = async (req, res) => {
     }
 };
 
-module.exports = { getItems, buyItem, getMascot, addItem };
+// 5. Mengedit Item Toko (Khusus Sensei)
+const editShopItem = async (req, res) => {
+    const { id } = req.params;
+    const { nama_item, tipe_item, harga_koin, image_url } = req.body;
+    try {
+        await db.query(
+            'UPDATE shop_items SET nama_item = $1, tipe_item = $2, harga_koin = $3, image_url = $4 WHERE id = $5',
+            [nama_item, tipe_item, harga_koin, image_url, id]
+        );
+        res.json({ message: 'Item toko berhasil diperbarui! ✅' });
+    } catch (error) { res.status(500).json({ message: 'Gagal memperbarui item.' }); }
+};
+
+// 6. Menghapus Item Toko (Khusus Sensei)
+const deleteShopItem = async (req, res) => {
+    try {
+        await db.query('DELETE FROM shop_items WHERE id = $1', [req.params.id]);
+        res.json({ message: 'Item toko berhasil dihapus! 🗑️' });
+    } catch (error) { res.status(500).json({ message: 'Gagal menghapus item.' }); }
+};
+
+module.exports = { getItems, buyItem, getMascot, addItem, editShopItem, deleteShopItem };
