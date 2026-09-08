@@ -1,6 +1,5 @@
 const db = require('../config/db');
 
-// 1. Ambil Postingan
 const getPosts = async (req, res) => {
     try {
         const result = await db.query(`
@@ -16,7 +15,6 @@ const getPosts = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 2. Buat Postingan Baru
 const createPost = async (req, res) => {
     const { konten } = req.body;
     if (!konten || konten === '<p><br></p>') return res.status(400).json({ message: 'Postingan tidak boleh kosong.' });
@@ -26,7 +24,6 @@ const createPost = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 3. Edit Postingan (Hanya Penulis)
 const editPost = async (req, res) => {
     const { id } = req.params;
     const { konten } = req.body;
@@ -36,26 +33,22 @@ const editPost = async (req, res) => {
         if (post.rows[0].user_id !== req.user.id) return res.status(403).json({ message: 'Akses ditolak.' });
 
         await db.query('UPDATE community_posts SET konten = $1 WHERE id = $2', [konten, id]);
-        res.json({ message: 'Postingan berhasil diperbarui! ✅' });
+        res.json({ message: 'Postingan diperbarui! ✅' });
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 4. Hapus Postingan (Penulis OR Sensei/Admin)
 const deletePost = async (req, res) => {
     const { id } = req.params;
     try {
         const post = await db.query('SELECT user_id FROM community_posts WHERE id = $1', [id]);
         if (post.rows.length === 0) return res.status(404).json({ message: 'Postingan tidak ditemukan.' });
-        if (post.rows[0].user_id !== req.user.id && req.user.role !== 'sensei' && req.user.role !== 'admin') {
-            return res.status(403).json({ message: 'Akses ditolak.' });
-        }
+        if (post.rows[0].user_id !== req.user.id && req.user.role !== 'sensei' && req.user.role !== 'admin') return res.status(403).json({ message: 'Akses ditolak.' });
 
         await db.query('DELETE FROM community_posts WHERE id = $1', [id]);
-        res.json({ message: 'Postingan berhasil dihapus! 🗑️' });
+        res.json({ message: 'Postingan dihapus! 🗑️' });
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 5. Tombol Like
 const toggleLike = async (req, res) => {
     const { post_id } = req.body;
     try {
@@ -70,7 +63,6 @@ const toggleLike = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [PERBAIKAN] 6. Ambil Komentar (Tarik ID dan Parent ID)
 const getComments = async (req, res) => {
     try {
         const result = await db.query(`
@@ -84,7 +76,7 @@ const getComments = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [PERBAIKAN] 7. Kirim Komentar (Bisa menerima parent_id)
+// [PERBAIKAN] Deteksi Mention (@) dan Kirim Notifikasi
 const addComment = async (req, res) => {
     const { post_id, komentar, parent_id } = req.body;
     if (!komentar) return res.status(400).json({ message: 'Komentar kosong.' });
@@ -93,8 +85,47 @@ const addComment = async (req, res) => {
             'INSERT INTO community_comments (post_id, user_id, komentar, parent_id) VALUES ($1, $2, $3, $4)', 
             [post_id, req.user.id, komentar, parent_id || null]
         );
+
+        // Mesin Pendeteksi Mention: Mengekstrak nama setelah tanda '@'
+        const mentionMatch = komentar.match(/@([a-zA-Z0-9_ ]+)/);
+        if (mentionMatch) {
+            let namaMention = mentionMatch[1].trim();
+            // Cari ID user yang disebutkan (menggunakan ILIKE untuk kecocokan parsial)
+            const userRes = await db.query('SELECT id FROM users WHERE nama_lengkap ILIKE $1 LIMIT 1', [`%${namaMention}%`]);
+            
+            // Jika user ditemukan dan dia tidak mention dirinya sendiri
+            if (userRes.rows.length > 0 && userRes.rows[0].id !== req.user.id) {
+                await db.query(
+                    "INSERT INTO notifications (user_id, sender_id, type, post_id, message) VALUES ($1, $2, 'mention', $3, $4)",
+                    [userRes.rows[0].id, req.user.id, post_id, 'membalas dan menyebut Anda di komunitas.']
+                );
+            }
+        }
+
         res.status(201).json({ message: 'Komentar dikirim!' });
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-module.exports = { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment };
+// [BARU] Mengambil Daftar Notifikasi
+const getNotifications = async (req, res) => {
+    try {
+        const result = await db.query(`
+            SELECT n.id, n.type, n.message, n.is_read, n.created_at, n.post_id, u.nama_lengkap as sender_name
+            FROM notifications n
+            JOIN users u ON n.sender_id = u.id
+            WHERE n.user_id = $1
+            ORDER BY n.created_at DESC LIMIT 15
+        `, [req.user.id]);
+        res.json({ notifications: result.rows });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+// [BARU] Menandai Notifikasi Telah Dibaca
+const markNotificationsRead = async (req, res) => {
+    try {
+        await db.query('UPDATE notifications SET is_read = true WHERE user_id = $1', [req.user.id]);
+        res.json({ message: 'Read' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+module.exports = { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment, getNotifications, markNotificationsRead };
