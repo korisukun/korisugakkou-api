@@ -32,7 +32,7 @@ const buyItem = async (req, res) => {
         
         const tipeItem = itemData.rows[0].tipe_item;
         
-        // Potong koin dengan teknik UPSERT
+        // Potong koin dengan teknik UPSERT (Tabel ini punya kunci UNIQUE, jadi aman)
         const sisaKoin = koinSekarang - parseInt(harga_koin);
         await db.query(`
             INSERT INTO user_statistics (murid_id, koin_dimiliki) 
@@ -41,14 +41,16 @@ const buyItem = async (req, res) => {
             DO UPDATE SET koin_dimiliki = EXCLUDED.koin_dimiliki
         `, [murid_id, sisaKoin]);
 
-        // Pastikan murid punya baris maskot dengan UPSERT
-        await db.query(`
-            INSERT INTO user_mascots (murid_id, level_mascot, status_mood) 
-            VALUES ($1, 1, 100)
-            ON CONFLICT (murid_id) DO NOTHING
-        `, [murid_id]);
+        // [PERBAIKAN] Cek kepemilikan maskot secara manual karena tidak ada constraint UNIQUE di ERD
+        const cekMaskot = await db.query('SELECT id FROM user_mascots WHERE murid_id = $1', [murid_id]);
+        if (cekMaskot.rows.length === 0) {
+            await db.query(`
+                INSERT INTO user_mascots (murid_id, level_mascot, status_mood) 
+                VALUES ($1, 1, 100)
+            `, [murid_id]);
+        }
 
-        // Proses Distribusi Barang berdasarkan Tipe Item (Constraint ERD)
+        // Proses Distribusi Barang berdasarkan Tipe Item
         if (tipeItem === 'aksesoris' || tipeItem === 'background') {
             await db.query('INSERT INTO user_items (murid_id, item_id) VALUES ($1, $2)', [murid_id, item_id]);
         } else if (tipeItem === 'makanan') {

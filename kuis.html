@@ -161,6 +161,12 @@
         }
         .btn-korisu-solid:hover { background-color: #e67300; color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
         
+        .btn-outline-korisu {
+            background-color: white; color: var(--korisu-orange); border: 2px solid var(--korisu-orange); border-radius: 15px; font-weight: bold; 
+            font-size: 1.1rem; padding: 14px 20px; transition: all 0.3s; width: 100%; margin-top: 10px;
+        }
+        .btn-outline-korisu:hover { background-color: #fffaf5; transform: translateY(-2px); }
+
         #hasil-notif { display: none; margin-top: 15px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .jawaban-lengkap { background-color: #fafafa; border: 1px solid #e0e0e0; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         
@@ -314,7 +320,7 @@
             
             <!-- Header Progress & Timer -->
             <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
-                <span class="badge-atas">Misi: <span id="progress-text">0 / 0</span></span>
+                <span class="badge-atas">Sesi Ini: <span id="progress-text">0 / 0</span></span>
                 <span class="badge-atas badge-timer" id="teks-timer">0 Detik ⏱️</span>
             </div>
 
@@ -451,6 +457,7 @@
         
         let kunciJawabanSaatIni = ""; 
         let vocabSaatIni = null;
+        let sisaTunggakanDatabase = 0;
 
         async function mulaiSesiSRS() {
             try {
@@ -462,6 +469,7 @@
                 if(data.data && data.data.length > 0) {
                     antreanSoal = data.data;
                     kamusDistraktor = data.kamus_distraktor || data.data;
+                    sisaTunggakanDatabase = data.jumlah_antrean;
                     indeksSaatIni = 0; 
                 } else {
                     document.querySelector('.flashcard-modern').innerHTML = `
@@ -696,8 +704,38 @@
 
         function lanjutSoal() {
             indeksSaatIni++;
-            if (indeksSaatIni < antreanSoal.length) tampilkanSoal(indeksSaatIni);
-            else mulaiSesiSRS(); 
+            if (indeksSaatIni < antreanSoal.length) {
+                // MASIH ADA SISA SOAL DI SESI INI
+                tampilkanSoal(indeksSaatIni);
+            } else {
+                // SESI SELESAI (10 SOAL HABIS)
+                // Cek apakah di database masih ada sisa tunggakan di luar 10 soal ini
+                let sisaDiLuarSesi = Math.max(0, sisaTunggakanDatabase - antreanSoal.length);
+                
+                if (sisaDiLuarSesi > 0) {
+                    // MUNCULKAN TEMBOK PEMBATAS ISTIRAHAT
+                    document.querySelector('.flashcard-modern').innerHTML = `
+                        <h1 class="mb-3" style="font-size: 5rem;">☕</h1>
+                        <h3 class="fw-bold mb-3 text-dark">Kerja Bagus!</h3>
+                        <p class="text-muted fs-5 mb-4">Kamu baru saja menyelesaikan 1 sesi evaluasi. Istirahatkan matamu sejenak.</p>
+                        <div class="alert alert-warning border-warning rounded-4 mb-4">
+                            <span class="fw-bold text-dark">Masih ada <span class="text-danger fs-5">${sisaDiLuarSesi}</span> kuis 6-Arah lagi di antrean hari ini.</span>
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <button onclick="window.location.reload()" class="btn-korisu-solid">🔥 Lanjut Sesi Berikutnya</button>
+                            <button onclick="kembaliKeKelas()" class="btn-outline-korisu">Kembali ke Kurikulum</button>
+                        </div>
+                    `;
+                } else {
+                    // BENAR-BENAR BERSIH 100%
+                    document.querySelector('.flashcard-modern').innerHTML = `
+                        <h1 class="mb-3" style="font-size: 5rem;">🎉</h1>
+                        <h3 class="fw-bold mb-3 text-dark">Sempurna!</h3>
+                        <p class="text-muted fs-5 mb-4">Semua ulasan hari ini telah selesai. Otakmu sudah menyerap semuanya dengan baik!</p>
+                        <button onclick="kembaliKeKelas()" class="btn-korisu-solid">Kembali ke Kurikulum</button>
+                    `;
+                }
+            }
         }
     </script>
 </body>
