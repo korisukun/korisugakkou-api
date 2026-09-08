@@ -58,8 +58,15 @@ const submitReview = async (req, res) => {
 
         let { srs_level, total_review, avg_waktu_detik } = currentSrs.rows[0];
         
-        let newTotalReview = total_review + 1;
-        let newAvgWaktu = ((parseFloat(avg_waktu_detik) * total_review) + waktu_jawab_detik) / newTotalReview;
+        // [PERBAIKAN SUPER]: Membulatkan hasil ke angka utuh (Integer) agar DB Postgres tidak menolak!
+        let safeSrsLevel = parseInt(srs_level) || 0;
+        let safeTotalReview = parseInt(total_review) || 0;
+        let safeAvgWaktu = parseInt(avg_waktu_detik) || 0;
+        let safeWaktuJawab = parseInt(waktu_jawab_detik) || 0;
+
+        let newTotalReview = safeTotalReview + 1;
+        // Penambahan Math.round() di sini adalah kunci utamanya
+        let newAvgWaktu = Math.round(((safeAvgWaktu * safeTotalReview) + safeWaktuJawab) / newTotalReview);
 
         let intervalMinutes = 0;
         let statusCat = 'again';
@@ -67,15 +74,15 @@ const submitReview = async (req, res) => {
         let koinReward = 0;
 
         if (is_correct) {
-            srs_level += 1;
+            safeSrsLevel += 1;
             statusCat = 'good';
-            expReward = 5 + srs_level; 
+            expReward = 5 + safeSrsLevel; 
             koinReward = 2; 
 
             const intervals = [0, 10, 720, 1440, 4320, 10080, 21600, 43200]; 
-            intervalMinutes = srs_level < intervals.length ? intervals[srs_level] : 43200; 
+            intervalMinutes = safeSrsLevel < intervals.length ? intervals[safeSrsLevel] : 43200; 
         } else {
-            srs_level = Math.max(0, srs_level - 1);
+            safeSrsLevel = Math.max(0, safeSrsLevel - 1);
             intervalMinutes = 1; 
             expReward = 1; 
             koinReward = 0;
@@ -90,17 +97,19 @@ const submitReview = async (req, res) => {
                 total_review = $4,
                 avg_waktu_detik = $5
             WHERE murid_id = $6 AND vocab_id = $7 AND arah_kuis = $8
-        `, [srs_level, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
+        `, [safeSrsLevel, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
 
-        // B. Menambahkan Koin dan EXP secara nyata ke profil database murid!
-if (expReward > 0 || koinReward > 0) {
-    await db.query(`
-        UPDATE user_statistics 
-        SET koin_dimiliki = COALESCE(koin_dimiliki, 0) + $1, 
-            total_exp_points = COALESCE(total_exp_points, 0) + $2 
-        WHERE murid_id = $3
-    `, [koinReward, expReward, muridId]);
-}
+        // B. Menggunakan UPSERT agar aman dari ketiadaan profil dompet
+        if (expReward > 0 || koinReward > 0) {
+            await db.query(`
+                INSERT INTO user_statistics (murid_id, koin_dimiliki, total_exp_points) 
+                VALUES ($1, $2, $3)
+                ON CONFLICT (murid_id) 
+                DO UPDATE SET 
+                    koin_dimiliki = COALESCE(user_statistics.koin_dimiliki, 0) + EXCLUDED.koin_dimiliki, 
+                    total_exp_points = COALESCE(user_statistics.total_exp_points, 0) + EXCLUDED.total_exp_points
+            `, [muridId, koinReward, expReward]);
+        }
 
         res.json({ message: 'Progres arah kuis disimpan.', reward: { exp: expReward, koin: koinReward } });
     } catch (error) {
