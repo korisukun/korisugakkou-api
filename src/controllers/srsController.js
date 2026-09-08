@@ -7,6 +7,7 @@ const getTodayReviews = async (req, res) => {
 
     try {
         if (courseId) {
+            // A. DATA KUIS: Ambil maksimal 50 soal saja untuk dikirim ke memori Kuis (Mencegah Lag)
             const result = await db.query(`
                 SELECT sr.vocab_id, sr.arah_kuis, sr.srs_level, sr.avg_waktu_detik,
                        v.kanji, v.furigana, v.arti_indonesia
@@ -19,17 +20,30 @@ const getTodayReviews = async (req, res) => {
                 LIMIT 50
             `, [muridId, courseId]);
 
+            // B. ANGKA VISUAL: Hitung TOTAL ASLI seluruh antrean untuk ditampilkan di Dasbor
+            const countResult = await db.query(`
+                SELECT count(sr.id) as total
+                FROM srs_reviews sr
+                JOIN vocabularies v ON sr.vocab_id = v.id
+                WHERE sr.murid_id = $1 
+                  AND v.course_id = $2
+                  AND sr.next_review_date <= CURRENT_TIMESTAMP
+            `, [muridId, courseId]);
+            
+            const trueTotal = parseInt(countResult.rows[0].total);
+
             const kamusRes = await db.query(
                 'SELECT kanji, furigana, arti_indonesia FROM vocabularies WHERE course_id = $1',
                 [courseId]
             );
 
             res.json({ 
-                jumlah_antrean: result.rows.length, 
-                data: result.rows,
+                jumlah_antrean: trueTotal, // Mengirim angka asli (Misal: 80), bukan terpaku pada 50
+                data: result.rows,         // Array soal kuis tetap dibatasi maksimal 50
                 kamus_distraktor: kamusRes.rows 
             });
         } else {
+            // Untuk halaman Dashboard utama (akumulasi seluruh kelas)
             const result = await db.query(`
                 SELECT count(sr.id) as total
                 FROM srs_reviews sr
