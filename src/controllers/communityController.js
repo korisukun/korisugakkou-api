@@ -1,10 +1,10 @@
 const db = require('../config/db');
 
-// 1. Ambil Postingan (beserta jumlah like, komen, dan status like si user)
+// 1. Ambil Postingan (Tambahkan p.user_id agar frontend tahu siapa penulisnya)
 const getPosts = async (req, res) => {
     try {
         const result = await db.query(`
-            SELECT p.id, p.konten, p.created_at, u.nama_lengkap, u.role,
+            SELECT p.id, p.user_id, p.konten, p.created_at, u.nama_lengkap, u.role,
                    (SELECT COUNT(*) FROM community_likes WHERE post_id = p.id) as total_likes,
                    (SELECT COUNT(*) FROM community_comments WHERE post_id = p.id) as total_comments,
                    EXISTS(SELECT 1 FROM community_likes WHERE post_id = p.id AND user_id = $1) as is_liked
@@ -26,7 +26,42 @@ const createPost = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 3. Tombol Like (Sistem Toggle: Klik 1x Like, Klik 2x Unlike)
+// [BARU] 3. Edit Postingan (Hanya Penulis)
+const editPost = async (req, res) => {
+    const { id } = req.params;
+    const { konten } = req.body;
+    try {
+        const post = await db.query('SELECT user_id FROM community_posts WHERE id = $1', [id]);
+        if (post.rows.length === 0) return res.status(404).json({ message: 'Postingan tidak ditemukan.' });
+        
+        // Cek apakah user yang login adalah penulis aslinya
+        if (post.rows[0].user_id !== req.user.id) {
+            return res.status(403).json({ message: 'Akses ditolak. Anda bukan penulis postingan ini.' });
+        }
+
+        await db.query('UPDATE community_posts SET konten = $1 WHERE id = $2', [konten, id]);
+        res.json({ message: 'Postingan berhasil diperbarui! ✅' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+// [BARU] 4. Hapus Postingan (Penulis OR Sensei/Admin)
+const deletePost = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const post = await db.query('SELECT user_id FROM community_posts WHERE id = $1', [id]);
+        if (post.rows.length === 0) return res.status(404).json({ message: 'Postingan tidak ditemukan.' });
+
+        // Izinkan jika dia Penulis Asli ATAU dia adalah Sensei/Admin
+        if (post.rows[0].user_id !== req.user.id && req.user.role !== 'sensei' && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Akses ditolak. Anda tidak berhak menghapus ini.' });
+        }
+
+        await db.query('DELETE FROM community_posts WHERE id = $1', [id]);
+        res.json({ message: 'Postingan berhasil dihapus! 🗑️' });
+    } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+// 5. Tombol Like
 const toggleLike = async (req, res) => {
     const { post_id } = req.body;
     try {
@@ -41,7 +76,7 @@ const toggleLike = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 4. Ambil Komentar Spesifik untuk 1 Post
+// 6. Ambil Komentar
 const getComments = async (req, res) => {
     try {
         const result = await db.query(`
@@ -55,7 +90,7 @@ const getComments = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// 5. Kirim Komentar
+// 7. Kirim Komentar
 const addComment = async (req, res) => {
     const { post_id, komentar } = req.body;
     if (!komentar) return res.status(400).json({ message: 'Komentar kosong.' });
@@ -65,4 +100,4 @@ const addComment = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-module.exports = { getPosts, createPost, toggleLike, getComments, addComment };
+module.exports = { getPosts, createPost, editPost, deletePost, toggleLike, getComments, addComment };
