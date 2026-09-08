@@ -33,7 +33,7 @@ const completeLesson = async (req, res) => {
         }
 
         // Gamifikasi: Berikan 10 EXP karena rajin menonton video
-        await db.query('UPDATE user_statistics SET total_exp_points = total_exp_points + 10 WHERE murid_id = $1', [murid_id]);
+	await db.query('UPDATE users SET koin = COALESCE(koin, 0) + $1, exp = COALESCE(exp, 0) + $2 WHERE id = $3', [koinDidapat, expDidapat, muridId]);
 
         res.json({ message: 'Materi diselesaikan! +10 EXP 🐿️', exp_didapat: 10 });
     } catch (error) {

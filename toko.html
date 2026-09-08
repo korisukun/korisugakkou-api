@@ -11,10 +11,11 @@
             --korisu-orange: #ff7f00;
             --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
+            --bg-light: #fafafa;
         }
         
         body { 
-            background-color: #fafafa; 
+            background-color: var(--bg-light); 
             color: var(--korisu-black); 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             overflow-x: hidden; 
@@ -23,68 +24,63 @@
             flex-direction: column;
         }
 
-        /* Navigasi Atas (Solid Orange) */
-        .navbar-custom { 
-            background-color: var(--korisu-orange); 
-            padding: 15px 0;
+        /* ---------------------------------------------------
+           NAVIGASI & DROPDOWN (SEAMLESS DENGAN DASHBOARD)
+           --------------------------------------------------- */
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
+        .navbar-custom { background-color: var(--korisu-orange); padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2); }
+        
+        .menu-primary-container { display: flex; align-items: center; }
+        #menu-primary { display: flex; flex-direction: row; list-style: none; margin: 0; padding: 0; gap: 5px; align-items: center;}
+        #menu-primary .nav-close { display: none; }
+        #menu-primary .menu-item { position: relative; }
+        
+        #menu-primary > .menu-item > a {
+            color: rgba(255, 255, 255, 0.8) !important; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            padding: 8px 12px; display: block; border-radius: 8px; transition: all 0.2s ease;
         }
-        .btn-nav-outline {
-            background-color: var(--korisu-white);
-            color: var(--korisu-orange);
-            font-weight: bold;
-            border-radius: 25px;
-            padding: 8px 20px;
-            border: none;
-            transition: all 0.2s;
-        }
-        .btn-nav-outline:hover {
-            background-color: #f8f9fa;
-            transform: translateY(-2px);
-        }
-        .coin-badge-nav {
-            background: rgba(255, 255, 255, 0.2);
-            color: var(--korisu-white);
-            font-weight: 700;
-            padding: 8px 16px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-        }
+        #menu-primary > .menu-item > a:hover, #menu-primary > .current-menu-item > a { color: var(--korisu-white) !important; }
 
-        /* Area Konten Utama (Dotted Grid Background) */
-        .content-section {
-            flex: 1;
-            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
-            background-size: 30px 30px;
-            padding-bottom: 60px;
-        }
+        #menu-primary > .menu-item-has-children > a::after { content: ' ▾'; font-size: 0.8rem; vertical-align: middle; margin-left: 4px; opacity: 0.8; }
+        #menu-primary .sub-menu .menu-item-has-children > a::after { content: ' ▸'; float: right; font-size: 1rem; opacity: 0.6; }
 
-        /* Header Universal */
-        .header-section {
-            background-color: var(--korisu-white);
-            padding: 50px 0;
-            text-align: center;
-            border-bottom: 1px solid #f0f0f0;
-            margin-bottom: 40px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+        #menu-primary .sub-menu {
+            visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 0; background-color: var(--korisu-white);
+            list-style: none; padding: 10px 0; margin: 0; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+            border: 1px solid #f0f0f0; min-width: 240px; z-index: 1060; transform: translateY(10px); transition: all 0.3s ease;
         }
-        .badge-atas {
-            display: inline-block;
-            background-color: #fffaf5;
-            color: var(--korisu-orange);
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 8px 16px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #ffe8d6;
+        
+        #menu-primary .menu-item-has-children:hover > .sub-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+        
+        #menu-primary .sub-menu .menu-item > a {
+            color: var(--korisu-black); padding: 10px 20px; font-weight: 600; font-size: 0.9rem; display: block; text-decoration: none; transition: all 0.2s ease;
         }
-        .heading-main {
-            font-weight: 900;
-            font-size: 3rem;
-            letter-spacing: -1px;
-            color: var(--korisu-black);
-            margin-bottom: 15px;
-        }
+        #menu-primary .sub-menu .menu-item > a:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+
+        #menu-primary .sub-menu .menu-item-has-children > .sub-menu { top: -10px; left: 100%; margin-left: 5px; transform: translateX(-10px); }
+        #menu-primary .sub-menu .menu-item-has-children:hover > .sub-menu { transform: translateX(0); }
+
+        /* Dropdown Profil Kanan */
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 20px; border: none; transition: all 0.2s; }
+        .btn-nav-outline:hover, .btn-nav-outline[aria-expanded="true"] { background-color: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu-custom { border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 15px 35px rgba(0,0,0,0.08); padding: 10px 0; margin-top: 10px !important; min-width: 220px; }
+        .dropdown-item { font-weight: 600; padding: 10px 20px; transition: all 0.2s ease; color: var(--korisu-black); }
+        .dropdown-item:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+        .dropdown-item.text-danger:hover { background-color: #fff0f0; color: #dc3545; }
+        .stats-top { background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); }
+
+        .notif-item { cursor: pointer; transition: background 0.2s; }
+        .notif-item:hover { background-color: #f8f9fa; }
+        .notif-item.unread { background-color: #fffaf5; border-left: 4px solid var(--korisu-orange); }
+
+        /* ---------------------------------------------------
+           STYLING KHUSUS HALAMAN TOKO
+           --------------------------------------------------- */
+        .content-section { flex: 1; background-image: radial-gradient(#e0e0e0 2px, transparent 2px); background-size: 30px 30px; padding-bottom: 60px; }
+        
+        .header-section { background-color: transparent; padding: 30px 0; text-align: center; margin-bottom: 40px; }
+        .badge-atas { display: inline-block; background-color: #fffaf5; color: var(--korisu-orange); font-weight: 700; font-size: 0.85rem; padding: 8px 16px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #ffe8d6; }
+        .heading-main { font-weight: 900; font-size: 3rem; letter-spacing: -1px; color: var(--korisu-black); margin-bottom: 15px; }
 
         /* Kartu Etalase Toko (Soft Shadow, Rounded) */
         .card-toko {
@@ -99,69 +95,145 @@
             display: flex;
             flex-direction: column;
         }
-        .card-toko:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            border-color: #ffe8d6;
-        }
+        .card-toko:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); border-color: #ffe8d6; }
         
-        .item-icon {
-            font-size: 5.5rem;
-            margin: 15px 0 25px 0;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-            transition: transform 0.3s;
-        }
-        .card-toko:hover .item-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
+        .item-icon { font-size: 5.5rem; margin: 15px 0 25px 0; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); transition: transform 0.3s; }
+        .card-toko:hover .item-icon { transform: scale(1.1) rotate(5deg); }
 
-        .badge-tipe {
-            font-size: 0.75rem;
-            font-weight: 800;
-            padding: 6px 12px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: inline-block;
-        }
+        .badge-tipe { font-size: 0.75rem; font-weight: 800; padding: 6px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; display: inline-block; }
         .badge-makanan { background-color: #d1e7dd; color: #0f5132; }
         .badge-aksesoris { background-color: #cfe2ff; color: #084298; }
         .badge-background { background-color: #e0cffc; color: #5320a9; }
 
-        /* Tombol Beli */
-        .btn-beli-solid { 
-            background-color: var(--korisu-black); 
-            color: white; 
-            border: none; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            padding: 12px 15px; 
-            transition: all 0.3s; 
-            width: 100%;
-        }
-        .btn-beli-solid:hover { 
-            background-color: var(--korisu-orange); 
-            color: white; 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); 
-        }
+        .btn-beli-solid { background-color: var(--korisu-black); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 15px; transition: all 0.3s; width: 100%; }
+        .btn-beli-solid:hover { background-color: var(--korisu-orange); color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
+
+        /* Modal Custom */
+        .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 15px; font-weight: bold; padding: 14px 20px; transition: all 0.3s; }
+        .btn-korisu-solid:hover { background-color: #e67300; color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
+
+        ::selection { background-color: #FFF7ED; color: #EA580C; }
     </style>
 </head>
 <body>
 
-    <!-- Navigasi Atas Minimalis -->
-    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm sticky-top">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
-                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
-                <span class="d-none d-sm-inline">Toko KORISU</span>
-            </a>
-            <div class="d-flex align-items-center gap-3">
-                <span class="coin-badge-nav" id="dompet-header">🪙 Memuat...</span>
-                <button class="btn-nav-outline" onclick="window.location.href='dashboard.html'">Kembali</button>
+    <!-- Navigasi Ke Dalam Container -->
+    <div class="container nav-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid px-2">
+                
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                    <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                </a>
+                
+                <!-- Menu Tengah -->
+                <div class="d-none d-lg-flex mx-auto">
+                    <div class="menu-primary-container">
+                        <ul id="menu-primary" class="navbar-nav">
+                            <li class="nav-close"><button class="btn-nav-close"><span class="close-btn">+</span></button></li>
+                            <li id="menu-item-3896" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-3896"><a href="dashboard.html" aria-current="page" onclick="return true">Beranda</a></li>
+                            <li id="menu-item-4136" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4136 icon"><a href="#" onclick="return true">Kelas</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4137" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4137"><a href="https://korisugakkou.com/jlpt-n4-complete-mastery" onclick="return true">Kelas Unggulan</a></li>
+                                    <li id="menu-item-5517" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5517 icon"><a href="#" onclick="return true">Dari 0</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5518" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5518"><a href="/hiragana-mastery" onclick="return true">Hiragana</a></li>
+                                            <li id="menu-item-5519" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5519"><a href="/katakana-mastery" onclick="return true">Katakana</a></li>
+                                            <li id="menu-item-5520" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5520"><a href="/japanese-fundamental-mastery" onclick="return true">Bahasa Jepang Dasar</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5508" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5508 icon"><a href="#" onclick="return true">JLPT</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5509" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5509"><a href="/jlpt-n5-complete-mastery/" onclick="return true">JLPT N5</a></li>
+                                            <li id="menu-item-5510" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5510"><a href="/jlpt-n4-complete-mastery/" onclick="return true">JLPT N4</a></li>
+                                            <li id="menu-item-5511" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5511"><a href="/jlpt-n3-complete-mastery/" onclick="return true">JLPT N3</a></li>
+                                            <li id="menu-item-5512" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5512"><a href="/jlpt-n2-complete-mastery/" onclick="return true">JLPT N2</a></li>
+                                            <li id="menu-item-5513" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5513"><a href="/jlpt-n1-complete-mastery/" onclick="return true">JLPT N1</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5514" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5514 icon"><a href="#" onclick="return true">Kaigo</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5515" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5515"><a href="/japanese-kaigo-basic-mastery" onclick="return true">Kaigo Pemula</a></li>
+                                            <li id="menu-item-5516" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5516"><a href="/japanese-kaigo-fukushishi-mastery" onclick="return true">Kaigo Fukushishi</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-4004" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4004"><a href="kelas.html" onclick="return true">Semua Kelas</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-3353" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children current-menu-item menu-item-3353 icon"><a href="#" onclick="return true">Layanan</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4139" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4139 icon"><a href="#" onclick="return true">Ujian</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-4140" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4140 icon"><a href="#" onclick="return true">JLPT</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4141"><a target="_blank" href="https://jlptonline.or.id/" onclick="return true">JLPT Indonesia</a></li>
+                                                    <li id="menu-item-4142" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4142"><a target="_blank" href="https://info.jees-jlpt.jp/" onclick="return true">JLPT Jepang</a></li>
+                                                </ul>
+                                            </li>
+                                            <li id="menu-item-4143" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4143"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/1" onclick="return true">JFT Basic</a></li>
+                                            <li id="menu-item-4144" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4144 icon"><a href="#" onclick="return true">Tokutei Ginou</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4145" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4145"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/2" onclick="return true">Perawat Lansia (Kaigo)</a></li>
+                                                    <li id="menu-item-4146" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4146"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/6" onclick="return true">Pengolahan Makanan</a></li>
+                                                    <li id="menu-item-4147" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4147"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/4" onclick="return true">Restoran</a></li>
+                                                    <li id="menu-item-4148" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4148"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/5" onclick="return true">Pertanian &amp; Peternakan</a></li>
+                                                    <li id="menu-item-4149" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4149"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/10" onclick="return true">Konstruksi</a></li>
+                                                    <li id="menu-item-4150" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4150"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/12" onclick="return true">Akomodasi (Hotel)</a></li>
+                                                    <li id="menu-item-4151" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4151"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/7" onclick="return true">Pemeliharaan Kendaraan</a></li>
+                                                    <li id="menu-item-4152" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4152"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/8" onclick="return true">Budidaya Perairan</a></li>
+                                                    <li id="menu-item-4153" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4153"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/9" onclick="return true">Perikanan</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5523" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5523"><a href="#" onclick="return true">1-on-1 Coaching</a></li>
+                                    <li id="menu-item-5521" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5521"><a href="#" onclick="return true">Try Out JLPT</a></li>
+                                    <li id="menu-item-5522" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5522"><a href="#" onclick="return true">Webinar</a></li>
+                                    <li id="menu-item-4993" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4993"><a href="toko.html" onclick="return true">E-Book</a></li>
+                                    <li id="menu-item-5524" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5524"><a href="toko.html" onclick="return true">Digital Download</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-5525" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5525"><a href="komunitas.html" onclick="return true">Komunitas</a></li>
+                            <li id="menu-item-4213" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4213"><a href="tentang.html" onclick="return true">Tentang</a></li>
+                            <li id="menu-item-4196" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4196"><a href="kontak.html" onclick="return true">Kontak</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bagian Kanan: Koin & Dropdown User -->
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-white stats-top" title="Total Koin" id="dompet-header">🪙 Memuat...</span>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-nav-outline dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            👤 <span id="nav-user-name">Memuat...</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userMenuButton">
+                            <li><h6 class="dropdown-header text-muted fw-bold">Menu Akun Saya</h6></li>
+                            <li><a class="dropdown-item" href="dashboard.html">🏠 Dasbor Utama</a></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" onclick="bukaModalNotif(event)">
+                                    🔔 Notifikasi 
+                                    <span id="badge-notif" class="badge bg-danger rounded-pill" style="display:none;">0</span>
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="profil.html">👤 Edit Profil</a></li>
+                            <li><a class="dropdown-item bg-light text-primary" href="toko.html">🏪 Kunjungi Toko</a></li>
+                            
+                            <div id="nav-menu-sensei" style="display: none;">
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header text-primary fw-bold">Administrator</h6></li>
+                                <li><a class="dropdown-item text-primary" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
+                            </div>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item text-danger" onclick="logout()">🚪 Keluar Akun</button></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </div>
 
     <!-- Header Section -->
     <div class="header-section mt-0">
@@ -173,10 +245,9 @@
     </div>
 
     <!-- Area Etalase -->
-    <div class="content-section">
+    <div class="content-section pt-0">
         <div class="container">
             <div class="row" id="etalase-toko">
-                <!-- Barang dari database akan dimunculkan di sini -->
                 <div class="col-12 text-center py-5">
                     <h5 class="fw-bold text-muted">Menyiapkan etalase toko...</h5>
                 </div>
@@ -184,17 +255,149 @@
         </div>
     </div>
 
+    <!-- MODAL NOTIFIKASI -->
+    <div class="modal fade" id="modalNotif" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 20px; border: none;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">🔔 Notifikasi Anda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-0" id="notif-container">
+                    <div class="text-center text-muted py-4">Memuat...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ALERT KUSTOM (Pengganti alert bawaan browser) -->
+    <div class="modal fade" id="modalAlert" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+                <div class="modal-body text-center p-5">
+                    <div class="mb-3" id="modal-alert-icon" style="font-size: 4rem;">🔔</div>
+                    <h3 class="fw-bold mb-3 text-dark" id="modal-alert-title">Pemberitahuan</h3>
+                    <p class="text-muted mb-4 fs-5" id="modal-alert-message"></p>
+                    <button type="button" class="btn btn-korisu-solid w-100 fs-5" data-bs-dismiss="modal">Mengerti</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL KONFIRMASI KUSTOM (Pengganti confirm bawaan browser) -->
+    <div class="modal fade" id="modalConfirm" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.15);">
+                <div class="modal-body text-center p-5">
+                    <div class="mb-3" style="font-size: 4rem;">🛍️</div>
+                    <h3 class="fw-bold mb-3 text-dark">Konfirmasi Beli</h3>
+                    <p class="text-muted mb-4 fs-5" id="modal-confirm-message"></p>
+                    <div class="d-flex gap-3">
+                        <button type="button" class="btn btn-light w-50 fw-bold rounded-pill" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-success w-50 fw-bold rounded-pill" id="btn-confirm-yes">Ya, Beli</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN = localStorage.getItem('korisu_token');
         let USER = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+        
+        let modalNotif = null;
+        let modalAlertInstance = null;
+        let modalConfirmInstance = null;
+        let confirmAction = null;
 
         if (!TOKEN) window.location.href = "auth.html";
 
-        // Pasang saldo koin saat ini
-        document.getElementById('dompet-header').innerText = `🪙 ${USER.koin || 0} Koin`;
+        // ==========================
+        // Logika Profil & Notifikasi
+        // ==========================
+        document.addEventListener('DOMContentLoaded', () => {
+            modalNotif = new bootstrap.Modal(document.getElementById('modalNotif'));
+            modalAlertInstance = new bootstrap.Modal(document.getElementById('modalAlert'));
+            modalConfirmInstance = new bootstrap.Modal(document.getElementById('modalConfirm'));
 
-        // Ambil barang dari server
+            document.getElementById('btn-confirm-yes').addEventListener('click', () => {
+                modalConfirmInstance.hide();
+                if(confirmAction) confirmAction();
+            });
+            
+            if (USER && USER.nama_lengkap) {
+                let namaDepan = USER.nama_lengkap.split(' ')[0];
+                document.getElementById('nav-user-name').innerText = namaDepan;
+                document.getElementById('dompet-header').innerText = `🪙 ${USER.koin || 0}`;
+                
+                if(USER.role === 'sensei' || USER.role === 'admin') {
+                    document.getElementById('nav-menu-sensei').style.display = 'block';
+                }
+                muatNotifikasi();
+            }
+
+            muatToko();
+        });
+
+        // -------------------------
+        // FUNGSI HELPER MODAL FRONTEND
+        // -------------------------
+        function showAlert(msg, icon = "🔔", title = "Pemberitahuan") {
+            document.getElementById('modal-alert-icon').innerText = icon;
+            document.getElementById('modal-alert-title').innerText = title;
+            document.getElementById('modal-alert-message').innerText = msg;
+            modalAlertInstance.show();
+        }
+
+        function showConfirm(msg, callback) {
+            document.getElementById('modal-confirm-message').innerText = msg;
+            confirmAction = callback;
+            modalConfirmInstance.show();
+        }
+
+        async function muatNotifikasi() {
+            if(!TOKEN) return;
+            const container = document.getElementById('notif-container');
+            try {
+                const res = await fetch(`${API_URL}/community/notifications`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                if (!res.ok) throw new Error("Gagal menarik data");
+
+                const data = await res.json();
+                const unread = data.notifications.filter(n => !n.is_read).length;
+                const badge = document.getElementById('badge-notif');
+                
+                if (unread > 0) { badge.innerText = unread; badge.style.display = 'inline-block'; } 
+                else { badge.style.display = 'none'; }
+                
+                container.innerHTML = "";
+                if(data.notifications.length > 0) {
+                    data.notifications.forEach(n => {
+                        const bgClass = n.is_read ? '' : 'unread';
+                        container.innerHTML += `
+                            <div class="notif-item p-3 border-bottom ${bgClass}" onclick="window.location.href='komunitas.html?post_id=${n.post_id}'">
+                                <div class="fw-bold">${n.sender_name}</div>
+                                <div class="text-muted small">${n.message}</div>
+                            </div>
+                        `;
+                    });
+                } else { container.innerHTML = "<div class='text-center text-muted py-4'>Tidak ada notifikasi baru.</div>"; }
+                
+            } catch(e) { container.innerHTML = `<div class='text-center text-danger py-4 fw-bold'>Gagal memuat notifikasi.</div>`; }
+        }
+
+        function bukaModalNotif(e) {
+            e.preventDefault(); 
+            modalNotif.show();
+            fetch(`${API_URL}/community/notifications/read`, { method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}` }}).then(() => { document.getElementById('badge-notif').style.display = 'none'; });
+        }
+
+        function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
+
+        // ==========================
+        // Logika Etalase Toko Koin Tupai
+        // ==========================
         async function muatToko() {
             try {
                 const res = await fetch(`${API_URL}/shop/items`, {
@@ -207,7 +410,6 @@
                 
                 if (res.ok && data.items.length > 0) {
                     data.items.forEach(item => {
-                        // Tentukan gaya badge yang sesuai
                         let badgeClass = 'badge-makanan';
                         if(item.tipe_item === 'aksesoris') badgeClass = 'badge-aksesoris';
                         if(item.tipe_item === 'background') badgeClass = 'badge-background';
@@ -222,30 +424,24 @@
                                     <h5 class="fw-bold mb-1">${item.nama_item}</h5>
                                     <div class="mt-auto pt-3">
                                         <h4 class="fw-bold mb-3" style="color: var(--korisu-orange);">🪙 ${item.harga_koin}</h4>
-                                        <button class="btn-beli-solid" onclick="beliBarang(${item.id}, ${item.harga_koin}, '${item.nama_item.replace(/'/g, "\\'")}')">BELI ITEM</button>
+                                        <button class="btn-beli-solid" onclick="konfirmasiBeli(${item.id}, ${item.harga_koin}, '${item.nama_item.replace(/'/g, "\\'")}')">BELI ITEM</button>
                                     </div>
                                 </div>
                             </div>
                         `;
                     });
                 } else {
-                    etalase.innerHTML = `
-                        <div class="col-12 text-center py-5">
-                            <h5 class="text-muted fw-bold">Toko sedang kosong hari ini.</h5>
-                        </div>`;
+                    etalase.innerHTML = `<div class="col-12 text-center py-5"><h5 class="text-muted fw-bold">Toko sedang kosong hari ini.</h5></div>`;
                 }
             } catch (error) {
-                document.getElementById('etalase-toko').innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <h5 class="text-danger fw-bold">Gagal terhubung ke toko.</h5>
-                    </div>`;
+                document.getElementById('etalase-toko').innerHTML = `<div class="col-12 text-center py-5"><h5 class="text-danger fw-bold">Gagal terhubung ke toko.</h5></div>`;
             }
         }
 
-        // Proses Pembelian
-        async function beliBarang(id, harga, nama) {
-            if (confirm(`Tukar ${harga} koin untuk membeli ${nama}?`)) {
+        function konfirmasiBeli(id, harga, nama) {
+            showConfirm(`Tukar ${harga} koin untuk membeli ${nama}?`, async () => {
                 try {
+                    // Penembakan API Langsung ke Server untuk Validasi Otoritatif (Server-Side Logic)
                     const res = await fetch(`${API_URL}/shop/buy`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` },
@@ -255,21 +451,21 @@
                     const hasil = await res.json();
 
                     if (res.ok) {
+                        // Jika server menyatakan berhasil, perbarui LocalStorage dan Tampilan
                         USER.koin = hasil.sisa_koin;
                         localStorage.setItem('korisu_user', JSON.stringify(USER));
-                        document.getElementById('dompet-header').innerText = `🪙 ${USER.koin} Koin`;
+                        document.getElementById('dompet-header').innerText = `🪙 ${USER.koin}`;
 
-                        alert(hasil.message);
+                        showAlert(hasil.message, "✅", "Berhasil!");
                     } else {
-                        alert(hasil.message); 
+                        // Jika server menolak (karena koin tidak cukup atau error lain)
+                        showAlert(hasil.message, "❌", "Transaksi Gagal"); 
                     }
                 } catch (error) {
-                    alert("Terjadi kesalahan jaringan saat memproses pembelian.");
+                    showAlert("Terjadi kesalahan jaringan saat memproses pembelian.", "🔌", "Error");
                 }
-            }
+            });
         }
-
-        document.addEventListener('DOMContentLoaded', muatToko);
     </script>
 </body>
 </html>

@@ -19,7 +19,6 @@ const getTodayReviews = async (req, res) => {
                 LIMIT 50
             `, [muridId, courseId]);
 
-            // [PERBAIKAN] Mengambil seluruh kosakata kelas sebagai bahan acakan tombol
             const kamusRes = await db.query(
                 'SELECT kanji, furigana, arti_indonesia FROM vocabularies WHERE course_id = $1',
                 [courseId]
@@ -28,7 +27,7 @@ const getTodayReviews = async (req, res) => {
             res.json({ 
                 jumlah_antrean: result.rows.length, 
                 data: result.rows,
-                kamus_distraktor: kamusRes.rows // Dikirim ke layar kuis
+                kamus_distraktor: kamusRes.rows 
             });
         } else {
             const result = await db.query(`
@@ -44,7 +43,7 @@ const getTodayReviews = async (req, res) => {
     }
 };
 
-// 2. Menerima Jawaban Murid
+// 2. Menerima Jawaban Murid & MENTRANSFER HADIAH KE DATABASE
 const submitReview = async (req, res) => {
     const muridId = req.user.id;
     const { vocab_id, arah_kuis, is_correct, waktu_jawab_detik } = req.body;
@@ -82,6 +81,7 @@ const submitReview = async (req, res) => {
             koinReward = 0;
         }
 
+        // A. Menyimpan progres memori
         await db.query(`
             UPDATE srs_reviews 
             SET srs_level = $1, 
@@ -91,6 +91,16 @@ const submitReview = async (req, res) => {
                 avg_waktu_detik = $5
             WHERE murid_id = $6 AND vocab_id = $7 AND arah_kuis = $8
         `, [srs_level, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
+
+        // B. [PERBAIKAN KRUSIAL] Menambahkan Koin dan EXP secara nyata ke profil database murid!
+        if (expReward > 0 || koinReward > 0) {
+            await db.query(`
+                UPDATE users 
+                SET koin = COALESCE(koin, 0) + $1, 
+                    exp = COALESCE(exp, 0) + $2 
+                WHERE id = $3
+            `, [koinReward, expReward, muridId]);
+        }
 
         res.json({ message: 'Progres arah kuis disimpan.', reward: { exp: expReward, koin: koinReward } });
     } catch (error) {

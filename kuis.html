@@ -11,48 +11,82 @@
             --korisu-orange: #ff7f00;
             --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
+            --bg-light: #fafafa;
         }
         
         body { 
-            background-color: #fafafa; 
+            background-color: var(--bg-light); 
             color: var(--korisu-black); 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            overflow-x: hidden; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
         }
 
-        /* Navigasi Atas (Solid Orange) */
-        .navbar-custom { 
-            background-color: var(--korisu-orange); 
-            padding: 15px 0;
+        /* ---------------------------------------------------
+           NAVIGASI & DROPDOWN (SEAMLESS DENGAN DASHBOARD)
+           --------------------------------------------------- */
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
+        .navbar-custom { background-color: var(--korisu-orange); padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2); }
+        
+        .menu-primary-container { display: flex; align-items: center; }
+        #menu-primary { display: flex; flex-direction: row; list-style: none; margin: 0; padding: 0; gap: 5px; align-items: center;}
+        #menu-primary .nav-close { display: none; }
+        #menu-primary .menu-item { position: relative; }
+        
+        #menu-primary > .menu-item > a {
+            color: rgba(255, 255, 255, 0.8) !important; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            padding: 8px 12px; display: block; border-radius: 8px; transition: all 0.2s ease;
         }
-        .btn-nav-outline {
-            background-color: var(--korisu-white);
-            color: var(--korisu-orange);
-            font-weight: bold;
-            border-radius: 25px;
-            padding: 8px 25px;
-            border: none;
-            transition: all 0.2s;
-        }
-        .btn-nav-outline:hover {
-            background-color: #f8f9fa;
-            transform: translateY(-2px);
-        }
+        #menu-primary > .menu-item > a:hover, #menu-primary > .current-menu-item > a { color: var(--korisu-white) !important; }
 
-        /* Area Konten dengan Dotted Grid Background */
+        #menu-primary > .menu-item-has-children > a::after { content: ' ▾'; font-size: 0.8rem; vertical-align: middle; margin-left: 4px; opacity: 0.8; }
+        #menu-primary .sub-menu .menu-item-has-children > a::after { content: ' ▸'; float: right; font-size: 1rem; opacity: 0.6; }
+
+        #menu-primary .sub-menu {
+            visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 0; background-color: var(--korisu-white);
+            list-style: none; padding: 10px 0; margin: 0; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+            border: 1px solid #f0f0f0; min-width: 240px; z-index: 1060; transform: translateY(10px); transition: all 0.3s ease;
+        }
+        
+        #menu-primary .menu-item-has-children:hover > .sub-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+        
+        #menu-primary .sub-menu .menu-item > a {
+            color: var(--korisu-black); padding: 10px 20px; font-weight: 600; font-size: 0.9rem; display: block; text-decoration: none; transition: all 0.2s ease;
+        }
+        #menu-primary .sub-menu .menu-item > a:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+
+        #menu-primary .sub-menu .menu-item-has-children > .sub-menu { top: -10px; left: 100%; margin-left: 5px; transform: translateX(-10px); }
+        #menu-primary .sub-menu .menu-item-has-children:hover > .sub-menu { transform: translateX(0); }
+
+        /* Dropdown Profil Kanan */
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 20px; border: none; transition: all 0.2s; }
+        .btn-nav-outline:hover, .btn-nav-outline[aria-expanded="true"] { background-color: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu-custom { border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 15px 35px rgba(0,0,0,0.08); padding: 10px 0; margin-top: 10px !important; min-width: 220px; }
+        .dropdown-item { font-weight: 600; padding: 10px 20px; transition: all 0.2s ease; color: var(--korisu-black); }
+        .dropdown-item:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+        .dropdown-item.text-danger:hover { background-color: #fff0f0; color: #dc3545; }
+        .stats-top { background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); }
+
+        .notif-item { cursor: pointer; transition: background 0.2s; }
+        .notif-item:hover { background-color: #f8f9fa; }
+        .notif-item.unread { background-color: #fffaf5; border-left: 4px solid var(--korisu-orange); }
+
+        /* ---------------------------------------------------
+           STYLING KHUSUS KUIS SRS
+           --------------------------------------------------- */
         .content-section {
             flex: 1;
             background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
             background-size: 30px 30px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 40px 15px;
+            justify-content: flex-start;
+            padding: 20px 15px 60px 15px;
         }
 
-        /* Kartu Kuis Utama (Clean, Soft Shadow, Rounded) */
         .flashcard-modern {
             background-color: var(--korisu-white);
             border: 1px solid #f0f0f0;
@@ -63,9 +97,9 @@
             padding: 2.5rem;
             text-align: center;
             transition: transform 0.3s ease;
+            position: relative;
         }
 
-        /* Header Kuis (Timer & Misi) */
         .badge-atas {
             display: inline-block;
             background-color: #fffaf5;
@@ -76,13 +110,8 @@
             border-radius: 20px;
             border: 1px solid #ffe8d6;
         }
-        .badge-timer {
-            background-color: #fff0f0;
-            color: #dc3545;
-            border: 1px solid #ffdcdc;
-        }
+        .badge-timer { background-color: #fff0f0; color: #dc3545; border: 1px solid #ffdcdc; transition: color 0.2s; }
 
-        /* Teks Soal */
         .teks-bantuan {
             font-size: 0.95rem;
             color: #888;
@@ -100,18 +129,17 @@
             word-wrap: break-word;
         }
 
-        /* Tombol Pilihan Ganda */
         .btn-pilihan {
             background-color: var(--korisu-white);
             color: var(--korisu-black);
-            border: 1.5px solid #e0e0e0;
+            border: 2px solid #e0e0e0;
             font-weight: 600;
             font-size: 1.1rem;
             width: 100%;
             padding: 15px 12px;
             margin-bottom: 15px;
             border-radius: 16px;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             text-align: center;
             white-space: normal;
             word-wrap: break-word;
@@ -124,74 +152,164 @@
             box-shadow: 0 8px 20px rgba(255,127,0,0.08);
         }
         
-        /* State Benar / Salah Lembut */
-        .btn-pilihan.benar {
-            background-color: #d1e7dd !important;
-            color: #0f5132 !important;
-            border-color: #198754 !important;
-            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.15);
+        .btn-pilihan.benar { background-color: #d1e7dd !important; color: #0f5132 !important; border-color: #198754 !important; box-shadow: 0 8px 20px rgba(25, 135, 84, 0.15); transform: scale(1.02); }
+        .btn-pilihan.salah { background-color: #f8d7da !important; color: #842029 !important; border-color: #dc3545 !important; }
+
+        .btn-korisu-solid { 
+            background-color: var(--korisu-orange); color: white; border: none; border-radius: 15px; font-weight: bold; 
+            font-size: 1.1rem; padding: 14px 20px; transition: all 0.3s; width: 100%; margin-top: 15px;
         }
-        .btn-pilihan.salah {
-            background-color: #f8d7da !important;
-            color: #842029 !important;
-            border-color: #dc3545 !important;
+        .btn-korisu-solid:hover { background-color: #e67300; color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
+        
+        #hasil-notif { display: none; margin-top: 15px; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .jawaban-lengkap { background-color: #fafafa; border: 1px solid #e0e0e0; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+        
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
-        /* Tombol Aksi */
-        .btn-korisu-solid { 
-            background-color: var(--korisu-orange); 
-            color: white; 
-            border: none; 
-            border-radius: 15px; 
-            font-weight: bold; 
-            font-size: 1.1rem;
-            padding: 14px 20px; 
-            transition: all 0.3s; 
-            width: 100%;
-            margin-top: 15px;
+        /* --- ANIMASI KOIN REAL-TIME --- */
+        @keyframes koinBounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); color: #fff; text-shadow: 0 0 10px #ff7f00; }
+            100% { transform: scale(1); }
         }
-        .btn-korisu-solid:hover { 
-            background-color: #e67300; 
-            color: white; 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); 
+        .koin-animate {
+            display: inline-block;
+            animation: koinBounce 0.4s ease-out;
         }
-        
-        /* Area Notifikasi & Review */
-        #hasil-notif { 
-            display: none; 
-            margin-top: 15px; 
-            animation: fadeIn 0.4s ease;
-        }
-        .jawaban-lengkap { 
-            background-color: #fafafa; 
-            border: 1px solid #e0e0e0; 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+
+        ::selection { background-color: #FFF7ED; color: #EA580C; }
     </style>
 </head>
 <body>
 
-    <!-- Navigasi Atas Minimalis -->
-    <nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
-                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
-                <span class="d-none d-sm-inline">KORISU Gakkou</span>
-            </a>
-            <button class="btn-nav-outline" onclick="kembaliKeKelas()">Kembali ke Kelas</button>
-        </div>
-    </nav>
+    <!-- Navigasi Ke Dalam Container -->
+    <div class="container nav-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid px-2">
+                
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                    <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                </a>
+                
+                <!-- Menu Tengah -->
+                <div class="d-none d-lg-flex mx-auto">
+                    <div class="menu-primary-container">
+                        <ul id="menu-primary" class="navbar-nav">
+                            <li class="nav-close"><button class="btn-nav-close"><span class="close-btn">+</span></button></li>
+                            <li id="menu-item-3896" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-3896"><a href="dashboard.html" aria-current="page" onclick="return true">Beranda</a></li>
+                            <li id="menu-item-4136" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children current-menu-item menu-item-4136 icon"><a href="#" onclick="return true">Kelas</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4137" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4137"><a href="https://korisugakkou.com/jlpt-n4-complete-mastery" onclick="return true">Kelas Unggulan</a></li>
+                                    <li id="menu-item-5517" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5517 icon"><a href="#" onclick="return true">Dari 0</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5518" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5518"><a href="/hiragana-mastery" onclick="return true">Hiragana</a></li>
+                                            <li id="menu-item-5519" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5519"><a href="/katakana-mastery" onclick="return true">Katakana</a></li>
+                                            <li id="menu-item-5520" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5520"><a href="/japanese-fundamental-mastery" onclick="return true">Bahasa Jepang Dasar</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5508" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5508 icon"><a href="#" onclick="return true">JLPT</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5509" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5509"><a href="/jlpt-n5-complete-mastery/" onclick="return true">JLPT N5</a></li>
+                                            <li id="menu-item-5510" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5510"><a href="/jlpt-n4-complete-mastery/" onclick="return true">JLPT N4</a></li>
+                                            <li id="menu-item-5511" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5511"><a href="/jlpt-n3-complete-mastery/" onclick="return true">JLPT N3</a></li>
+                                            <li id="menu-item-5512" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5512"><a href="/jlpt-n2-complete-mastery/" onclick="return true">JLPT N2</a></li>
+                                            <li id="menu-item-5513" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5513"><a href="/jlpt-n1-complete-mastery/" onclick="return true">JLPT N1</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5514" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5514 icon"><a href="#" onclick="return true">Kaigo</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5515" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5515"><a href="/japanese-kaigo-basic-mastery" onclick="return true">Kaigo Pemula</a></li>
+                                            <li id="menu-item-5516" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5516"><a href="/japanese-kaigo-fukushishi-mastery" onclick="return true">Kaigo Fukushishi</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-4004" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4004"><a href="kelas.html" onclick="return true">Semua Kelas</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-3353" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-3353 icon"><a href="#" onclick="return true">Layanan</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4139" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4139 icon"><a href="#" onclick="return true">Ujian</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-4140" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4140 icon"><a href="#" onclick="return true">JLPT</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4141"><a target="_blank" href="https://jlptonline.or.id/" onclick="return true">JLPT Indonesia</a></li>
+                                                    <li id="menu-item-4142" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4142"><a target="_blank" href="https://info.jees-jlpt.jp/" onclick="return true">JLPT Jepang</a></li>
+                                                </ul>
+                                            </li>
+                                            <li id="menu-item-4143" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4143"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/1" onclick="return true">JFT Basic</a></li>
+                                            <li id="menu-item-4144" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4144 icon"><a href="#" onclick="return true">Tokutei Ginou</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4145" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4145"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/2" onclick="return true">Perawat Lansia (Kaigo)</a></li>
+                                                    <li id="menu-item-4146" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4146"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/6" onclick="return true">Pengolahan Makanan</a></li>
+                                                    <li id="menu-item-4147" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4147"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/4" onclick="return true">Restoran</a></li>
+                                                    <li id="menu-item-4148" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4148"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/5" onclick="return true">Pertanian &amp; Peternakan</a></li>
+                                                    <li id="menu-item-4149" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4149"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/10" onclick="return true">Konstruksi</a></li>
+                                                    <li id="menu-item-4150" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4150"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/12" onclick="return true">Akomodasi (Hotel)</a></li>
+                                                    <li id="menu-item-4151" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4151"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/7" onclick="return true">Pemeliharaan Kendaraan</a></li>
+                                                    <li id="menu-item-4152" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4152"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/8" onclick="return true">Budidaya Perairan</a></li>
+                                                    <li id="menu-item-4153" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4153"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/9" onclick="return true">Perikanan</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5523" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5523"><a href="#" onclick="return true">1-on-1 Coaching</a></li>
+                                    <li id="menu-item-5521" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5521"><a href="#" onclick="return true">Try Out JLPT</a></li>
+                                    <li id="menu-item-5522" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5522"><a href="#" onclick="return true">Webinar</a></li>
+                                    <li id="menu-item-4993" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4993"><a href="toko.html" onclick="return true">E-Book</a></li>
+                                    <li id="menu-item-5524" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5524"><a href="toko.html" onclick="return true">Digital Download</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-5525" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5525"><a href="komunitas.html" onclick="return true">Komunitas</a></li>
+                            <li id="menu-item-4213" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4213"><a href="tentang.html" onclick="return true">Tentang</a></li>
+                            <li id="menu-item-4196" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4196"><a href="kontak.html" onclick="return true">Kontak</a></li>
+                        </ul>
+                    </div>
+                </div>
 
-    <!-- Area Kuis -->
-    <div class="content-section">
+                <!-- Bagian Kanan: Koin & Dropdown User -->
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-white stats-top" title="Total Koin">🪙 <span id="koin-murid">0</span></span>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-nav-outline dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            👤 <span id="nav-user-name">Memuat...</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userMenuButton">
+                            <li><h6 class="dropdown-header text-muted fw-bold">Menu Akun Saya</h6></li>
+                            <li><a class="dropdown-item" href="dashboard.html">🏠 Dasbor Utama</a></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" onclick="bukaModalNotif(event)">
+                                    🔔 Notifikasi 
+                                    <span id="badge-notif" class="badge bg-danger rounded-pill" style="display:none;">0</span>
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="profil.html">👤 Edit Profil</a></li>
+                            <li><a class="dropdown-item" href="toko.html">🏪 Kunjungi Toko</a></li>
+                            
+                            <div id="nav-menu-sensei" style="display: none;">
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header text-primary fw-bold">Administrator</h6></li>
+                                <li><a class="dropdown-item text-primary" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
+                            </div>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item text-danger" onclick="logout()">🚪 Keluar Akun</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Tombol Navigasi Cepat (Back to Class) -->
+    <div class="container text-center mb-1">
+        <button class="btn btn-sm btn-light fw-bold rounded-pill px-4 py-2 shadow-sm border" onclick="kembaliKeKelas()">🔙 Kembali ke Kurikulum Kelas</button>
+    </div>
+
+    <!-- Area Kuis Utama -->
+    <div class="content-section pt-3">
         <div class="flashcard-modern">
             
             <!-- Header Progress & Timer -->
@@ -211,7 +329,7 @@
                 </div>
             </div>
 
-            <!-- Area Hasil Pop-up (Kartu Penjelasan) -->
+            <!-- Area Hasil Pop-up (Langsung di dalam kartu) -->
             <div id="hasil-notif">
                 <h3 id="status-jawaban" class="fw-bold mb-4">...</h3>
                 
@@ -222,19 +340,37 @@
                     <div class="fs-5">🇮🇩 <strong>Arti:</strong> <span id="info-arti" class="fw-medium text-dark"></span></div>
                 </div>
 
-                <div class="bg-light border border-success rounded-4 p-3 mb-4">
+                <div class="bg-light border border-success rounded-4 p-3 mb-4 text-center">
                     <h5 class="text-success fw-bold mb-0" id="reward-text">...</h5>
                 </div>
-                <button class="btn-korisu-solid" id="btn-lanjut" onclick="lanjutSoal()">Lanjutkan Misi ➔</button>
+                <button class="btn-korisu-solid shadow-sm" id="btn-lanjut" onclick="lanjutSoal()">Lanjutkan Misi ➔</button>
             </div>
             
         </div>
     </div>
 
-    <!-- Script Logika Dipertahankan Utuh -->
+    <!-- MODAL NOTIFIKASI -->
+    <div class="modal fade" id="modalNotif" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">🔔 Notifikasi Anda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-0" id="notif-container">
+                    <div class="text-center text-muted py-4">Memuat...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Utama (Super Cepat / Sat Set) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
+        const userData = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+        let modalNotif = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         const targetCourseId = urlParams.get('course_id');
@@ -242,12 +378,72 @@
         if (!TOKEN_SAYA) window.location.href = "auth.html";
         if (!targetCourseId) window.location.href = "kelas.html";
 
+        document.addEventListener('DOMContentLoaded', () => {
+            modalNotif = new bootstrap.Modal(document.getElementById('modalNotif'));
+            
+            if (userData && userData.nama_lengkap) {
+                let namaDepan = userData.nama_lengkap.split(' ')[0];
+                document.getElementById('nav-user-name').innerText = namaDepan;
+                document.getElementById('koin-murid').innerText = userData.koin || 0;
+                
+                if(userData.role === 'sensei' || userData.role === 'admin') {
+                    document.getElementById('nav-menu-sensei').style.display = 'block';
+                }
+                muatNotifikasi();
+            }
+
+            mulaiSesiSRS();
+        });
+
+        // -------------------------
+        // Logika Sinkronisasi Notifikasi
+        // -------------------------
+        async function muatNotifikasi() {
+            const container = document.getElementById('notif-container');
+            try {
+                const res = await fetch(`${API_URL}/community/notifications`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }});
+                if (!res.ok) throw new Error("Gagal menarik data");
+
+                const data = await res.json();
+                const unread = data.notifications.filter(n => !n.is_read).length;
+                const badge = document.getElementById('badge-notif');
+                
+                if (unread > 0) { badge.innerText = unread; badge.style.display = 'inline-block'; } 
+                else { badge.style.display = 'none'; }
+                
+                container.innerHTML = "";
+                if(data.notifications.length > 0) {
+                    data.notifications.forEach(n => {
+                        const bgClass = n.is_read ? '' : 'unread';
+                        container.innerHTML += `
+                            <div class="notif-item p-3 border-bottom ${bgClass}" onclick="window.location.href='komunitas.html?post_id=${n.post_id}'">
+                                <div class="fw-bold">${n.sender_name}</div>
+                                <div class="text-muted small">${n.message}</div>
+                            </div>
+                        `;
+                    });
+                } else { container.innerHTML = "<div class='text-center text-muted py-4'>Tidak ada notifikasi baru.</div>"; }
+                
+            } catch(e) { container.innerHTML = `<div class='text-center text-danger py-4 fw-bold'>Gagal memuat notifikasi.</div>`; }
+        }
+
+        function bukaModalNotif(e) {
+            e.preventDefault(); 
+            modalNotif.show();
+            fetch(`${API_URL}/community/notifications/read`, { method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` }}).then(() => { document.getElementById('badge-notif').style.display = 'none'; });
+        }
+
+        function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
+
         function kembaliKeKelas() {
             window.location.href = `kelas.html?course_id=${targetCourseId}`;
         }
 
+        // -------------------------
+        // Logika Kuis Cepat (Optimistic UI & Real-Time Koin)
+        // -------------------------
         let antreanSoal = [];
-        let kamusDistraktor = []; // Bank Kata lengkap yang disuntikkan backend
+        let kamusDistraktor = []; 
         let indeksSaatIni = 0;
         let waktuMulai = 0;
         let timerInterval;
@@ -259,17 +455,13 @@
         async function mulaiSesiSRS() {
             try {
                 const res = await fetch(`${API_URL}/srs/today?course_id=${targetCourseId}`, { headers: { 'Authorization': `Bearer ${TOKEN_SAYA}` } });
-                
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => null);
-                    throw new Error(errData ? errData.message : `HTTP Error: ${res.status}`);
-                }
+                if (!res.ok) throw new Error("Gagal mengambil soal dari server.");
 
                 const data = await res.json();
                 
                 if(data.data && data.data.length > 0) {
                     antreanSoal = data.data;
-                    kamusDistraktor = data.kamus_distraktor || data.data; // Tangkap bank kosakata
+                    kamusDistraktor = data.kamus_distraktor || data.data;
                     indeksSaatIni = 0; 
                 } else {
                     document.querySelector('.flashcard-modern').innerHTML = `
@@ -288,16 +480,7 @@
                 `;
                 return; 
             }
-
-            try {
-                tampilkanSoal(0);
-            } catch (e) {
-                document.querySelector('.flashcard-modern').innerHTML = `
-                    <h4 class='text-danger mb-3'>⚠️ Error Data Kosakata</h4>
-                    <div class='alert alert-danger fs-6 text-start'><strong>Detail:</strong> ${e.message}</div>
-                    <button onclick="kembaliKeKelas()" class="btn btn-outline-dark mt-3 px-4">Kembali</button>
-                `;
-            }
+            tampilkanSoal(0);
         }
 
         function tampilkanSoal(indeks) {
@@ -338,9 +521,12 @@
             clearInterval(timerInterval);
             detikBerjalan = 0;
             document.getElementById('teks-timer').innerText = `0 Detik ⏱️`;
+            document.getElementById('teks-timer').style.color = "#dc3545";
+            
             timerInterval = setInterval(() => {
                 detikBerjalan++;
                 document.getElementById('teks-timer').innerText = `${detikBerjalan} Detik ⏱️`;
+                if(detikBerjalan > 10) document.getElementById('teks-timer').style.color = "#842029"; 
             }, 1000);
         }
 
@@ -352,7 +538,6 @@
             let hasComma = safeKunci.includes(',');
             let lastChar = safeKunci.slice(-1);
 
-            // TAHAP 1: Filter Pengecoh Tingkat Tinggi (Sesuai kesamaan huruf akhir & koma)
             let poolPengecoh = kamusDistraktor.filter(v => {
                 let rawVal = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
                 let safeVal = String(rawVal || ""); 
@@ -363,39 +548,32 @@
                 return true;
             });
 
-            // TAHAP 2: Jika saringan di atas terlalu ketat dan hasil < 3, ambil kata acak yang asli dari kelas ini
             if (poolPengecoh.length < 3) {
                 let poolCadangan = kamusDistraktor.filter(v => {
                     let rawVal = fieldTarget === 'furigana' ? (v.furigana || v.kanji) : v[fieldTarget];
                     let safeVal = String(rawVal || "");
-                    
-                    // Hindari kata yang sama dengan kunci dan hindari duplikasi dengan pool yang sudah ada
                     return safeVal !== "" && safeVal !== safeKunci && !poolPengecoh.some(p => {
                         let pVal = fieldTarget === 'furigana' ? (p.furigana || p.kanji) : p[fieldTarget];
                         return String(pVal || "") === safeVal;
                     });
                 });
 
-                // Mengacak kumpulan cadangan agar tidak monoton
                 for (let i = poolCadangan.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [poolCadangan[i], poolCadangan[j]] = [poolCadangan[j], poolCadangan[i]];
                 }
 
-                // Masukkan kata acak ke keranjang pengecoh utama sampai memenuhi kuota
                 for(let i = 0; i < poolCadangan.length; i++) {
                     if (poolPengecoh.length >= 3) break;
                     poolPengecoh.push(poolCadangan[i]);
                 }
             }
 
-            // Mengacak urutan akhir di keranjang pengecoh
             for (let i = poolPengecoh.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [poolPengecoh[i], poolPengecoh[j]] = [poolPengecoh[j], poolPengecoh[i]];
             }
 
-            // Memasukkan pengecoh ke dalam tombol Set (untuk memastikan semuanya unik)
             for (let i = 0; i < poolPengecoh.length; i++) {
                 if (pilihanSet.size >= 4) break;
                 let item = poolPengecoh[i];
@@ -403,7 +581,6 @@
                 pilihanSet.add(String(rawRandomVal));
             }
 
-            // Merender Set menjadi tombol di layar (diacak lagi agar jawaban benar tidak selalu di atas)
             let arrayPilihan = Array.from(pilihanSet);
             for (let i = arrayPilihan.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -416,7 +593,7 @@
                 const teksAman = teksPilihan.replace(/'/g, "\\'").replace(/"/g, '&quot;');
                 wadah.innerHTML += `
                     <div class="col-sm-6">
-                        <button class="btn btn-pilihan" id="btn-pil-${idx}" onclick="cekJawaban('${teksAman}', this.id)">
+                        <button class="btn btn-pilihan shadow-sm" id="btn-pil-${idx}" onclick="cekJawaban('${teksAman}', this.id)">
                             ${teksPilihan}
                         </button>
                     </div>
@@ -424,13 +601,18 @@
             });
         }
 
-        async function cekJawaban(jawabanUser, btnId) {
+        function cekJawaban(jawabanUser, btnId) {
             clearInterval(timerInterval);
             const detikDihabiskan = Math.round((Date.now() - waktuMulai) / 1000);
             const vocabId = vocabSaatIni.vocab_id;
             const arahSpesifik = vocabSaatIni.arah_kuis; 
             
             const isBenar = (jawabanUser === String(kunciJawabanSaatIni || "Tidak diketahui"));
+
+            // Kalkulasi Instan di Frontend (Tanpa Menunggu Backend)
+            let srsLevelSekarang = parseInt(vocabSaatIni.srs_level) || 0;
+            let expPrediksi = 5 + (srsLevelSekarang + 1);
+            let koinPrediksi = 2;
 
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
             semuaTombol.forEach(btn => btn.disabled = true);
@@ -445,50 +627,52 @@
                 });
             }
 
-            try {
-                const res = await fetch(`${API_URL}/srs/submit`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_SAYA}` },
-                    body: JSON.stringify({ 
-                        vocab_id: vocabId, 
-                        arah_kuis: arahSpesifik, 
-                        waktu_jawab_detik: detikDihabiskan, 
-                        is_correct: isBenar 
-                    })
-                });
-                
-                if (!res.ok) throw new Error("Gagal menyimpan progres.");
-                const hasilBackend = await res.json();
-                
-                setTimeout(() => {
-                    document.getElementById('area-soal').style.display = "none";
-                    const notifBox = document.getElementById('hasil-notif');
-                    notifBox.style.display = "block";
+            // TAMPILAN INSTAN (Hanya 300ms delay agar mata sempat melihat warna tombol)
+            setTimeout(() => {
+                document.getElementById('area-soal').style.display = "none";
+                const notifBox = document.getElementById('hasil-notif');
+                notifBox.style.display = "block";
 
-                    if(isBenar) {
-                        document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${detikDihabiskan}s)`;
-                        document.getElementById('status-jawaban').className = "fw-bold mb-3 text-success";
-                        document.getElementById('reward-text').innerText = `+${hasilBackend.reward.exp} EXP  •  +${hasilBackend.reward.koin} Koin 🐿️`;
-                        
-                        let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
-                        if (userSekarang) {
-                            userSekarang.koin = (userSekarang.koin || 0) + hasilBackend.reward.koin;
-                            userSekarang.exp = (userSekarang.exp || 0) + hasilBackend.reward.exp;
-                            localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
-                        }
-                    } else {
-                        document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat`;
-                        document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
-                        document.getElementById('reward-text').innerText = `Tidak apa-apa, arah memori ini akan direview ulang segera!`;
-                    }
+                if(isBenar) {
+                    document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${detikDihabiskan}s)`;
+                    document.getElementById('status-jawaban').className = "fw-bold mb-3 text-success";
+                    document.getElementById('reward-text').innerText = `+${expPrediksi} EXP  •  +${koinPrediksi} Koin 🐿️`;
                     
-                    document.getElementById('btn-lanjut').focus(); 
-                }, 1000); 
+                    // Update LocalStorage & UI Navigasi Secara Real-time
+                    let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
+                    if (userSekarang) {
+                        userSekarang.koin = (userSekarang.koin || 0) + koinPrediksi;
+                        userSekarang.exp = (userSekarang.exp || 0) + expPrediksi;
+                        localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
+
+                        // Menerapkan update angka & animasi pantulan koin di Navigasi Kanan Atas
+                        const koinEl = document.getElementById('koin-murid');
+                        koinEl.innerText = userSekarang.koin;
+                        
+                        koinEl.classList.remove('koin-animate');
+                        void koinEl.offsetWidth; // Memicu reflow paksa agar animasi bisa diulang
+                        koinEl.classList.add('koin-animate');
+                    }
+                } else {
+                    document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat`;
+                    document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
+                    document.getElementById('reward-text').innerText = `Tidak apa-apa, memori ini akan direview ulang segera!`;
+                }
                 
-            } catch (error) {
-                alert("Sistem terkendala saat menyimpan progres kuis: " + error.message);
-                semuaTombol.forEach(btn => btn.disabled = false);
-            }
+                document.getElementById('btn-lanjut').focus(); 
+            }, 300);
+
+            // SYNC BACKEND BERJALAN SENYAP DI LATAR BELAKANG
+            fetch(`${API_URL}/srs/submit`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_SAYA}` },
+                body: JSON.stringify({ 
+                    vocab_id: vocabId, 
+                    arah_kuis: arahSpesifik, 
+                    waktu_jawab_detik: detikDihabiskan, 
+                    is_correct: isBenar 
+                })
+            }).catch(error => console.error("Gagal sinkron data kuis ke server: ", error));
         }
 
         function lanjutSoal() {
@@ -496,8 +680,6 @@
             if (indeksSaatIni < antreanSoal.length) tampilkanSoal(indeksSaatIni);
             else mulaiSesiSRS(); 
         }
-
-        document.addEventListener('DOMContentLoaded', mulaiSesiSRS);
     </script>
 </body>
 </html>
