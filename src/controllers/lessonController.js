@@ -36,10 +36,11 @@ const completeLesson = async (req, res) => {
         const expDidapat = 10;
         const koinDidapat = 5;
 
-        // Gamifikasi: Berikan 10 EXP dan 5 Koin nyata ke Database karena rajin menonton video
-        await db.query(
-            'UPDATE users SET koin = COALESCE(koin, 0) + $1, exp = COALESCE(exp, 0) + $2 WHERE id = $3', 
-            [koinDidapat, expDidapat, murid_id]
+        // Gamifikasi: Berikan 10 EXP dan 5 Koin nyata ke tabel user_statistics
+await db.query(
+    'UPDATE user_statistics SET koin_dimiliki = COALESCE(koin_dimiliki, 0) + $1, total_exp_points = COALESCE(total_exp_points, 0) + $2 WHERE murid_id = $3', 
+    [koinDidapat, expDidapat, murid_id]
+);
         );
 
         res.json({ 
