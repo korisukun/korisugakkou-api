@@ -45,11 +45,19 @@
         .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 25px; transition: all 0.3s; }
         .btn-korisu-solid:hover { background-color: #e67300; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
 
+        /* [PERBAIKAN CSS] Styling Komentar & Hierarki Reply */
         .comment-section { background-color: #f8f9fa; border-radius: 16px; padding: 20px; margin-top: 15px; display: none; }
-        .comment-item { border-bottom: 1px solid #e9ecef; padding: 10px 0; }
+        .comment-item { padding: 12px 0; border-bottom: 1px solid #e9ecef; }
         .comment-item:last-child { border-bottom: none; }
         .comment-author { font-weight: 700; font-size: 0.95rem; }
         .comment-text { font-size: 0.95rem; color: #555; margin-top: 5px; }
+        
+        /* Tombol & Garis Balasan */
+        .btn-reply { font-size: 0.8rem; color: var(--korisu-orange); background: none; border: none; padding: 0; font-weight: bold; margin-top: 5px; transition: color 0.2s; }
+        .btn-reply:hover { text-decoration: underline; color: #e67300; }
+        .reply-section { margin-left: 20px; padding-left: 15px; border-left: 2px solid #dee2e6; margin-top: 10px; }
+        .reply-item { margin-top: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e9ecef; }
+        .reply-item:last-child { border-bottom: none; padding-bottom: 0; }
 
         .ql-toolbar.ql-snow { border: 1px solid #dee2e6; border-top-left-radius: 16px; border-top-right-radius: 16px; background-color: #f8f9fa; }
         .ql-container.ql-snow { border: 1px solid #dee2e6; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; background-color: #fff; font-family: inherit; font-size: 1.05rem; }
@@ -133,7 +141,7 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT POSTINGAN (BARU) -->
+    <!-- MODAL EDIT POSTINGAN -->
     <div class="modal fade" id="modalEditPost" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content" style="border-radius: 20px;">
@@ -165,19 +173,10 @@
         document.getElementById('koin-murid').innerText = userData.koin || 0;
         if(userData.role === 'sensei' || userData.role === 'admin') document.getElementById('nav-menu-sensei').style.display = 'block';
 
-        // Editor untuk Buat Postingan
-        const quill = new Quill('#editor-container', {
-            theme: 'snow', placeholder: 'Ada materi yang membingungkan? Atau mau berbagi pencapaian hari ini?',
-            modules: { toolbar: [['bold', 'italic'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] }
-        });
+        const quill = new Quill('#editor-container', { theme: 'snow', placeholder: 'Ada materi yang membingungkan? Atau mau berbagi pencapaian hari ini?', modules: { toolbar: [['bold', 'italic'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] } });
+        const editQuill = new Quill('#editor-edit-container', { theme: 'snow', modules: { toolbar: [['bold', 'italic'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] } });
 
-        // Editor untuk Edit Postingan
-        const editQuill = new Quill('#editor-edit-container', {
-            theme: 'snow',
-            modules: { toolbar: [['bold', 'italic'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] }
-        });
-
-        let postGlobal = []; // Variabel penyimpan data untuk referensi saat edit
+        let postGlobal = []; 
         let currentEditPostId = null;
         let modalEdit = null;
 
@@ -186,7 +185,6 @@
             muatFeed();
         });
 
-        // 1. Ambil Feed Postingan (Dilengkapi Opsi Edit/Hapus)
         async function muatFeed() {
             try {
                 const res = await fetch(`${API_URL}/community/posts`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
@@ -195,8 +193,7 @@
                 container.innerHTML = "";
 
                 if(res.ok && data.posts.length > 0) {
-                    postGlobal = data.posts; // Simpan ke global
-                    
+                    postGlobal = data.posts;
                     data.posts.forEach(post => {
                         const isSensei = post.role === 'sensei' || post.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
                         const d = new Date(post.created_at);
@@ -204,7 +201,6 @@
                         const likeClass = post.is_liked ? 'liked' : '';
                         const likeIcon = post.is_liked ? '❤️' : '🤍';
 
-                        // [BARU] LOGIKA KONTROL CRUD
                         let menuOpsi = '';
                         const isPenulis = (post.user_id == userData.id);
                         const isAdmin = (userData.role === 'sensei' || userData.role === 'admin');
@@ -232,7 +228,7 @@
                                             <div class="post-time">🕒 ${timeString}</div>
                                         </div>
                                     </div>
-                                    ${menuOpsi} <!-- Tombol Opsi Edit/Hapus Disisipkan Disini -->
+                                    ${menuOpsi}
                                 </div>
                                 <div class="post-content-area ql-editor px-0 pb-0">${post.konten}</div>
                                 
@@ -250,8 +246,9 @@
 
                                 <div class="comment-section" id="comment-box-${post.id}">
                                     <div id="comment-list-${post.id}" class="mb-3"></div>
-                                    <div class="d-flex gap-2">
-                                        <input type="text" id="input-komen-${post.id}" class="form-control rounded-pill px-3" placeholder="Tulis balasanmu...">
+                                    <!-- Form Balasan Post Utama -->
+                                    <div class="d-flex gap-2 mt-3">
+                                        <input type="text" id="input-komen-${post.id}" class="form-control rounded-pill px-3" placeholder="Tulis komentar ke postingan ini...">
                                         <button class="btn btn-dark rounded-pill px-4 fw-bold" onclick="kirimKomen(${post.id})">Kirim</button>
                                     </div>
                                 </div>
@@ -264,75 +261,7 @@
             } catch (error) { document.getElementById('feed-container').innerHTML = "<div class='text-danger text-center'>Gagal memuat komunitas.</div>"; }
         }
 
-        // 2. Submit Posting Baru
-        document.getElementById('form-post').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            let konten = quill.root.innerHTML;
-            if(konten === '<p><br></p>') return alert('Postingan tidak boleh kosong!');
-            
-            const btn = document.getElementById('btn-submit-post'); btn.disabled = true; btn.innerText = "Mengirim...";
-            try {
-                const res = await fetch(`${API_URL}/community/posts`, {
-                    method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ konten })
-                });
-                if(res.ok) { quill.root.innerHTML = ''; muatFeed(); }
-            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; btn.innerText = "Posting ke Forum 🚀"; }
-        });
-
-        // [BARU] 3. Buka Modal Edit
-        function bukaModalEdit(id) {
-            const postTarget = postGlobal.find(p => p.id === id);
-            if(!postTarget) return;
-            currentEditPostId = id;
-            editQuill.root.innerHTML = postTarget.konten;
-            modalEdit.show();
-        }
-
-        // [BARU] 4. Simpan Perubahan Edit
-        document.getElementById('btn-simpan-edit').addEventListener('click', async () => {
-            let konten = editQuill.root.innerHTML;
-            if(konten === '<p><br></p>') return alert('Postingan tidak boleh kosong!');
-            
-            const btn = document.getElementById('btn-simpan-edit'); btn.disabled = true; btn.innerText = "Menyimpan...";
-            try {
-                const res = await fetch(`${API_URL}/community/posts/${currentEditPostId}`, {
-                    method: 'PUT', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ konten })
-                });
-                if(res.ok) { modalEdit.hide(); muatFeed(); } else { alert("Gagal memperbarui postingan."); }
-            } catch (err) { alert("Error jaringan"); } finally { btn.disabled = false; btn.innerText = "Simpan Perubahan"; }
-        });
-
-        // [BARU] 5. Eksekusi Hapus Postingan
-        async function hapusPost(id) {
-            if(!confirm('Yakin ingin menghapus postingan ini secara permanen?')) return;
-            try {
-                const res = await fetch(`${API_URL}/community/posts/${id}`, {
-                    method: 'DELETE', headers: { 'Authorization': `Bearer ${TOKEN}` }
-                });
-                if(res.ok) { muatFeed(); } else { alert("Gagal menghapus postingan."); }
-            } catch (err) { alert("Error jaringan"); }
-        }
-
-        // 6. Tombol Like
-        async function toggleLike(postId, btnElement) {
-            try {
-                const res = await fetch(`${API_URL}/community/like`, {
-                    method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ post_id: postId })
-                });
-                const data = await res.json();
-                if(res.ok) {
-                    let countSpan = btnElement.querySelector('.like-count');
-                    let currentCount = parseInt(countSpan.innerText);
-                    if(data.is_liked) { btnElement.classList.add('liked'); btnElement.innerHTML = `❤️ <span class="like-count">${currentCount + 1}</span> Suka`; } 
-                    else { btnElement.classList.remove('liked'); btnElement.innerHTML = `🤍 <span class="like-count">${currentCount - 1}</span> Suka`; }
-                }
-            } catch(e){}
-        }
-
-        // 7. Toggle & Muat Komentar
+        // [PERBAIKAN] Logika Rendering Hierarki Komentar 1 Tingkat
         async function toggleKomentar(postId) {
             const box = document.getElementById(`comment-box-${postId}`);
             if(box.style.display === 'block') { box.style.display = 'none'; return; }
@@ -343,13 +272,47 @@
                 const res = await fetch(`${API_URL}/community/comments/${postId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
                 const data = await res.json();
                 list.innerHTML = "";
+                
                 if(data.comments.length > 0) {
-                    data.comments.forEach(c => {
+                    // Pisahkan Induk dan Balasan
+                    const parentComments = data.comments.filter(c => !c.parent_id);
+                    const replies = data.comments.filter(c => c.parent_id);
+
+                    parentComments.forEach(c => {
                         const isSensei = c.role === 'sensei' || c.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
+                        
+                        // Kumpulkan balasan milik Induk ini
+                        let htmlBalasan = '';
+                        const childReplies = replies.filter(r => r.parent_id === c.id);
+                        if (childReplies.length > 0) {
+                            htmlBalasan += `<div class="reply-section">`;
+                            childReplies.forEach(r => {
+                                const isSenseiReply = r.role === 'sensei' || r.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
+                                htmlBalasan += `
+                                    <div class="reply-item">
+                                        <div class="comment-author">${r.nama_lengkap} ${isSenseiReply}</div>
+                                        <div class="comment-text">${r.komentar}</div>
+                                    </div>
+                                `;
+                            });
+                            htmlBalasan += `</div>`;
+                        }
+
                         list.innerHTML += `
                             <div class="comment-item">
                                 <div class="comment-author">${c.nama_lengkap} ${isSensei}</div>
                                 <div class="comment-text">${c.komentar}</div>
+                                
+                                <!-- Tombol Balas (Hanya muncul di komentar Induk) -->
+                                <button class="btn-reply" onclick="bukaFormBalas(${c.id})">↪ Balas</button>
+                                
+                                ${htmlBalasan}
+
+                                <!-- Form Balas Khusus Induk Ini (Hidden) -->
+                                <div id="form-balas-${c.id}" class="d-flex gap-2 mt-2 reply-section" style="display: none !important;">
+                                    <input type="text" id="input-balas-${c.id}" class="form-control form-control-sm rounded-pill px-3" placeholder="Balas ke ${c.nama_lengkap}...">
+                                    <button class="btn btn-sm btn-dark rounded-pill px-3 fw-bold" onclick="kirimKomen(${postId}, ${c.id})">Kirim</button>
+                                </div>
                             </div>
                         `;
                     });
@@ -357,27 +320,91 @@
             } catch(e) { list.innerHTML = "Gagal memuat."; }
         }
 
-        // 8. Kirim Komentar
-        async function kirimKomen(postId) {
-            const input = document.getElementById(`input-komen-${postId}`);
+        // Penampil Form Balas
+        function bukaFormBalas(commentId) {
+            const form = document.getElementById(`form-balas-${commentId}`);
+            if (form.style.display === 'none' || form.style.getPropertyValue('display') === 'none') {
+                form.style.setProperty('display', 'flex', 'important');
+            } else {
+                form.style.setProperty('display', 'none', 'important');
+            }
+        }
+
+        // [PERBAIKAN] Kirim Komentar (Mendukung Induk dan Balasan)
+        async function kirimKomen(postId, parentId = null) {
+            const inputId = parentId ? `input-balas-${parentId}` : `input-komen-${postId}`;
+            const input = document.getElementById(inputId);
             const text = input.value.trim();
             if(!text) return;
+            
             input.disabled = true;
             try {
                 const res = await fetch(`${API_URL}/community/comment`, {
                     method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ post_id: postId, komentar: text })
+                    body: JSON.stringify({ post_id: postId, komentar: text, parent_id: parentId })
                 });
-                if(res.ok) { input.value = ''; await toggleKomentar(postId); await toggleKomentar(postId); }
+                if(res.ok) { 
+                    input.value = ''; 
+                    // Refresh komentar dengan menyembunyikan lalu menampilkannya lagi
+                    document.getElementById(`comment-box-${postId}`).style.display = 'none';
+                    await toggleKomentar(postId); 
+                }
             } catch(e){} finally { input.disabled = false; }
         }
 
+        // --- Logika Postingan Lainnya Tetap Sama ---
+        document.getElementById('form-post').addEventListener('submit', async (e) => {
+            e.preventDefault(); let konten = quill.root.innerHTML;
+            if(konten === '<p><br></p>') return alert('Postingan tidak boleh kosong!');
+            const btn = document.getElementById('btn-submit-post'); btn.disabled = true; btn.innerText = "Mengirim...";
+            try {
+                const res = await fetch(`${API_URL}/community/posts`, { method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ konten }) });
+                if(res.ok) { quill.root.innerHTML = ''; muatFeed(); }
+            } catch (err) {} finally { btn.disabled = false; btn.innerText = "Posting ke Forum 🚀"; }
+        });
+
+        function bukaModalEdit(id) {
+            const postTarget = postGlobal.find(p => p.id === id);
+            if(!postTarget) return; currentEditPostId = id; editQuill.root.innerHTML = postTarget.konten; modalEdit.show();
+        }
+
+        document.getElementById('btn-simpan-edit').addEventListener('click', async () => {
+            let konten = editQuill.root.innerHTML;
+            if(konten === '<p><br></p>') return;
+            const btn = document.getElementById('btn-simpan-edit'); btn.disabled = true; btn.innerText = "Menyimpan...";
+            try {
+                const res = await fetch(`${API_URL}/community/posts/${currentEditPostId}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ konten }) });
+                if(res.ok) { modalEdit.hide(); muatFeed(); }
+            } catch (err) {} finally { btn.disabled = false; btn.innerText = "Simpan Perubahan"; }
+        });
+
+        async function hapusPost(id) {
+            if(!confirm('Yakin ingin menghapus postingan ini secara permanen?')) return;
+            try {
+                const res = await fetch(`${API_URL}/community/posts/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                if(res.ok) { muatFeed(); }
+            } catch (err) {}
+        }
+
+        async function toggleLike(postId, btnElement) {
+            try {
+                const res = await fetch(`${API_URL}/community/like`, { method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ post_id: postId }) });
+                const data = await res.json();
+                if(res.ok) {
+                    let currentCount = parseInt(btnElement.querySelector('.like-count').innerText);
+                    if(data.is_liked) { btnElement.classList.add('liked'); btnElement.innerHTML = `❤️ <span class="like-count">${currentCount + 1}</span> Suka`; } 
+                    else { btnElement.classList.remove('liked'); btnElement.innerHTML = `🤍 <span class="like-count">${currentCount - 1}</span> Suka`; }
+                }
+            } catch(e){}
+        }
+
         function bagikanPost(postId) {
-            const tempLink = `https://korisugakkou.com/komunitas.html?post=${postId}`;
-            navigator.clipboard.writeText(tempLink).then(() => { alert("Tautan ke diskusi ini telah disalin! 📋 Silakan bagikan."); });
+            navigator.clipboard.writeText(`https://korisugakkou.com/komunitas.html?post=${postId}`).then(() => { alert("Tautan ke diskusi ini telah disalin! 📋"); });
         }
 
         function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
+
+        document.addEventListener('DOMContentLoaded', () => { modalEdit = new bootstrap.Modal(document.getElementById('modalEditPost')); muatFeed(); });
     </script>
 </body>
 </html>
