@@ -53,6 +53,9 @@ app.use('/api/shop', shopRoutes);
 const quoteRoutes = require('./src/routes/quoteRoutes');
 app.use('/api/quotes', quoteRoutes);
 
+const communityRoutes = require('./src/routes/communityRoutes');
+app.use('/api/community', communityRoutes);
+
 // Endpoint Tes (Health Check)
 app.get('/api/status', (req, res) => {
     res.json({ 

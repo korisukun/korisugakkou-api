@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komunitas - KORISU Gakkou</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <style>
+        :root { --korisu-orange: #ff7f00; --korisu-black: #1a1a1a; --korisu-white: #ffffff; --bg-light: #fafafa; }
+        body { background-color: var(--bg-light); background-image: radial-gradient(#e0e0e0 2px, transparent 2px); background-size: 30px 30px; color: var(--korisu-black); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Navigasi (Identik dengan Dashboard) */
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
+        .navbar-custom { background-color: var(--korisu-orange); padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2); }
+        .navbar-custom .nav-link { color: rgba(255, 255, 255, 0.8) !important; font-weight: 600; margin: 0 10px; font-size: 0.95rem; position: relative; }
+        .navbar-custom .nav-link:hover, .navbar-custom .nav-link.active { color: var(--korisu-white) !important; }
+        .navbar-custom .nav-link.active::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 20px; height: 3px; background-color: var(--korisu-white); border-radius: 3px; }
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 20px; border: none; transition: all 0.2s; }
+        .btn-nav-outline:hover, .btn-nav-outline[aria-expanded="true"] { background-color: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu-custom { border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 15px 35px rgba(0,0,0,0.08); padding: 10px 0; margin-top: 10px !important; min-width: 220px; }
+        .dropdown-item { font-weight: 600; padding: 10px 20px; transition: all 0.2s ease; color: var(--korisu-black); }
+        .dropdown-item:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+        .dropdown-item.text-danger:hover { background-color: #fff0f0; color: #dc3545; }
+        .stats-top { background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); }
+
+        /* UI Komunitas Khusus */
+        .header-section { padding: 20px 0 40px 0; text-align: center; }
+        .heading-main { font-weight: 900; font-size: 3.5rem; letter-spacing: -1px; color: var(--korisu-black); margin-bottom: 10px; }
+        
+        .card-post { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.03); padding: 25px; margin-bottom: 20px; }
+        .post-author-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #ffecd9 0%, #fffaf5 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 2px solid #ffe8d6; margin-right: 15px; }
+        .post-author-name { font-weight: 800; color: var(--korisu-black); font-size: 1.1rem; margin-bottom: 0; }
+        .post-time { font-size: 0.85rem; color: #888; font-weight: 600; }
+        .badge-sensei { background-color: #dc3545; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; margin-left: 8px; vertical-align: middle; }
+        
+        .post-content-area { margin: 20px 0; font-size: 1.05rem; line-height: 1.6; color: #444; }
+        .post-content-area img { max-width: 100%; border-radius: 12px; } /* Jika ada upload gambar dr quill */
+
+        .action-bar { border-top: 1px solid #f0f0f0; padding-top: 15px; display: flex; justify-content: space-around; }
+        .btn-action { background: none; border: none; font-weight: 600; color: #6c757d; font-size: 1rem; transition: all 0.2s; padding: 8px 15px; border-radius: 10px; display: flex; align-items: center; gap: 8px; }
+        .btn-action:hover { background-color: #f8f9fa; color: var(--korisu-orange); }
+        .btn-action.liked { color: #dc3545; }
+        .btn-action.liked:hover { background-color: #fff0f0; }
+
+        .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 25px; transition: all 0.3s; }
+        .btn-korisu-solid:hover { background-color: #e67300; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
+
+        /* Komentar Section */
+        .comment-section { background-color: #f8f9fa; border-radius: 16px; padding: 20px; margin-top: 15px; display: none; }
+        .comment-item { border-bottom: 1px solid #e9ecef; padding: 10px 0; }
+        .comment-item:last-child { border-bottom: none; }
+        .comment-author { font-weight: 700; font-size: 0.95rem; }
+        .comment-text { font-size: 0.95rem; color: #555; margin-top: 5px; }
+
+        /* Editor Compose Post */
+        .ql-toolbar.ql-snow { border: 1px solid #dee2e6; border-top-left-radius: 16px; border-top-right-radius: 16px; background-color: #f8f9fa; }
+        .ql-container.ql-snow { border: 1px solid #dee2e6; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; background-color: #fff; font-family: inherit; font-size: 1.05rem; }
+        .ql-editor { min-height: 100px; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi -->
+    <div class="container nav-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid px-2">
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                    <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                </a>
+                <div class="d-none d-lg-flex mx-auto">
+                    <a href="dashboard.html" class="nav-link">Dasbor</a>
+                    <a href="kelas.html" class="nav-link">Kelas / Kurikulum</a>
+                    <a href="toko.html" class="nav-link">Layanan Toko</a>
+                    <a href="komunitas.html" class="nav-link active">Komunitas</a>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-white stats-top" title="Total Koin">🪙 <span id="koin-murid">0</span></span>
+                    <div class="dropdown">
+                        <button class="btn btn-nav-outline dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            👤 <span id="nav-user-name">Memuat...</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom">
+                            <li><a class="dropdown-item" href="dashboard.html">🏠 Dasbor Utama</a></li>
+                            <li><a class="dropdown-item" href="profil.html">👤 Edit Profil</a></li>
+                            <div id="nav-menu-sensei" style="display: none;">
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-primary" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
+                            </div>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item text-danger" onclick="logout()">🚪 Keluar Akun</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container">
+            <h1 class="heading-main">
+                Forum <span style="color: var(--korisu-orange);">Komunitas</span>
+            </h1>
+            <p class="text-muted mt-2 fs-5 mx-auto" style="max-width: 650px;">
+                Ruang diskusi bersama. Tanyakan keraguanmu, bagikan progresmu, dan saling dukung dengan sesama pelajar bahasa Jepang!
+            </p>
+        </div>
+    </div>
+
+    <!-- Area Feed -->
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <!-- Kotak Buat Postingan Baru -->
+                <div class="card-post mb-4 shadow-sm" style="border: 2px solid var(--korisu-orange);">
+                    <div class="d-flex mb-3">
+                        <div class="post-author-icon" style="width: 40px; height: 40px; font-size: 1.2rem;">✏️</div>
+                        <h5 class="fw-bold align-self-center mb-0">Buat Diskusi Baru</h5>
+                    </div>
+                    <form id="form-post">
+                        <div id="editor-container"></div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" id="btn-submit-post" class="btn-korisu-solid">Posting ke Forum 🚀</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Wadah Feed Postingan -->
+                <div id="feed-container">
+                    <div class="text-center py-5 fw-bold text-muted fs-5">⏳ Memuat Postingan Komunitas...</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        const API_URL = 'https://korisugakkou-api.onrender.com/api';
+        const TOKEN = localStorage.getItem('korisu_token');
+        const userData = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+
+        if (!TOKEN) window.location.href = "auth.html";
+
+        // Inisialisasi Navigasi & User Data[cite: 9]
+        document.getElementById('nav-user-name').innerText = userData.nama_lengkap ? userData.nama_lengkap.split(' ')[0] : 'Akun';
+        document.getElementById('koin-murid').innerText = userData.koin || 0;
+        if(userData.role === 'sensei' || userData.role === 'admin') document.getElementById('nav-menu-sensei').style.display = 'block';
+
+        // Inisialisasi Quill Editor
+        const quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: 'Ada materi yang membingungkan? Atau mau berbagi pencapaian hari ini?',
+            modules: { toolbar: [['bold', 'italic'], [{'list': 'ordered'}, {'list': 'bullet'}], ['clean']] }
+        });
+
+        // 1. Ambil Feed Postingan
+        async function muatFeed() {
+            try {
+                const res = await fetch(`${API_URL}/community/posts`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                const data = await res.json();
+                const container = document.getElementById('feed-container');
+                container.innerHTML = "";
+
+                if(res.ok && data.posts.length > 0) {
+                    data.posts.forEach(post => {
+                        const isSensei = post.role === 'sensei' || post.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
+                        const d = new Date(post.created_at);
+                        const timeString = `${d.getDate()}/${d.getMonth()+1} • ${d.getHours()}:${d.getMinutes() < 10 ? '0':''}${d.getMinutes()}`;
+                        const likeClass = post.is_liked ? 'liked' : '';
+                        const likeIcon = post.is_liked ? '❤️' : '🤍';
+
+                        container.innerHTML += `
+                            <div class="card-post">
+                                <div class="d-flex align-items-center">
+                                    <div class="post-author-icon">👤</div>
+                                    <div>
+                                        <div class="post-author-name">${post.nama_lengkap} ${isSensei}</div>
+                                        <div class="post-time">🕒 ${timeString}</div>
+                                    </div>
+                                </div>
+                                <div class="post-content-area ql-editor px-0 pb-0">${post.konten}</div>
+                                
+                                <div class="action-bar">
+                                    <button class="btn-action ${likeClass}" onclick="toggleLike(${post.id}, this)">
+                                        ${likeIcon} <span class="like-count">${post.total_likes}</span> Suka
+                                    </button>
+                                    <button class="btn-action" onclick="toggleKomentar(${post.id})">
+                                        💬 <span>${post.total_comments}</span> Diskusi
+                                    </button>
+                                    <button class="btn-action" onclick="bagikanPost(${post.id})">
+                                        🔗 Bagikan
+                                    </button>
+                                </div>
+
+                                <!-- Area Komentar (Hidden by default) -->
+                                <div class="comment-section" id="comment-box-${post.id}">
+                                    <div id="comment-list-${post.id}" class="mb-3">
+                                        <div class="text-muted text-center small">Memuat diskusi...</div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="text" id="input-komen-${post.id}" class="form-control rounded-pill px-3" placeholder="Tulis balasanmu di sini...">
+                                        <button class="btn btn-dark rounded-pill px-4 fw-bold" onclick="kirimKomen(${post.id})">Kirim</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = `<div class="text-center p-5 bg-white rounded-4 border"><h3 class="fw-bold">Belum ada diskusi 🍃</h3><p class="text-muted">Jadilah yang pertama memulai pembicaraan!</p></div>`;
+                }
+            } catch (error) { document.getElementById('feed-container').innerHTML = "<div class='text-danger text-center'>Gagal memuat komunitas.</div>"; }
+        }
+
+        // 2. Submit Posting
+        document.getElementById('form-post').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            let konten = quill.root.innerHTML;
+            if(konten === '<p><br></p>') return alert('Postingan tidak boleh kosong!');
+            
+            const btn = document.getElementById('btn-submit-post'); btn.disabled = true; btn.innerText = "Mengirim...";
+            try {
+                const res = await fetch(`${API_URL}/community/posts`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ konten })
+                });
+                if(res.ok) { quill.root.innerHTML = ''; muatFeed(); }
+            } catch (err) { alert("Error"); } finally { btn.disabled = false; btn.innerText = "Posting ke Forum 🚀"; }
+        });
+
+        // 3. Tombol Like
+        async function toggleLike(postId, btnElement) {
+            try {
+                const res = await fetch(`${API_URL}/community/like`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ post_id: postId })
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    let countSpan = btnElement.querySelector('.like-count');
+                    let currentCount = parseInt(countSpan.innerText);
+                    if(data.is_liked) {
+                        btnElement.classList.add('liked'); btnElement.innerHTML = `❤️ <span class="like-count">${currentCount + 1}</span> Suka`;
+                    } else {
+                        btnElement.classList.remove('liked'); btnElement.innerHTML = `🤍 <span class="like-count">${currentCount - 1}</span> Suka`;
+                    }
+                }
+            } catch(e){}
+        }
+
+        // 4. Buka & Muat Komentar
+        async function toggleKomentar(postId) {
+            const box = document.getElementById(`comment-box-${postId}`);
+            if(box.style.display === 'block') { box.style.display = 'none'; return; }
+            box.style.display = 'block';
+            
+            const list = document.getElementById(`comment-list-${postId}`);
+            try {
+                const res = await fetch(`${API_URL}/community/comments/${postId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                const data = await res.json();
+                list.innerHTML = "";
+                if(data.comments.length > 0) {
+                    data.comments.forEach(c => {
+                        const isSensei = c.role === 'sensei' || c.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
+                        list.innerHTML += `
+                            <div class="comment-item">
+                                <div class="comment-author">${c.nama_lengkap} ${isSensei}</div>
+                                <div class="comment-text">${c.komentar}</div>
+                            </div>
+                        `;
+                    });
+                } else { list.innerHTML = `<div class="text-muted small">Belum ada diskusi, jadilah yang pertama merespon!</div>`; }
+            } catch(e) { list.innerHTML = "Gagal memuat."; }
+        }
+
+        // 5. Kirim Komentar
+        async function kirimKomen(postId) {
+            const input = document.getElementById(`input-komen-${postId}`);
+            const text = input.value.trim();
+            if(!text) return;
+            input.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/community/comment`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ post_id: postId, komentar: text })
+                });
+                if(res.ok) { input.value = ''; await toggleKomentar(postId); await toggleKomentar(postId); /* trik refresh cepat */ }
+            } catch(e){} finally { input.disabled = false; }
+        }
+
+        // 6. Tombol Share (Copy to Clipboard)
+        function bagikanPost(postId) {
+            const tempLink = `https://korisugakkou.com/komunitas.html?post=${postId}`;
+            navigator.clipboard.writeText(tempLink).then(() => {
+                alert("Tautan ke diskusi ini telah disalin! 📋 Silakan tempel (paste) di grup belajar Anda.");
+            });
+        }
+
+        function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
+
+        document.addEventListener('DOMContentLoaded', muatFeed);
+    </script>
+</body>
+</html>

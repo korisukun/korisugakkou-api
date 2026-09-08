@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil Saya - KORISU Gakkou</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --korisu-orange: #ff7f00;
+            --korisu-black: #1a1a1a;
+            --korisu-white: #ffffff;
+            --bg-light: #fafafa;
+        }
+        
+        body { 
+            background-color: var(--bg-light); 
+            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--korisu-black); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasi Ke Dalam */
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
+        .navbar-custom { 
+            background-color: var(--korisu-orange); 
+            padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2);
+        }
+        .btn-nav-outline {
+            background-color: var(--korisu-white); color: var(--korisu-orange);
+            font-weight: bold; border-radius: 25px; padding: 8px 20px; border: none; transition: all 0.2s;
+        }
+        .btn-nav-outline:hover { background-color: #f8f9fa; transform: translateY(-2px); }
+
+        .header-section { padding: 20px 0 40px 0; text-align: center; }
+        .heading-main { font-weight: 900; font-size: 3rem; letter-spacing: -1px; color: var(--korisu-black); margin-bottom: 10px; }
+
+        .card-profile {
+            background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 40px; margin-bottom: 25px;
+        }
+
+        .avatar-circle {
+            width: 120px; height: 120px; background: linear-gradient(135deg, #ffecd9 0%, #fffaf5 100%);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; margin: 0 auto 20px auto; border: 3px solid #ffe8d6;
+        }
+
+        .form-control { background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 12px; padding: 12px 15px; }
+        .form-control:focus { border-color: var(--korisu-orange); box-shadow: 0 0 0 0.25rem rgba(255, 127, 0, 0.15); background-color: var(--korisu-white); }
+        
+        .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 14px 20px; transition: all 0.3s; width: 100%; }
+        .btn-korisu-solid:hover { background-color: #e67300; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
+    </style>
+</head>
+<body>
+
+    <div class="container nav-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid px-2 d-flex justify-content-between">
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                    <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                    <span class="d-none d-sm-inline">KORISU Gakkou</span>
+                </a>
+                <button class="btn-nav-outline" onclick="window.location.href='dashboard.html'">Kembali ke Dasbor</button>
+            </div>
+        </nav>
+    </div>
+
+    <div class="header-section">
+        <div class="container">
+            <h1 class="heading-main">Pengaturan <span style="color: var(--korisu-orange);">Profil</span></h1>
+            <p class="text-muted fs-5">Kelola informasi akun dan identitas belajarmu di sini.</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            
+            <div class="col-lg-4 mb-4">
+                <div class="card-profile text-center h-100">
+                    <div class="avatar-circle">👤</div>
+                    <h3 class="fw-bold mb-1" id="disp-nama">Memuat...</h3>
+                    <p class="text-muted mb-4" id="disp-email">Memuat...</p>
+                    
+                    <div class="d-flex justify-content-around bg-light rounded-4 p-3 border">
+                        <div>
+                            <small class="text-muted fw-bold d-block">Level</small>
+                            <span class="fs-4 fw-bold text-dark" id="disp-level">0</span>
+                        </div>
+                        <div style="border-left: 2px solid #dee2e6;"></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">Koin Tupai</small>
+                            <span class="fs-4 fw-bold text-orange" id="disp-koin">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card-profile h-100">
+                    <h4 class="fw-bold mb-4">✏️ Edit Informasi Akun</h4>
+                    <form id="form-profil">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nama Lengkap</label>
+                            <input type="text" id="input-nama" class="form-control" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted">Email (Tidak bisa diubah)</label>
+                            <input type="email" id="input-email" class="form-control text-muted" disabled>
+                        </div>
+                        <button type="submit" id="btn-simpan" class="btn-korisu-solid">SIMPAN PERUBAHAN NAMA</button>
+                    </form>
+
+                    <hr class="my-5">
+
+                    <h4 class="fw-bold mb-4 text-danger">⚠️ Zona Berbahaya</h4>
+                    <p class="text-muted">Keluar dari perangkat ini untuk mengamankan akun Anda.</p>
+                    <button class="btn btn-outline-danger w-100 fw-bold rounded-3 py-2" onclick="logout()">Keluar Akun Sekarang</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://korisugakkou-api.onrender.com/api';
+        const TOKEN = localStorage.getItem('korisu_token');
+        let dataMurid = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+
+        if (!TOKEN) window.location.href = "auth.html";
+
+        function muatDataProfil() {
+            // Tampilkan data dari LocalStorage
+            document.getElementById('disp-nama').innerText = dataMurid.nama_lengkap || 'Murid';
+            document.getElementById('disp-email').innerText = dataMurid.email || 'Email tidak ditemukan';
+            document.getElementById('disp-koin').innerText = dataMurid.koin || 0;
+            
+            const exp = dataMurid.exp || 0;
+            document.getElementById('disp-level').innerText = Math.floor(exp / 500) + 1;
+
+            // Isi nilai input form
+            document.getElementById('input-nama').value = dataMurid.nama_lengkap || '';
+            document.getElementById('input-email').value = dataMurid.email || '';
+        }
+
+        // [Masa Depan]: Fungsi ini bisa dikembangkan jika backend Anda memiliki rute PUT /api/users/update
+        document.getElementById('form-profil').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const namaBaru = document.getElementById('input-nama').value;
+            const btn = document.getElementById('btn-simpan');
+            btn.innerText = "MENYIMPAN...";
+            btn.disabled = true;
+
+            // Simulasi update local (Ganti blok ini dengan fetch API jika rute backend sudah dibuat)
+            setTimeout(() => {
+                dataMurid.nama_lengkap = namaBaru;
+                localStorage.setItem('korisu_user', JSON.stringify(dataMurid));
+                
+                document.getElementById('disp-nama').innerText = namaBaru;
+                btn.innerText = "SIMPAN PERUBAHAN NAMA";
+                btn.disabled = false;
+                alert("Nama berhasil diperbarui secara lokal!");
+            }, 800);
+        });
+
+        function logout() {
+            localStorage.removeItem('korisu_token');
+            localStorage.removeItem('korisu_user');
+            window.location.href = "auth.html";
+        }
+
+        document.addEventListener('DOMContentLoaded', muatDataProfil);
+    </script>
+</body>
+</html>

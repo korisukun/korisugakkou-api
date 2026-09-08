@@ -27,7 +27,7 @@
         }
 
         /* Navigasi Ke Dalam (Floating Inside Container) */
-        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; }
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
         .navbar-custom { 
             background-color: var(--korisu-orange); 
             padding: 15px 25px;
@@ -48,11 +48,24 @@
             content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
             width: 20px; height: 3px; background-color: var(--korisu-white); border-radius: 3px;
         }
+        
+        /* Tombol & Dropdown Navigasi */
         .btn-nav-outline {
             background-color: var(--korisu-white); color: var(--korisu-orange);
-            font-weight: bold; border-radius: 25px; padding: 8px 25px; border: none; transition: all 0.2s;
+            font-weight: bold; border-radius: 25px; padding: 8px 20px; border: none; transition: all 0.2s;
         }
-        .btn-nav-outline:hover { background-color: #f8f9fa; transform: translateY(-2px); }
+        .btn-nav-outline:hover, .btn-nav-outline[aria-expanded="true"] { 
+            background-color: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+        
+        /* Styling Khusus Dropdown Menu */
+        .dropdown-menu-custom {
+            border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+            padding: 10px 0; margin-top: 10px !important; min-width: 220px;
+        }
+        .dropdown-item { font-weight: 600; padding: 10px 20px; transition: all 0.2s ease; color: var(--korisu-black); }
+        .dropdown-item:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+        .dropdown-item.text-danger:hover { background-color: #fff0f0; color: #dc3545; }
 
         /* Area Header */
         .header-section { padding: 20px 0 40px 0; text-align: center; }
@@ -74,24 +87,11 @@
 
         /* Kamar Maskot Spesifik */
         .kamar-maskot {
-            background: linear-gradient(180deg, #fffaf5 0%, #ffecd9 100%);
-            border: 2px solid #ffe8d6;
-            text-align: center;
-            padding: 50px 20px;
-            position: relative;
-            border-radius: 20px;
-            margin-bottom: 20px;
+            background: linear-gradient(180deg, #fffaf5 0%, #ffecd9 100%); border: 2px solid #ffe8d6;
+            text-align: center; padding: 50px 20px; position: relative; border-radius: 20px; margin-bottom: 20px;
         }
-        .maskot-area { 
-            font-size: 8rem; line-height: 1; position: relative; display: inline-block;
-            filter: drop-shadow(0 15px 20px rgba(0,0,0,0.15)); z-index: 2;
-        }
-        /* Item Bertumpuk (Multiple Items) */
-        .maskot-item-overlay { 
-            position: absolute; font-size: 4rem; 
-            /* Default position - Can be tweaked per item logic later */
-            bottom: -5px; right: -25px; transform: rotate(10deg); z-index: 3;
-        }
+        .maskot-area { font-size: 8rem; line-height: 1; position: relative; display: inline-block; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.15)); z-index: 2; }
+        .maskot-item-overlay { position: absolute; font-size: 4rem; bottom: -5px; right: -25px; transform: rotate(10deg); z-index: 3; }
         
         .meta-text { font-size: 0.85rem; color: #888; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .card-title-main { font-weight: 800; font-size: 1.6rem; line-height: 1.3; margin-bottom: 15px; }
@@ -116,22 +116,55 @@
 </head>
 <body>
 
-    <!-- Navigasi Ke Dalam Container -->
+    <!-- Navigasi Ke Dalam Container dengan DROPDOWN PROFIL -->
     <div class="container nav-wrapper">
         <nav class="navbar navbar-expand-lg navbar-custom">
             <div class="container-fluid px-2">
-                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="#">
+                <!-- Logo -->
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
                     <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
                 </a>
+                
+                <!-- Menu Tengah -->
                 <div class="d-none d-lg-flex mx-auto">
-                    <a href="#" class="nav-link active">Dasbor</a>
+                    <a href="dashboard.html" class="nav-link active">Dasbor</a>
                     <a href="kelas.html" class="nav-link">Kelas / Kurikulum</a>
                     <a href="toko.html" class="nav-link">Layanan Toko</a>
                     <a href="#" class="nav-link">Komunitas</a>
                 </div>
-                <div class="d-flex align-items-center gap-2">
+
+                <!-- Bagian Kanan: Koin & Dropdown User -->
+                <div class="d-flex align-items-center gap-3">
                     <span class="text-white stats-top" title="Total Koin">🪙 <span id="koin-murid">0</span></span>
-                    <button class="btn-nav-outline ms-2" onclick="logout()">Keluar</button>
+                    
+                    <!-- MENU DROPDOWN PROFIL -->
+                    <div class="dropdown">
+                        <button class="btn btn-nav-outline dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            👤 <span id="nav-user-name">Memuat...</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userMenuButton">
+                            <li><h6 class="dropdown-header text-muted fw-bold">Menu Akun Saya</h6></li>
+                            <li><a class="dropdown-item" href="dashboard.html">🏠 Dasbor Utama</a></li>
+                            <li><a class="dropdown-item d-flex justify-content-between align-items-center" href="#">
+                                🔔 Notifikasi 
+                                <span class="badge bg-danger rounded-pill">Baru</span>
+                            </a></li>
+                            <li><a class="dropdown-item" href="profil.html">👤 Edit Profil</a></li>
+                            <li><a class="dropdown-item" href="toko.html">🏪 Kunjungi Toko</a></li>
+                            
+                            <!-- Menu Khusus Sensei (Otomatis muncul jika role = sensei) -->
+                            <div id="nav-menu-sensei" style="display: none;">
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header text-primary fw-bold">Administrator</h6></li>
+                                <li><a class="dropdown-item text-primary" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
+                            </div>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item text-danger" onclick="logout()">🚪 Keluar Akun</button></li>
+                        </ul>
+                    </div>
+                    <!-- END DROPDOWN -->
+
                 </div>
             </div>
         </nav>
@@ -166,7 +199,7 @@
                     <button id="btn-aksi-srs" class="btn-korisu-solid w-100 fs-5" onclick="window.location.href='kelas.html'">Buka Katalog Kelas</button>
                 </div>
 
-                <!-- 2. Kamar Maskot (Dapat menampung banyak item) -->
+                <!-- 2. Kamar Maskot -->
                 <div class="card-blog-style flex-grow-1">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="meta-text mb-0">🏠 KAMAR TUPAI</div>
@@ -176,7 +209,6 @@
                     <div class="kamar-maskot">
                         <div class="maskot-area" id="area-tumpukan-item">
                             🐿️
-                            <!-- Item akan disuntikkan ke sini via JavaScript -->
                         </div>
                     </div>
 
@@ -200,7 +232,7 @@
             <!-- KOLOM KANAN (Progres, Kalender & Quote) -->
             <div class="col-lg-5 d-flex flex-column">
                 
-                <!-- 3. Streak & Kalender (BARU) -->
+                <!-- 3. Streak & Kalender -->
                 <div class="card-blog-style p-4">
                     <div class="meta-text">📅 KONSISTENSI BELAJAR</div>
                     
@@ -217,7 +249,6 @@
                     <!-- Grid Kalender -->
                     <div class="calendar-grid">
                         <div class="cal-day-header">M</div><div class="cal-day-header">S</div><div class="cal-day-header">S</div><div class="cal-day-header">R</div><div class="cal-day-header">K</div><div class="cal-day-header">J</div><div class="cal-day-header">S</div>
-                        <!-- Tanggal akan dirender via JS -->
                     </div>
                     <div id="wadah-tanggal" class="calendar-grid mt-1"></div>
                 </div>
@@ -241,15 +272,12 @@
                     <p class="fs-5 mb-0 text-muted" id="arti-indo">...</p>
                 </div>
 
-                <!-- Tombol Admin (Hidden) -->
-                <button id="menu-sensei" style="display: none;" onclick="window.location.href='panel-sensei.html'" class="btn mt-4 w-100 text-center bg-dark text-white fw-bold p-3 rounded-4 shadow-sm transition">
-                    ⚙️ Buka Panel Sensei Admin
-                </button>
-
             </div>
         </div>
     </div>
 
+    <!-- Jangan lupa panggil Bootstrap JS agar Dropdown bisa terbuka -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = 'https://korisugakkou-api.onrender.com/api';
         const TOKEN_SAYA = localStorage.getItem('korisu_token');
@@ -272,13 +300,12 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
 
             let html = '';
-            for(let i=0; i<firstDay; i++) { html += `<div></div>`; } // Kotak kosong awal bulan
+            for(let i=0; i<firstDay; i++) { html += `<div></div>`; }
             
             for(let i=1; i<=daysInMonth; i++) {
                 if(i === today) {
                     html += `<div class="cal-hari aktif">${i}</div>`;
                 } else if(i < today) {
-                    // Simulasi hari berlalu (bisa dikembangkan jika backend menyimpan riwayat login harian)
                     html += `<div class="cal-hari lewat">${i}</div>`;
                 } else {
                     html += `<div class="cal-hari">${i}</div>`;
@@ -293,12 +320,10 @@
                 const data = await respons.json();
                 
                 if(respons.ok && data.mascot) {
-                    // LOGIKA LEVEL (Berdasarkan Total EXP Murid, bukan dari database maskot)
                     const expMurid = dataMuridLokal.exp || 0;
                     const levelKalkulasi = Math.floor(expMurid / 500) + 1;
                     document.getElementById('maskot-level').innerText = levelKalkulasi;
                     
-                    // LOGIKA MOOD
                     const mood = data.mascot.status_mood || 100;
                     const moodBar = document.getElementById('mood-bar');
                     moodBar.style.width = `${mood}%`;
@@ -308,22 +333,26 @@
                     else if(mood < 70) moodBar.className = "progress-bar bg-warning text-dark rounded-pill";
                     else moodBar.className = "progress-bar bg-success rounded-pill";
 
-                    // LOGIKA BANYAK ITEM (Simulasi Array jika backend sudah siap, atau fallback 1 item)
                     const areaTumpukan = document.getElementById('area-tumpukan-item');
                     let namaItemDitampilkan = [];
-                    
-                    // Membersihkan tumpukan lama kecuali ikon tupai dasarnya
                     areaTumpukan.innerHTML = '🐿️'; 
 
-                    // Cek apakah item_dipakai itu Array (banyak) atau Objek (satu)
+                    const posisiStyling = [
+                        "top: -30px; left: 15px; transform: rotate(-10deg); font-size: 4.5rem;", 
+                        "bottom: -5px; right: -25px; transform: rotate(15deg); font-size: 3.5rem;", 
+                        "bottom: -5px; left: -15px; transform: rotate(-15deg); font-size: 3.5rem;", 
+                        "top: 20px; right: -30px; transform: rotate(20deg); font-size: 3rem;"      
+                    ];
+
                     if (data.mascot.items_dipakai && Array.isArray(data.mascot.items_dipakai)) {
                         data.mascot.items_dipakai.forEach((item, idx) => {
                             namaItemDitampilkan.push(item.nama_item);
-                            areaTumpukan.innerHTML += `<span class="maskot-item-overlay" style="z-index: ${idx+3}; margin-bottom: ${idx*10}px;">${item.image_url}</span>`;
+                            let gayaPosisi = posisiStyling[idx % posisiStyling.length];
+                            areaTumpukan.innerHTML += `<span class="maskot-item-overlay" style="${gayaPosisi} z-index: ${idx+3};">${item.image_url}</span>`;
                         });
-                    } else if (data.mascot.item_dipakai) { // Fallback versi lama
+                    } else if (data.mascot.item_dipakai) { 
                         namaItemDitampilkan.push(data.mascot.item_dipakai.nama_item);
-                        areaTumpukan.innerHTML += `<span class="maskot-item-overlay">${data.mascot.item_dipakai.image_url}</span>`;
+                        areaTumpukan.innerHTML += `<span class="maskot-item-overlay" style="${posisiStyling[0]}">${data.mascot.item_dipakai.image_url}</span>`;
                     }
 
                     if(namaItemDitampilkan.length > 0) {
@@ -372,20 +401,26 @@
             dataMuridLokal = JSON.parse(localStorage.getItem('korisu_user'));
             
             if (dataMuridLokal) {
+                // Menuliskan Nama Lengkap di teks sapaan bawah
                 document.getElementById('nama-murid').innerText = dataMuridLokal.nama_lengkap;
+                
+                // Menuliskan Nama Panggilan (Kata pertama saja) di Tombol Dropdown Navigasi
+                let namaDepan = dataMuridLokal.nama_lengkap ? dataMuridLokal.nama_lengkap.split(' ')[0] : 'Murid';
+                document.getElementById('nav-user-name').innerText = namaDepan;
+                
                 document.getElementById('koin-murid').innerText = dataMuridLokal.koin || 0;
                 document.getElementById('streak-murid').innerText = dataMuridLokal.streak || 0;
                 
                 const exp = dataMuridLokal.exp || 0;
-                // Bar persentase per 500 EXP (Misal exp 1200, progresnya 200/500 = 40%)
                 const expSisaLevel = exp % 500;
                 const expPersen = Math.min((expSisaLevel / 500) * 100, 100);
                 
                 document.getElementById('exp-bar').style.width = `${expPersen}%`;
                 document.getElementById('exp-text').innerText = `${exp}`;
 
+                // Jika user adalah Sensei/Admin, tampilkan menu khusus di dalam dropdown
                 if(dataMuridLokal.role === 'sensei' || dataMuridLokal.role === 'admin') {
-                    document.getElementById('menu-sensei').style.display = 'block';
+                    document.getElementById('nav-menu-sensei').style.display = 'block';
                 }
             }
             
