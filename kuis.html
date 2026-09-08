@@ -609,10 +609,32 @@
             
             const isBenar = (jawabanUser === String(kunciJawabanSaatIni || "Tidak diketahui"));
 
-            // Kalkulasi Instan di Frontend (Tanpa Menunggu Backend)
+            // Kalkulasi Instan di Frontend menyelaraskan 5 Kategori Backend
             let srsLevelSekarang = parseInt(vocabSaatIni.srs_level) || 0;
-            let expPrediksi = 5 + (srsLevelSekarang + 1);
-            let koinPrediksi = 2;
+            let expPrediksi = 0;
+            let koinPrediksi = 0;
+            let tingkatKesulitan = "";
+
+            if (isBenar) {
+                if (detikDihabiskan < 5) {
+                    expPrediksi = 15 + Math.min(7, srsLevelSekarang + 2);
+                    koinPrediksi = 5;
+                    tingkatKesulitan = "Easy (<5s)";
+                } else if (detikDihabiskan <= 10) {
+                    expPrediksi = 10 + Math.min(7, srsLevelSekarang + 1);
+                    koinPrediksi = 3;
+                    tingkatKesulitan = "Medium (5-10s)";
+                } else if (detikDihabiskan <= 15) {
+                    expPrediksi = 5 + srsLevelSekarang; // Level ditahan (+0)
+                    koinPrediksi = 2;
+                    tingkatKesulitan = "Hard (10-15s)";
+                } else {
+                    let levelTurun = Math.max(0, srsLevelSekarang - 1);
+                    expPrediksi = 2 + levelTurun;
+                    koinPrediksi = 1;
+                    tingkatKesulitan = "Very Hard (>15s)";
+                }
+            }
 
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
             semuaTombol.forEach(btn => btn.disabled = true);
@@ -627,36 +649,33 @@
                 });
             }
 
-            // TAMPILAN INSTAN (Hanya 300ms delay agar mata sempat melihat warna tombol)
             setTimeout(() => {
                 document.getElementById('area-soal').style.display = "none";
                 const notifBox = document.getElementById('hasil-notif');
                 notifBox.style.display = "block";
 
                 if(isBenar) {
-                    document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${detikDihabiskan}s)`;
+                    document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${tingkatKesulitan})`;
                     document.getElementById('status-jawaban').className = "fw-bold mb-3 text-success";
                     document.getElementById('reward-text').innerText = `+${expPrediksi} EXP  •  +${koinPrediksi} Koin 🐿️`;
                     
-                    // Update LocalStorage & UI Navigasi Secara Real-time
                     let userSekarang = JSON.parse(localStorage.getItem('korisu_user'));
                     if (userSekarang) {
                         userSekarang.koin = (userSekarang.koin || 0) + koinPrediksi;
                         userSekarang.exp = (userSekarang.exp || 0) + expPrediksi;
                         localStorage.setItem('korisu_user', JSON.stringify(userSekarang));
 
-                        // Menerapkan update angka & animasi pantulan koin di Navigasi Kanan Atas
                         const koinEl = document.getElementById('koin-murid');
                         koinEl.innerText = userSekarang.koin;
                         
                         koinEl.classList.remove('koin-animate');
-                        void koinEl.offsetWidth; // Memicu reflow paksa agar animasi bisa diulang
+                        void koinEl.offsetWidth; 
                         koinEl.classList.add('koin-animate');
                     }
                 } else {
-                    document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat`;
+                    document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat ❌ (Again)`;
                     document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
-                    document.getElementById('reward-text').innerText = `Tidak apa-apa, memori ini akan direview ulang segera!`;
+                    document.getElementById('reward-text').innerText = `Level memori turun. Kosakata ini akan direview ulang segera!`;
                 }
                 
                 document.getElementById('btn-lanjut').focus(); 
