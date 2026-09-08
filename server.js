@@ -36,6 +36,7 @@ app.use('/api/srs', require('./src/routes/srsRoutes'));
 app.use('/api/shop', require('./src/routes/shopRoutes'));
 app.use('/api/quotes', require('./src/routes/quoteRoutes'));
 app.use('/api/community', require('./src/routes/communityRoutes'));
+app.use('/api/users', require('./src/routes/userRoutes'));
 
 // Endpoint Tes (Health Check)
 app.get('/api/status', (req, res) => {

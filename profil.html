@@ -136,11 +136,19 @@
         if (!TOKEN) window.location.href = "auth.html";
 
         function muatDataProfil() {
-            // Tampilkan data dari LocalStorage
+            // Tampilkan data dari LocalStorage saat halaman pertama kali dimuat
             document.getElementById('disp-nama').innerText = dataMurid.nama_lengkap || 'Murid';
             document.getElementById('disp-email').innerText = dataMurid.email || 'Email tidak ditemukan';
             document.getElementById('disp-koin').innerText = dataMurid.koin || 0;
             
+            // Render di Navigasi Atas Kanan
+            let namaDepan = dataMurid.nama_lengkap ? dataMurid.nama_lengkap.split(' ')[0] : 'Akun';
+            document.getElementById('nav-user-name').innerText = namaDepan;
+            
+            if(dataMurid.role === 'sensei' || dataMurid.role === 'admin') {
+                document.getElementById('nav-menu-sensei').style.display = 'block';
+            }
+
             const exp = dataMurid.exp || 0;
             document.getElementById('disp-level').innerText = Math.floor(exp / 500) + 1;
 
@@ -149,24 +157,45 @@
             document.getElementById('input-email').value = dataMurid.email || '';
         }
 
-        // [Masa Depan]: Fungsi ini bisa dikembangkan jika backend Anda memiliki rute PUT /api/users/update
+        // FUNGSI UPDATE NYATA KE BACKEND
         document.getElementById('form-profil').addEventListener('submit', async (e) => {
             e.preventDefault();
             const namaBaru = document.getElementById('input-nama').value;
             const btn = document.getElementById('btn-simpan');
-            btn.innerText = "MENYIMPAN...";
+            btn.innerText = "MENYIMPAN KE SERVER...";
             btn.disabled = true;
 
-            // Simulasi update local (Ganti blok ini dengan fetch API jika rute backend sudah dibuat)
-            setTimeout(() => {
-                dataMurid.nama_lengkap = namaBaru;
-                localStorage.setItem('korisu_user', JSON.stringify(dataMurid));
-                
-                document.getElementById('disp-nama').innerText = namaBaru;
+            try {
+                const res = await fetch(`${API_URL}/users/profile`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify({ nama_lengkap: namaBaru })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Update LocalStorage agar tetap sinkron
+                    dataMurid.nama_lengkap = data.user.nama_lengkap;
+                    localStorage.setItem('korisu_user', JSON.stringify(dataMurid));
+                    
+                    // Update tampilan teks di layar secara instan
+                    document.getElementById('disp-nama').innerText = data.user.nama_lengkap;
+                    document.getElementById('nav-user-name').innerText = data.user.nama_lengkap.split(' ')[0];
+                    
+                    alert(data.message);
+                } else {
+                    alert(data.message || "Gagal memperbarui profil.");
+                }
+            } catch (error) {
+                alert("Terjadi kesalahan jaringan saat mencoba menyimpan ke server.");
+            } finally {
                 btn.innerText = "SIMPAN PERUBAHAN NAMA";
                 btn.disabled = false;
-                alert("Nama berhasil diperbarui secara lokal!");
-            }, 800);
+            }
         });
 
         function logout() {
