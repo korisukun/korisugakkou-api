@@ -11,15 +11,19 @@
             --korisu-orange: #ff7f00;
             --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
+            --bg-light: #fafafa;
         }
         
-        body { background-color: #fafafa; color: var(--korisu-black); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        body { background-color: var(--bg-light); color: var(--korisu-black); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Navigasi Header */
         .navbar-custom { background-color: var(--korisu-orange); padding: 15px 0; }
-        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 25px; border: none; transition: all 0.2s; }
-        .btn-nav-outline:hover { background-color: #f8f9fa; transform: translateY(-2px); }
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 25px; border: none; transition: all 0.2s; text-decoration: none; }
+        .btn-nav-outline:hover { background-color: #f8f9fa; transform: translateY(-2px); color: var(--korisu-orange); }
 
         .content-section { flex: 1; background-image: radial-gradient(#e0e0e0 2px, transparent 2px); background-size: 30px 30px; padding: 40px 0 60px 0; }
         
+        /* Area Video Utama */
         .card-modern { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 30px; }
         .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); background-color: #000; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
@@ -31,17 +35,21 @@
         .desc-text p { margin-bottom: 10px; }
 
         .task-box { background-color: #fffaf5; border: 1px solid #ffe8d6; border-radius: 16px; padding: 20px; }
-        .btn-selesai-modern { background-color: #198754; color: white; border: none; border-radius: 12px; font-weight: 800; padding: 12px 25px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2); }
+        .btn-selesai-modern { background-color: #198754; color: white; border: none; border-radius: 12px; font-weight: 800; padding: 14px 25px; transition: all 0.3s; box-shadow: 0 8px 20px rgba(25, 135, 84, 0.2); }
         .btn-selesai-modern:hover:not(:disabled) { background-color: #146c43; transform: translateY(-2px); box-shadow: 0 12px 25px rgba(25, 135, 84, 0.3); }
-        .btn-selesai-modern:disabled { background-color: #6c757d; box-shadow: none; }
+        .btn-selesai-modern:disabled { background-color: #e9ecef; color: #6c757d; box-shadow: none; border: 1px solid #dee2e6; cursor: not-allowed; }
+        
         .badge-kategori { display: inline-block; background-color: #fffaf5; color: var(--korisu-orange); font-weight: 700; font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #ffe8d6; }
 
-        /* Sidebar Kurikulum */
-        .sidebar-wrapper { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 20px; height: 100%; max-height: 85vh; overflow-y: auto; }
+        /* Sidebar Kurikulum & Progress */
+        .sidebar-wrapper { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.04); padding: 25px; height: 100%; max-height: 85vh; overflow-y: auto; }
         .sidebar-wrapper::-webkit-scrollbar { width: 6px; }
         .sidebar-wrapper::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px;}
         .sidebar-wrapper::-webkit-scrollbar-thumb { background: #ffcd99; border-radius: 10px; }
         .sidebar-wrapper::-webkit-scrollbar-thumb:hover { background: var(--korisu-orange); }
+
+        .progress-custom { height: 12px; border-radius: 10px; background-color: #f1f3f5; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .progress-bar-korisu { background-color: var(--korisu-orange); border-radius: 10px; transition: width 0.8s ease; }
 
         .accordion-item { border: 1px solid #f0f0f0; border-radius: 16px !important; margin-bottom: 10px; overflow: hidden; }
         .accordion-button { font-weight: 700; font-size: 1rem; background-color: var(--korisu-white); color: var(--korisu-black); padding: 15px; border: none; box-shadow: none !important; }
@@ -50,33 +58,53 @@
         .lesson-item-side { padding: 15px 20px; border-top: 1px solid #f0f0f0; cursor: pointer; display: flex; align-items: center; transition: all 0.2s ease; font-size: 0.95rem; }
         .lesson-item-side:hover { background-color: #fffaf5; padding-left: 25px; color: var(--korisu-orange); }
         .lesson-item-side.active { background-color: #fff0e5; border-left: 4px solid var(--korisu-orange); font-weight: bold; color: var(--korisu-orange); padding-left: 20px; }
+        .lesson-item-side.completed .status-icon { color: #198754; font-weight: bold; }
 
         .modal-content-modern { border: none; border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
-        .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 20px; transition: all 0.3s; }
+        .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 15px; font-weight: bold; padding: 14px 20px; transition: all 0.3s; }
         .btn-korisu-solid:hover { background-color: #e67300; color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
+
+        ::selection { background-color: #FFF7ED; color: #EA580C; }
     </style>
 </head>
 <body>
 
+    <!-- Navigasi Utama -->
     <nav class="navbar navbar-expand-lg navbar-custom shadow-sm sticky-top">
         <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
-            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="#" onclick="kembaliKeKelas(); return false;">
+            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="kelas.html">
                 <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
                 <span class="d-none d-sm-inline" id="nav-course-title">Ruang Putar Video</span>
             </a>
-            <button class="btn-nav-outline" onclick="kembaliKeKelas()">🔙 Kembali ke Halaman Kelas</button>
+            <div class="d-flex gap-2">
+                <a href="kelas.html" id="btn-back-katalog" class="btn btn-nav-outline px-3 d-none d-md-block">📚 Katalog</a>
+                <button class="btn btn-nav-outline" onclick="kembaliKeKelas()">🔙 Kurikulum Kelas</button>
+            </div>
         </div>
     </nav>
 
     <div class="content-section">
-        <div class="container-fluid px-4">
+        <div class="container-fluid px-lg-5">
             <div class="row">
                 
-                <!-- KOLOM KIRI: Daftar Kurikulum -->
+                <!-- KOLOM KIRI: Daftar Kurikulum & Progres -->
                 <div class="col-lg-4 mb-4 order-2 order-lg-1">
                     <div class="sidebar-wrapper">
-                        <div class="d-flex align-items-center mb-4 pb-2 border-bottom">
-                            <h5 class="fw-bold mb-0">Daftar Materi</h5>
+                        
+                        <!-- Panel Progres Belajar -->
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h5 class="fw-bold mb-3 text-dark">📈 Progres Belajarmu</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="fw-bold text-muted" id="progress-text-count">Selesai 0 / 0 Materi</small>
+                                <small class="fw-bold text-orange fs-6" id="progress-text-percent">0%</small>
+                            </div>
+                            <div class="progress progress-custom">
+                                <div id="progress-bar-fill" class="progress-bar progress-bar-korisu" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-3">
+                            <h6 class="fw-bold text-muted text-uppercase tracking-widest mb-0">Daftar Materi</h6>
                         </div>
                         <div class="accordion" id="accordionSidebar">
                             <div class="text-center text-muted fw-bold py-4">Memuat daftar materi...</div>
@@ -97,10 +125,10 @@
                         <!-- KOTAK DESKRIPSI -->
                         <div class="desc-box mb-4">
                             <h5 class="fw-bold text-dark mb-3">📝 Catatan Sensei</h5>
-                            <!-- PERBAIKAN: Menggunakan .innerHTML via JS -->
                             <div id="teks-deskripsi" class="desc-text">Memuat catatan materi...</div>
                         </div>
 
+                        <!-- TOMBOL AKSI -->
                         <div class="task-box d-flex flex-column flex-md-row justify-content-between align-items-center">
                             <div class="mb-3 mb-md-0 text-center text-md-start">
                                 <h6 class="fw-bold mb-1" style="color: var(--korisu-orange);">Tugas Kamu:</h6>
@@ -115,17 +143,30 @@
         </div>
     </div>
 
-    <!-- Modal Sukses -->
-    <div class="modal fade" id="modalSukses" tabindex="-1">
+    <!-- Modal Sukses Auto-Next -->
+    <div class="modal fade" id="modalSukses" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content modal-content-modern">
                 <div class="modal-body text-center p-5">
-                    <h1 class="mb-3" style="font-size: 4rem;">🎉</h1>
+                    <h1 class="mb-3" style="font-size: 4.5rem;">🎉</h1>
                     <h3 class="fw-bold mb-2 text-dark">Materi Selesai!</h3>
-                    <div class="bg-light border border-success rounded-4 p-3 mx-auto mb-4" style="max-width: 250px;">
-                        <h5 class="text-success fw-bold mb-0" id="teks-exp">+10 EXP Didapatkan</h5>
+                    <p class="text-muted mb-4">Kerja bagus! Perjalananmu semakin dekat menuju kelulusan.</p>
+                    
+                    <!-- Area Hadiah (EXP & KOIN) -->
+                    <div class="d-flex justify-content-center gap-3 mb-4">
+                        <div class="bg-light border border-success rounded-4 p-3 w-50">
+                            <small class="text-muted fw-bold d-block mb-1">MENDAPAT</small>
+                            <h5 class="text-success fw-bold mb-0" id="teks-exp">+10 EXP</h5>
+                        </div>
+                        <div class="bg-light border border-warning rounded-4 p-3 w-50">
+                            <small class="text-muted fw-bold d-block mb-1">HADIAH</small>
+                            <h5 class="text-warning fw-bold mb-0" id="teks-koin">+5 Koin</h5>
+                        </div>
                     </div>
-                    <button type="button" class="btn-korisu-solid w-100 fs-5" onclick="kembaliKeKelas()">Lanjutkan Belajar</button>
+                    
+                    <!-- Tombol Dinamis (Selanjutnya / Kembali) -->
+                    <button type="button" id="btn-next-lesson" class="btn-korisu-solid w-100 fs-5 mb-2">Materi Selanjutnya ➔</button>
+                    <button type="button" class="btn btn-light w-100 fw-bold rounded-pill" onclick="kembaliKeKelas()">Tutup Dulu</button>
                 </div>
             </div>
         </div>
@@ -141,24 +182,27 @@
         const lessonId = urlParams.get('id');
         const sourceCourseId = urlParams.get('course_id'); 
 
+        // Variabel untuk Logika "Auto-Next" & Progress
+        let daftarMateriLinear = []; 
+        let indeksMateriSaatIni = -1;
+        let totalMateri = 0;
+        let materiSelesai = 0;
+
         if (!TOKEN) window.location.href = "auth.html";
         if (!lessonId || !sourceCourseId) window.location.href = "kelas.html";
 
-        function kembaliKeKelas() {
-            window.location.href = `kelas.html?course_id=${sourceCourseId}`;
-        }
+        // Ubah Link Kembali ke Kelas
+        document.getElementById('btn-back-katalog').href = `kelas.html?course_id=${sourceCourseId}`;
+
+        function kembaliKeKelas() { window.location.href = `kelas.html?course_id=${sourceCourseId}`; }
 
         async function muatVideo() {
             try {
-                const res = await fetch(`${API_URL}/lessons/${lessonId}`, {
-                    headers: { 'Authorization': `Bearer ${TOKEN}` }
-                });
+                const res = await fetch(`${API_URL}/lessons/${lessonId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
                 const data = await res.json();
 
                 if (res.ok && data.lesson) {
                     document.getElementById('judul-materi').innerText = data.lesson.judul_materi;
-                    
-                    // PERBAIKAN FATAL: Gunakan .innerHTML agar format tebal/poin/miring bisa tampil
                     document.getElementById('teks-deskripsi').innerHTML = data.lesson.deskripsi || "Sensei belum menambahkan catatan untuk materi ini. Silakan langsung tonton videonya ya!";
 
                     let urlVideo = data.lesson.konten_url;
@@ -166,6 +210,11 @@
                     let paramKeamanan = "rel=0&modestbranding=1&iv_load_policy=3&cc_load_policy=0";
                     document.getElementById('frame-video').src = urlVideo + pemisah + paramKeamanan;
                     
+                    // Cek di Memori Lokal jika Backend belum menangkap status Selesai
+                    if (localStorage.getItem(`selesai_lesson_${lessonId}`)) {
+                        kunciTombolSelesai();
+                    }
+
                 } else {
                     document.getElementById('judul-materi').innerText = "Materi tidak ditemukan.";
                     document.getElementById('teks-deskripsi').innerHTML = "-";
@@ -173,7 +222,6 @@
                 }
             } catch (error) {
                 document.getElementById('judul-materi').innerHTML = "<span class='text-danger'>Gagal memuat video.</span>";
-                document.getElementById('teks-deskripsi').innerHTML = "Terjadi kesalahan jaringan saat memuat catatan.";
             }
         }
 
@@ -186,6 +234,10 @@
                     document.getElementById('nav-course-title').innerText = data.course.judul_course;
                     const wadahSidebar = document.getElementById('accordionSidebar');
                     wadahSidebar.innerHTML = "";
+                    
+                    daftarMateriLinear = [];
+                    totalMateri = 0;
+                    materiSelesai = 0;
 
                     if(data.course.modules.length === 0) {
                         wadahSidebar.innerHTML = "<div class='text-muted text-center'>Materi belum disiapkan.</div>";
@@ -197,14 +249,28 @@
                         let isModuleActive = false; 
 
                         modul.lessons.forEach(lesson => {
+                            // Masukkan ke array datar untuk sistem "Auto-Next"
+                            daftarMateriLinear.push(lesson);
+                            totalMateri++;
+
                             let icon = lesson.tipe_lesson.includes('video') ? '🎥' : '📝';
                             let isActive = (lesson.id == lessonId); 
-                            if (isActive) isModuleActive = true;
+                            if (isActive) {
+                                isModuleActive = true;
+                                indeksMateriSaatIni = daftarMateriLinear.length - 1; // Simpan indeks posisi saat ini
+                            }
+
+                            // Cek status selesai (gabungan backend & lokal storage)
+                            let isCompleted = lesson.is_completed || localStorage.getItem(`selesai_lesson_${lesson.id}`);
+                            if (isCompleted) materiSelesai++;
+
+                            let statusHtml = isCompleted ? `<span class="status-icon ms-auto">✔️</span>` : ``;
 
                             htmlLessons += `
-                                <div class="lesson-item-side ${isActive ? 'active' : ''}" onclick="window.location.href='video-player.html?id=${lesson.id}&course_id=${sourceCourseId}'">
+                                <div class="lesson-item-side ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}" onclick="window.location.href='video-player.html?id=${lesson.id}&course_id=${sourceCourseId}'">
                                     <div class="me-3 fs-5">${icon}</div>
                                     <div class="flex-grow-1">${lesson.judul_materi}</div>
+                                    ${statusHtml}
                                 </div>
                             `;
                         });
@@ -227,16 +293,33 @@
                             </div>
                         `;
                     });
+
+                    // Update UI Progress Bar
+                    kalkulasiProgressUI();
+
                 }
             } catch (error) {
                 document.getElementById('accordionSidebar').innerHTML = "<div class='text-danger text-center'>Gagal memuat kurikulum.</div>";
             }
         }
 
+        function kalkulasiProgressUI() {
+            const persentase = totalMateri > 0 ? Math.round((materiSelesai / totalMateri) * 100) : 0;
+            document.getElementById('progress-bar-fill').style.width = `${persentase}%`;
+            document.getElementById('progress-text-percent').innerText = `${persentase}%`;
+            document.getElementById('progress-text-count').innerText = `Selesai ${materiSelesai} / ${totalMateri} Materi`;
+        }
+
+        function kunciTombolSelesai() {
+            const btn = document.getElementById('btn-tandai');
+            btn.disabled = true;
+            btn.innerText = "✅ Materi Telah Diselesaikan";
+        }
+
         async function tandaiSelesai() {
             const btn = document.getElementById('btn-tandai');
             btn.disabled = true;
-            btn.innerText = "MENYIMPAN...";
+            btn.innerText = "MENYIMPAN PROGRES...";
 
             try {
                 const res = await fetch(`${API_URL}/lessons/${lessonId}/complete`, {
@@ -246,12 +329,41 @@
                 const data = await res.json();
 
                 if (res.ok) {
-                    USER.exp = (USER.exp || 0) + data.exp_didapat;
+                    // Update Poin EXP & Koin (Simulasi +5 Koin Tupai)
+                    let expDapat = data.exp_didapat || 10;
+                    let koinDapat = data.koin_didapat || 5; 
+                    
+                    USER.exp = (USER.exp || 0) + expDapat;
+                    USER.koin = (USER.koin || 0) + koinDapat;
                     localStorage.setItem('korisu_user', JSON.stringify(USER));
+                    localStorage.setItem(`selesai_lesson_${lessonId}`, 'true'); // Simpan memori lokal
 
-                    document.getElementById('teks-exp').innerText = `+${data.exp_didapat} EXP Didapatkan 🐿️`;
+                    // Tampilkan Hadiah di Pop-up
+                    document.getElementById('teks-exp').innerText = `+${expDapat} EXP`;
+                    document.getElementById('teks-koin').innerText = `+${koinDapat} Koin`;
+
+                    // Logika Sistem "Auto-Next" (Cari materi selanjutnya di Playlist)
+                    const btnNext = document.getElementById('btn-next-lesson');
+                    
+                    if (indeksMateriSaatIni >= 0 && indeksMateriSaatIni + 1 < daftarMateriLinear.length) {
+                        // Masih ada materi selanjutnya
+                        const materiSelanjutnya = daftarMateriLinear[indeksMateriSaatIni + 1];
+                        btnNext.innerText = "Materi Selanjutnya ➔";
+                        btnNext.onclick = () => { window.location.href = `video-player.html?id=${materiSelanjutnya.id}&course_id=${sourceCourseId}`; };
+                    } else {
+                        // Materi terakhir
+                        btnNext.innerText = "🎉 Selesai! Kembali ke Katalog";
+                        btnNext.onclick = () => { window.location.href = `kelas.html`; };
+                    }
+
                     const myModal = new bootstrap.Modal(document.getElementById('modalSukses'));
                     myModal.show();
+                    kunciTombolSelesai();
+
+                    // Perbarui visual sidebar secara instan
+                    materiSelesai++;
+                    kalkulasiProgressUI();
+
                 } else {
                     alert(data.message);
                     btn.disabled = false;
@@ -260,6 +372,7 @@
             } catch (error) {
                 alert("Gagal menghubungi server.");
                 btn.disabled = false;
+                btn.innerText = "Tandai Selesai & Ambil EXP ✔️";
             }
         }
 

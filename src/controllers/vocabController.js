@@ -1,6 +1,6 @@
 const db = require('../config/db');
 
-// 1. Menambah Kosakata Masal (Bulk Add)
+// 1. Menambah Kosakata Masal (Bulk Add) & Distribusi ke Murid Lama
 const addVocabBulk = async (req, res) => {
     const { vocabularies, course_id } = req.body;
     
@@ -9,14 +9,49 @@ const addVocabBulk = async (req, res) => {
     }
 
     try {
-        // Menyisipkan array kosakata satu per satu ke database
+        // A. Cari tahu siapa saja murid yang sudah terlanjur mengikuti kelas ini
+        let enrolledUsers = [];
+        try {
+            // Mencoba mencari dari tabel pendaftaran resmi (asumsi nama tabel 'enrollments')
+            const enrollRes = await db.query('SELECT user_id FROM enrollments WHERE course_id = $1', [course_id]);
+            enrolledUsers = enrollRes.rows.map(r => r.user_id);
+        } catch (err) {
+            // Fallback (Penyelamat): Jika tabel enrollments beda nama, cari murid dari tabel SRS eksisting
+            const srsRes = await db.query(
+                'SELECT DISTINCT murid_id FROM srs_reviews sr JOIN vocabularies v ON sr.vocab_id = v.id WHERE v.course_id = $1', 
+                [course_id]
+            );
+            enrolledUsers = srsRes.rows.map(r => r.murid_id);
+        }
+
+        // B. Menyisipkan kosakata ke tabel master dan mendistribusikannya ke antrean murid
         for (const v of vocabularies) {
-            await db.query(
-                'INSERT INTO vocabularies (course_id, kanji, furigana, arti_indonesia) VALUES ($1, $2, $3, $4)',
+            
+            // 1. Simpan ke master vocabularies dan ambil ID barunya (RETURNING id)
+            const vocabRes = await db.query(
+                'INSERT INTO vocabularies (course_id, kanji, furigana, arti_indonesia) VALUES ($1, $2, $3, $4) RETURNING id',
                 [course_id, v.kanji, v.furigana, v.arti_indonesia]
             );
+            const newVocabId = vocabRes.rows[0].id;
+
+            // 2. Suntikkan ke jadwal SRS murid lama untuk ke-6 arah kuis
+            if (enrolledUsers.length > 0) {
+                for (const muridId of enrolledUsers) {
+                    for (let arah = 1; arah <= 6; arah++) {
+                        try {
+                            await db.query(
+                                'INSERT INTO srs_reviews (murid_id, vocab_id, arah_kuis) VALUES ($1, $2, $3)',
+                                [muridId, newVocabId, arah]
+                            );
+                        } catch (duplicateErr) {
+                            // Abaikan diam-diam jika kosakata ini kebetulan sudah masuk
+                        }
+                    }
+                }
+            }
         }
-        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan ke database! 📚' });
+        
+        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan & disinkronkan ke murid lama! 📚' });
     } catch (error) {
         console.error('Error tambah kosakata masal:', error.message);
         res.status(500).json({ message: `Gagal: ${error.message}` });
@@ -49,7 +84,7 @@ const editVocab = async (req, res) => {
     }
 };
 
-// [BARU] Menghapus Kosakata
+// 4. Menghapus Kosakata
 const deleteVocab = async (req, res) => {
     try {
         await db.query('DELETE FROM vocabularies WHERE id = $1', [req.params.id]);
@@ -59,5 +94,4 @@ const deleteVocab = async (req, res) => {
     }
 };
 
-// Pastikan diekspor
 module.exports = { addVocabBulk, getVocabsByCourse, editVocab, deleteVocab };

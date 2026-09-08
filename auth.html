@@ -11,7 +11,8 @@
             --korisu-orange: #ff7f00;
             --korisu-black: #1a1a1a;
             --korisu-white: #ffffff;
-            --korisu-bg: #fffaf5; /* Warna latar gradasi lembut */
+            --korisu-bg: #fffaf5; 
+            --bg-light: #fafafa;
         }
         
         body {
@@ -22,25 +23,47 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* Navigasi Atas */
-        .navbar-custom {
-            background-color: var(--korisu-orange);
-            padding: 15px 0;
+        /* Navigasi Ke Dalam (Seamless dengan Dashboard) */
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
+        .navbar-custom { background-color: var(--korisu-orange); padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2); }
+        
+        /* SISTEM MULTI-LEVEL DROPDOWN KUSTOM */
+        .menu-primary-container { display: flex; align-items: center; }
+        #menu-primary { display: flex; flex-direction: row; list-style: none; margin: 0; padding: 0; gap: 5px; align-items: center;}
+        #menu-primary .nav-close { display: none; }
+        #menu-primary .menu-item { position: relative; }
+        
+        #menu-primary > .menu-item > a {
+            color: rgba(255, 255, 255, 0.8) !important; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            padding: 8px 12px; display: block; border-radius: 8px; transition: all 0.2s ease;
         }
-        .navbar-custom .nav-link {
-            color: var(--korisu-white) !important;
-            font-weight: 500;
-            margin: 0 10px;
+        #menu-primary > .menu-item > a:hover, #menu-primary > .current-menu-item > a { color: var(--korisu-white) !important; }
+
+        #menu-primary > .menu-item-has-children > a::after { content: ' ▾'; font-size: 0.8rem; vertical-align: middle; margin-left: 4px; opacity: 0.8; }
+        #menu-primary .sub-menu .menu-item-has-children > a::after { content: ' ▸'; float: right; font-size: 1rem; opacity: 0.6; }
+
+        #menu-primary .sub-menu {
+            visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 0; background-color: var(--korisu-white);
+            list-style: none; padding: 10px 0; margin: 0; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+            border: 1px solid #f0f0f0; min-width: 240px; z-index: 1060; transform: translateY(10px); transition: all 0.3s ease;
         }
-        .btn-nav-outline {
-            background-color: var(--korisu-white);
-            color: var(--korisu-orange);
-            font-weight: bold;
-            border-radius: 25px;
-            padding: 8px 25px;
+        
+        #menu-primary .menu-item-has-children:hover > .sub-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+        
+        #menu-primary .sub-menu .menu-item > a {
+            color: var(--korisu-black); padding: 10px 20px; font-weight: 600; font-size: 0.9rem; display: block; text-decoration: none; transition: all 0.2s ease;
         }
+        #menu-primary .sub-menu .menu-item > a:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+
+        #menu-primary .sub-menu .menu-item-has-children > .sub-menu { top: -10px; left: 100%; margin-left: 5px; transform: translateX(-10px); }
+        #menu-primary .sub-menu .menu-item-has-children:hover > .sub-menu { transform: translateX(0); }
+
+        /* Tombol Navigasi Kanan (Publik) */
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 25px; border: none; transition: all 0.2s; text-decoration: none; }
+        .btn-nav-outline:hover { background-color: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); color: var(--korisu-orange); }
 
         /* Area Konten Utama */
         .hero-section {
@@ -58,6 +81,7 @@
             border-radius: 20px;
             font-size: 0.85rem;
             letter-spacing: 0.5px;
+            border: 1px solid #ffe8d6;
         }
 
         .heading-main {
@@ -66,34 +90,35 @@
             font-size: 3.5rem;
             line-height: 1.2;
             margin-bottom: 20px;
+            letter-spacing: -1px;
         }
-        .text-orange {
-            color: var(--korisu-orange);
-        }
+        .text-orange { color: var(--korisu-orange); }
 
         .desc-text {
             font-size: 1.1rem;
             color: #555;
             line-height: 1.6;
             max-width: 90%;
+            font-weight: 500;
         }
 
-        /* Kartu Autentikasi (Diperhalus sesuai referensi) */
+        /* Kartu Autentikasi */
         .auth-card {
             background-color: var(--korisu-white);
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
             padding: 3rem 2.5rem;
             width: 100%;
-            border: none; /* Menghilangkan border tebal sebelumnya */
+            border: 1px solid #f0f0f0;
         }
 
         .form-control {
             background-color: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-radius: 10px;
-            padding: 12px 15px;
+            border-radius: 12px;
+            padding: 14px 15px;
             margin-bottom: 20px;
+            font-weight: 500;
         }
         .form-control:focus {
             border-color: var(--korisu-orange);
@@ -105,17 +130,18 @@
             background-color: var(--korisu-orange);
             color: var(--korisu-white);
             border: none;
-            border-radius: 25px;
+            border-radius: 12px;
             font-weight: bold;
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             margin-top: 10px;
             transition: all 0.3s ease;
         }
         .btn-korisu:hover {
             background-color: #e67300;
+            color: var(--korisu-white);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 127, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25);
         }
 
         .toggle-link {
@@ -136,27 +162,104 @@
             font-weight: bold;
             border: none;
         }
+
+        ::selection { background-color: #FFF7ED; color: #EA580C; }
     </style>
 </head>
 <body>
 
-    <!-- Navigasi -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="#">
-                <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
-            </a>
-            <div class="d-none d-lg-flex">
-                <a href="#" class="nav-link">Beranda</a>
-                <a href="#" class="nav-link">Kelas ⌄</a>
-                <a href="#" class="nav-link">Layanan ⌄</a>
-                <a href="#" class="nav-link">Blog</a>
-                <a href="#" class="nav-link">Tentang</a>
-                <a href="#" class="nav-link">Kontak</a>
+    <!-- Navigasi Ke Dalam Container (Seamless dengan Dashboard Publik) -->
+    <div class="container nav-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid px-2">
+                
+                <!-- Logo -->
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="https://korisugakkou.com/">
+                    <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                </a>
+                
+                <!-- Menu Tengah: Struktur Navigasi Publik KORISU -->
+                <div class="d-none d-lg-flex mx-auto">
+                    <div class="menu-primary-container">
+                        <ul id="menu-primary" class="navbar-nav">
+                            <li class="nav-close"><button class="btn-nav-close"><span class="close-btn">+</span></button></li>
+                            <li id="menu-item-3896" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-3896"><a href="https://korisugakkou.com/" onclick="return true">Beranda</a></li>
+                            <li id="menu-item-4136" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4136 icon"><a href="#" onclick="return true">Kelas</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4137" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4137"><a href="https://korisugakkou.com/jlpt-n4-complete-mastery" onclick="return true">Kelas Unggulan</a></li>
+                                    <li id="menu-item-5517" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5517 icon"><a href="#" onclick="return true">Dari 0</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5518" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5518"><a href="/hiragana-mastery" onclick="return true">Hiragana</a></li>
+                                            <li id="menu-item-5519" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5519"><a href="/katakana-mastery" onclick="return true">Katakana</a></li>
+                                            <li id="menu-item-5520" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5520"><a href="/japanese-fundamental-mastery" onclick="return true">Bahasa Jepang Dasar</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5508" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5508 icon"><a href="#" onclick="return true">JLPT</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5509" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5509"><a href="/jlpt-n5-complete-mastery/" onclick="return true">JLPT N5</a></li>
+                                            <li id="menu-item-5510" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5510"><a href="/jlpt-n4-complete-mastery/" onclick="return true">JLPT N4</a></li>
+                                            <li id="menu-item-5511" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5511"><a href="/jlpt-n3-complete-mastery/" onclick="return true">JLPT N3</a></li>
+                                            <li id="menu-item-5512" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5512"><a href="/jlpt-n2-complete-mastery/" onclick="return true">JLPT N2</a></li>
+                                            <li id="menu-item-5513" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5513"><a href="/jlpt-n1-complete-mastery/" onclick="return true">JLPT N1</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5514" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5514 icon"><a href="#" onclick="return true">Kaigo</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5515" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5515"><a href="/japanese-kaigo-basic-mastery" onclick="return true">Kaigo Pemula</a></li>
+                                            <li id="menu-item-5516" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5516"><a href="/japanese-kaigo-fukushishi-mastery" onclick="return true">Kaigo Fukushishi</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-4004" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4004"><a href="/courses" onclick="return true">Semua Kelas</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-3353" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-3353 icon"><a href="#" onclick="return true">Layanan</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4139" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4139 icon"><a href="#" onclick="return true">Ujian</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-4140" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4140 icon"><a href="#" onclick="return true">JLPT</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4141"><a target="_blank" href="https://jlptonline.or.id/" onclick="return true">JLPT Indonesia</a></li>
+                                                    <li id="menu-item-4142" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4142"><a target="_blank" href="https://info.jees-jlpt.jp/" onclick="return true">JLPT Jepang</a></li>
+                                                </ul>
+                                            </li>
+                                            <li id="menu-item-4143" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4143"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/1" onclick="return true">JFT Basic</a></li>
+                                            <li id="menu-item-4144" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4144 icon"><a href="#" onclick="return true">Tokutei Ginou</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4145" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4145"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/2" onclick="return true">Perawat Lansia (Kaigo)</a></li>
+                                                    <li id="menu-item-4146" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4146"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/6" onclick="return true">Pengolahan Makanan</a></li>
+                                                    <li id="menu-item-4147" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4147"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/4" onclick="return true">Restoran</a></li>
+                                                    <li id="menu-item-4148" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4148"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/5" onclick="return true">Pertanian &amp; Peternakan</a></li>
+                                                    <li id="menu-item-4149" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4149"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/10" onclick="return true">Konstruksi</a></li>
+                                                    <li id="menu-item-4150" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4150"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/12" onclick="return true">Akomodasi (Hotel)</a></li>
+                                                    <li id="menu-item-4151" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4151"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/7" onclick="return true">Pemeliharaan Kendaraan</a></li>
+                                                    <li id="menu-item-4152" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4152"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/8" onclick="return true">Budidaya Perairan</a></li>
+                                                    <li id="menu-item-4153" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4153"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/9" onclick="return true">Perikanan</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5523" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5523"><a href="#" onclick="return true">1-on-1 Coaching</a></li>
+                                    <li id="menu-item-5521" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5521"><a href="#" onclick="return true">Try Out JLPT</a></li>
+                                    <li id="menu-item-5522" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5522"><a href="#" onclick="return true">Webinar</a></li>
+                                    <li id="menu-item-4993" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4993"><a href="/ebook" onclick="return true">E-Book</a></li>
+                                    <li id="menu-item-5524" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5524"><a href="/download" onclick="return true">Digital Download</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-5525" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5525"><a href="/blog" onclick="return true">Blog</a></li>
+                            <li id="menu-item-4213" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4213"><a href="tentang.html" onclick="return true">Tentang</a></li>
+                            <li id="menu-item-4196" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4196"><a href="kontak.html" onclick="return true">Kontak</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bagian Kanan: Tombol Publik -->
+                <div class="d-flex align-items-center">
+                    <a href="auth.html" class="btn-nav-outline">Mulai Sekarang</a>
+                </div>
+                
             </div>
-            <a href="#" class="btn btn-nav-outline">Mulai Sekarang</a>
-        </div>
-    </nav>
+        </nav>
+    </div>
 
     <!-- Konten Utama (Split Screen) -->
     <div class="hero-section">

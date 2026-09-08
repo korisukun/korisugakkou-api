@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hubungi Kami - KORISU Gakkou</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Tailwind CSS (Hanya untuk layout form kontak) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --korisu-orange: #ff7f00;
+            --korisu-black: #1a1a1a;
+            --korisu-white: #ffffff;
+            --bg-light: #fafafa;
+        }
+
+        /* 100% Selaras dengan Dashboard (Segoe UI & Dotted Background) */
+        body { 
+            background-color: var(--bg-light); 
+            background-image: radial-gradient(#e0e0e0 2px, transparent 2px);
+            background-size: 30px 30px;
+            color: var(--korisu-black); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            overflow-x: hidden; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasi Ke Dalam (Seamless dengan Dashboard) */
+        .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
+        .navbar-custom { background-color: var(--korisu-orange); padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2); }
+        
+        /* ---------------------------------------------------
+           SISTEM MULTI-LEVEL DROPDOWN KUSTOM
+           --------------------------------------------------- */
+        .menu-primary-container { display: flex; align-items: center; }
+        #menu-primary { display: flex; flex-direction: row; list-style: none; margin: 0; padding: 0; gap: 5px; align-items: center;}
+        #menu-primary .nav-close { display: none; }
+        #menu-primary .menu-item { position: relative; }
+        
+        #menu-primary > .menu-item > a {
+            color: rgba(255, 255, 255, 0.8) !important; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+            padding: 8px 12px; display: block; border-radius: 8px; transition: all 0.2s ease;
+        }
+        #menu-primary > .menu-item > a:hover, #menu-primary > .current-menu-item > a { color: var(--korisu-white) !important; }
+
+        #menu-primary > .menu-item-has-children > a::after { content: ' ▾'; font-size: 0.8rem; vertical-align: middle; margin-left: 4px; opacity: 0.8; }
+        #menu-primary .sub-menu .menu-item-has-children > a::after { content: ' ▸'; float: right; font-size: 1rem; opacity: 0.6; }
+
+        #menu-primary .sub-menu {
+            visibility: hidden; opacity: 0; position: absolute; top: 100%; left: 0; background-color: var(--korisu-white);
+            list-style: none; padding: 10px 0; margin: 0; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
+            border: 1px solid #f0f0f0; min-width: 240px; z-index: 1060; transform: translateY(10px); transition: all 0.3s ease;
+        }
+        
+        #menu-primary .menu-item-has-children:hover > .sub-menu { visibility: visible; opacity: 1; transform: translateY(0); }
+        
+        #menu-primary .sub-menu .menu-item > a {
+            color: var(--korisu-black); padding: 10px 20px; font-weight: 600; font-size: 0.9rem; display: block; text-decoration: none; transition: all 0.2s ease;
+        }
+        #menu-primary .sub-menu .menu-item > a:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+
+        #menu-primary .sub-menu .menu-item-has-children > .sub-menu { top: -10px; left: 100%; margin-left: 5px; transform: translateX(-10px); }
+        #menu-primary .sub-menu .menu-item-has-children:hover > .sub-menu { transform: translateX(0); }
+        /* --------------------------------------------------- */
+
+        /* Dropdown Navigasi Kanan (Profil) */
+        .btn-nav-outline { background-color: var(--korisu-white); color: var(--korisu-orange); font-weight: bold; border-radius: 25px; padding: 8px 20px; border: none; transition: all 0.2s; }
+        .btn-nav-outline:hover, .btn-nav-outline[aria-expanded="true"] { background-color: #f8f9fa; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .dropdown-menu-custom { border-radius: 16px; border: 1px solid #f0f0f0; box-shadow: 0 15px 35px rgba(0,0,0,0.08); padding: 10px 0; margin-top: 10px !important; min-width: 220px; }
+        .dropdown-item { font-weight: 600; padding: 10px 20px; transition: all 0.2s ease; color: var(--korisu-black); }
+        .dropdown-item:hover { background-color: #fffaf5; color: var(--korisu-orange); padding-left: 25px; }
+        .dropdown-item.text-danger:hover { background-color: #fff0f0; color: #dc3545; }
+        .stats-top { background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); }
+
+        /* Notifikasi */
+        .notif-item { cursor: pointer; transition: background 0.2s; }
+        .notif-item:hover { background-color: #f8f9fa; }
+        .notif-item.unread { background-color: #fffaf5; border-left: 4px solid var(--korisu-orange); }
+
+        ::selection { background-color: #FFF7ED; color: #EA580C; }
+
+        /* Animasi Custom Tailwind */
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-100 { animation-delay: 100ms; opacity: 0; }
+        @keyframes pulse-slow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
+        @keyframes float-y { 0%, 100% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+        .animate-float { animation: float-y 5s ease-in-out infinite; }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigasi Ke Dalam Container (Identik Dashboard) -->
+    <div class="container nav-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid px-2">
+                
+                <a class="navbar-brand text-white fw-bold d-flex align-items-center gap-2" href="dashboard.html">
+                    <div style="background: white; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🐿️</div>
+                </a>
+                
+                <!-- Menu Tengah: Struktur Navigasi KORISU -->
+                <div class="d-none d-lg-flex mx-auto">
+                    <div class="menu-primary-container">
+                        <ul id="menu-primary" class="navbar-nav">
+                            <li class="nav-close"><button class="btn-nav-close"><span class="close-btn">+</span></button></li>
+                            <li id="menu-item-3896" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-home menu-item-3896"><a href="dashboard.html" aria-current="page" onclick="return true">Beranda</a></li>
+                            <li id="menu-item-4136" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4136 icon"><a href="#" onclick="return true">Kelas</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4137" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4137"><a href="https://korisugakkou.com/jlpt-n4-complete-mastery" onclick="return true">Kelas Unggulan</a></li>
+                                    <li id="menu-item-5517" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5517 icon"><a href="#" onclick="return true">Dari 0</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5518" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5518"><a href="/hiragana-mastery" onclick="return true">Hiragana</a></li>
+                                            <li id="menu-item-5519" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5519"><a href="/katakana-mastery" onclick="return true">Katakana</a></li>
+                                            <li id="menu-item-5520" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5520"><a href="/japanese-fundamental-mastery" onclick="return true">Bahasa Jepang Dasar</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5508" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5508 icon"><a href="#" onclick="return true">JLPT</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5509" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5509"><a href="/jlpt-n5-complete-mastery/" onclick="return true">JLPT N5</a></li>
+                                            <li id="menu-item-5510" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5510"><a href="/jlpt-n4-complete-mastery/" onclick="return true">JLPT N4</a></li>
+                                            <li id="menu-item-5511" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5511"><a href="/jlpt-n3-complete-mastery/" onclick="return true">JLPT N3</a></li>
+                                            <li id="menu-item-5512" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5512"><a href="/jlpt-n2-complete-mastery/" onclick="return true">JLPT N2</a></li>
+                                            <li id="menu-item-5513" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5513"><a href="/jlpt-n1-complete-mastery/" onclick="return true">JLPT N1</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5514" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-5514 icon"><a href="#" onclick="return true">Kaigo</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-5515" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5515"><a href="/japanese-kaigo-basic-mastery" onclick="return true">Kaigo Pemula</a></li>
+                                            <li id="menu-item-5516" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5516"><a href="/japanese-kaigo-fukushishi-mastery" onclick="return true">Kaigo Fukushishi</a></li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-4004" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4004"><a href="kelas.html" onclick="return true">Semua Kelas</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-3353" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-3353 icon"><a href="#" onclick="return true">Layanan</a>
+                                <ul class="sub-menu">
+                                    <li id="menu-item-4139" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4139 icon"><a href="#" onclick="return true">Ujian</a>
+                                        <ul class="sub-menu">
+                                            <li id="menu-item-4140" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4140 icon"><a href="#" onclick="return true">JLPT</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4141"><a target="_blank" href="https://jlptonline.or.id/" onclick="return true">JLPT Indonesia</a></li>
+                                                    <li id="menu-item-4142" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4142"><a target="_blank" href="https://info.jees-jlpt.jp/" onclick="return true">JLPT Jepang</a></li>
+                                                </ul>
+                                            </li>
+                                            <li id="menu-item-4143" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4143"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/1" onclick="return true">JFT Basic</a></li>
+                                            <li id="menu-item-4144" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-4144 icon"><a href="#" onclick="return true">Tokutei Ginou</a>
+                                                <ul class="sub-menu">
+                                                    <li id="menu-item-4145" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4145"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/2" onclick="return true">Perawat Lansia (Kaigo)</a></li>
+                                                    <li id="menu-item-4146" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4146"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/6" onclick="return true">Pengolahan Makanan</a></li>
+                                                    <li id="menu-item-4147" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4147"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/4" onclick="return true">Restoran</a></li>
+                                                    <li id="menu-item-4148" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4148"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/5" onclick="return true">Pertanian &amp; Peternakan</a></li>
+                                                    <li id="menu-item-4149" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4149"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/10" onclick="return true">Konstruksi</a></li>
+                                                    <li id="menu-item-4150" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4150"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/12" onclick="return true">Akomodasi (Hotel)</a></li>
+                                                    <li id="menu-item-4151" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4151"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/7" onclick="return true">Pemeliharaan Kendaraan</a></li>
+                                                    <li id="menu-item-4152" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4152"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/8" onclick="return true">Budidaya Perairan</a></li>
+                                                    <li id="menu-item-4153" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4153"><a target="_blank" href="https://www.prometric-jp.com/id/ssw/test_list/archives/9" onclick="return true">Perikanan</a></li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li id="menu-item-5523" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5523"><a href="#" onclick="return true">1-on-1 Coaching</a></li>
+                                    <li id="menu-item-5521" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5521"><a href="#" onclick="return true">Try Out JLPT</a></li>
+                                    <li id="menu-item-5522" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5522"><a href="#" onclick="return true">Webinar</a></li>
+                                    <li id="menu-item-4993" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-4993"><a href="toko.html" onclick="return true">E-Book</a></li>
+                                    <li id="menu-item-5524" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5524"><a href="toko.html" onclick="return true">Digital Download</a></li>
+                                </ul>
+                            </li>
+                            <li id="menu-item-5525" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-5525"><a href="komunitas.html" onclick="return true">Komunitas</a></li>
+                            <li id="menu-item-4213" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-4213"><a href="tentang.html" onclick="return true">Tentang</a></li>
+                            <li id="menu-item-4196" class="menu-item menu-item-type-post_type menu-item-object-page current-menu-item page_item current_page_item menu-item-4196"><a href="kontak.html" aria-current="page" onclick="return true">Kontak</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bagian Kanan: Koin & Dropdown User -->
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-white stats-top" title="Total Koin">🪙 <span id="koin-murid">0</span></span>
+                    
+                    <div class="dropdown">
+                        <button class="btn btn-nav-outline dropdown-toggle d-flex align-items-center gap-2" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            👤 <span id="nav-user-name">Memuat...</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-custom" aria-labelledby="userMenuButton">
+                            <li><h6 class="dropdown-header text-muted fw-bold">Menu Akun Saya</h6></li>
+                            <li><a class="dropdown-item" href="dashboard.html">🏠 Dasbor Utama</a></li>
+                            <li>
+                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="#" onclick="bukaModalNotif(event)">
+                                    🔔 Notifikasi 
+                                    <span id="badge-notif" class="badge bg-danger rounded-pill" style="display:none;">0</span>
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="profil.html">👤 Edit Profil</a></li>
+                            <li><a class="dropdown-item" href="toko.html">🏪 Kunjungi Toko</a></li>
+                            
+                            <div id="nav-menu-sensei" style="display: none;">
+                                <li><hr class="dropdown-divider"></li>
+                                <li><h6 class="dropdown-header text-primary fw-bold">Administrator</h6></li>
+                                <li><a class="dropdown-item text-primary" href="panel-sensei.html">👨‍🏫 Panel Sensei LMS</a></li>
+                            </div>
+                            
+                            <li><hr class="dropdown-divider"></li>
+                            <li><button class="dropdown-item text-danger" onclick="logout()">🚪 Keluar Akun</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- MAIN CONTENT SECTION (Gaya Tailwind tapi menggunakan Segoe UI CSS) -->
+    <main class="flex-grow relative pb-20 sm:pb-32 px-4 sm:px-6 lg:px-8 flex items-center justify-center pt-10">
+        
+        <!-- Background Decorations (Blobs) -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-[500px] h-[500px] bg-orange-200 rounded-full blur-[100px] opacity-30 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-[400px] h-[400px] bg-gray-300 rounded-full blur-[100px] opacity-20 pointer-events-none"></div>
+        
+        <!-- Aksen huruf Jepang background -->
+        <div class="absolute top-32 left-10 text-9xl font-black text-orange-600/5 rotate-12 select-none pointer-events-none">あ</div>
+        <div class="absolute bottom-40 right-10 text-9xl font-black text-gray-900/5 -rotate-12 select-none pointer-events-none animate-float">お</div>
+
+        <!-- Main Container -->
+        <div class="max-w-7xl mx-auto w-full relative z-10">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                
+                <!-- Left Column: Contact Info -->
+                <div class="animate-fade-in-up">
+                    <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-orange-50 text-orange-600 font-bold text-xs sm:text-sm tracking-widest uppercase border border-orange-200 shadow-sm mb-6">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-600"></span>
+                        </span>
+                        Hubungi Kami
+                    </div>
+                    
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-black mb-6 text-gray-900 leading-[1.15] tracking-tight">
+                        Masih Ada <br class="hidden sm:block">
+                        <span class="text-orange-600 relative inline-block whitespace-nowrap">
+                            Pertanyaan?
+                            <svg class="absolute w-full h-3 md:h-4 -bottom-1 left-0 text-orange-200 opacity-80 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="6" fill="transparent" />
+                            </svg>
+                        </span>
+                    </h1>
+                    
+                    <p class="text-base sm:text-lg md:text-xl text-gray-600 mb-10 leading-relaxed font-medium max-w-lg">
+                        Jangan ragu berdiskusi mengenai target belajar Anda. Tim mentor kami siap membantu mengarahkan paket belajar yang paling efektif untuk kebutuhan Anda.
+                    </p>
+
+                    <div class="space-y-4 sm:space-y-6">
+                        <!-- Info Card 1 -->
+                        <div class="flex items-start gap-4 sm:gap-5 p-5 sm:p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-orange-200 transition-all duration-300 group">
+                            <div class="bg-orange-50 p-3 sm:p-4 rounded-xl text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors transform group-hover:scale-110">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-lg sm:text-xl mb-1">WhatsApp Support</h4>
+                                <p class="text-gray-500 text-sm sm:text-base mb-2 font-medium">Fast response: 09.00 - 17.00 WIB</p>
+                                <a href="#" class="text-orange-600 font-bold hover:underline text-sm sm:text-base inline-block">+62 856-4155-2605</a>
+                            </div>
+                        </div>
+                        
+                        <!-- Info Card 2 -->
+                        <div class="flex items-start gap-4 sm:gap-5 p-5 sm:p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-orange-200 transition-all duration-300 group">
+                            <div class="bg-orange-50 p-3 sm:p-4 rounded-xl text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors transform group-hover:scale-110">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-lg sm:text-xl mb-1">Email</h4>
+                                <p class="text-gray-500 text-sm sm:text-base mb-2 font-medium">Untuk kerjasama & pertanyaan teknis</p>
+                                <a href="mailto:nuru.korisu@gmail.com" class="text-orange-600 font-bold hover:underline text-sm sm:text-base inline-block">nuru.korisu@gmail.com</a>
+                            </div>
+                        </div>
+
+                        <!-- Info Card 3 -->
+                        <div class="flex items-start gap-4 sm:gap-5 p-5 sm:p-6 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-orange-200 transition-all duration-300 group">
+                            <div class="bg-orange-50 p-3 sm:p-4 rounded-xl text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors transform group-hover:scale-110">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 sm:w-7 sm:h-7"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 text-lg sm:text-xl mb-1">Office</h4>
+                                <p class="text-gray-500 text-sm sm:text-base font-medium leading-relaxed">
+                                    Kota Pekalongan, Jawa Tengah, Indonesia
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Contact Form -->
+                <div class="animate-fade-in-up delay-100 w-full max-w-xl mx-auto lg:mx-0 lg:ml-auto">
+                    <div class="bg-white p-8 sm:p-10 md:p-12 rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl border border-gray-100 relative overflow-hidden">
+                        
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-bl-full -z-0"></div>
+                        
+                        <h3 class="text-2xl sm:text-3xl font-black mb-8 text-gray-900 relative z-10">Kirim Pesan Langsung</h3>
+                        
+                        <!-- Form State -->
+                        <form id="contact-form" class="space-y-6 relative z-10 block">
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2.5 text-sm sm:text-base">Nama Lengkap</label>
+                                <input type="text" id="input-name" required class="w-full px-5 py-4 rounded-xl border-2 border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition bg-gray-50 focus:bg-white text-gray-900 font-medium text-base" placeholder="Contoh: Budi Santoso">
+                            </div>
+                            
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-800 font-bold mb-2.5 text-sm sm:text-base">Nomor WhatsApp</label>
+                                    <input type="tel" id="input-whatsapp" required class="w-full px-5 py-4 rounded-xl border-2 border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition bg-gray-50 focus:bg-white text-gray-900 font-medium text-base" placeholder="08123456789">
+                                </div>
+                                <div>
+                                    <label class="block text-gray-800 font-bold mb-2.5 text-sm sm:text-base">Alamat Email</label>
+                                    <input type="email" id="input-email" required class="w-full px-5 py-4 rounded-xl border-2 border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition bg-gray-50 focus:bg-white text-gray-900 font-medium text-base" placeholder="budi@email.com">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-800 font-bold mb-2.5 text-sm sm:text-base">Pesan Anda</label>
+                                <textarea id="input-message" rows="4" required class="w-full px-5 py-4 rounded-xl border-2 border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition bg-gray-50 focus:bg-white resize-none text-gray-900 font-medium text-base leading-relaxed" placeholder="Ceritakan tujuan belajar atau kendala Anda di sini..."></textarea>
+                            </div>
+                            
+                            <button type="submit" id="btn-submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-black text-lg py-4 sm:py-5 rounded-xl shadow-xl shadow-orange-500/30 transition transform hover:-translate-y-1 flex items-center justify-center gap-3 cursor-pointer mt-4">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> 
+                                Kirim Pesan via WhatsApp
+                            </button>
+                        </form>
+
+                        <!-- Success State (Hidden by default) -->
+                        <div id="success-state" class="hidden bg-green-50 border border-green-200 text-green-800 p-8 rounded-[1.5rem] flex flex-col items-center justify-center text-center animate-fade-in-up h-[400px]">
+                            <div class="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6 animate-pulse-slow shadow-sm border border-green-200">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            </div>
+                            <h4 class="text-2xl font-black mb-3">Pesan Terkirim!</h4>
+                            <p class="text-green-700 font-medium leading-relaxed">Terima kasih telah menghubungi kami.<br/>Jendela WhatsApp Anda akan segera terbuka untuk melanjutkan percakapan.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL NOTIFIKASI -->
+    <div class="modal fade" id="modalNotif" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">🔔 Notifikasi Anda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-0" id="notif-container">
+                    <div class="text-center text-muted py-4">Memuat...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS (Wajib untuk Modal & Dropdown Profil) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript Vanilla Murni -->
+    <script>
+        const API_URL = 'https://korisugakkou-api.onrender.com/api';
+        const TOKEN = localStorage.getItem('korisu_token');
+        const userData = JSON.parse(localStorage.getItem('korisu_user') || '{}');
+        let modalNotif = null;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            modalNotif = new bootstrap.Modal(document.getElementById('modalNotif'));
+
+            // Mengisi data sesi jika pengguna sudah login
+            if (userData && userData.nama_lengkap) {
+                let namaDepan = userData.nama_lengkap.split(' ')[0];
+                document.getElementById('nav-user-name').innerText = namaDepan;
+                document.getElementById('koin-murid').innerText = userData.koin || 0;
+                
+                if(userData.role === 'sensei' || userData.role === 'admin') {
+                    document.getElementById('nav-menu-sensei').style.display = 'block';
+                }
+                // Tarik notifikasi jika login
+                muatNotifikasi();
+            } else {
+                document.getElementById('nav-user-name').innerText = 'Tamu';
+            }
+        });
+
+        // ==========================
+        // SISTEM NOTIFIKASI
+        // ==========================
+        async function muatNotifikasi() {
+            if(!TOKEN) return; // Abaikan jika belum login
+            const container = document.getElementById('notif-container');
+            try {
+                const res = await fetch(`${API_URL}/community/notifications`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
+                if (!res.ok) throw new Error("Gagal menarik data");
+
+                const data = await res.json();
+                const unread = data.notifications.filter(n => !n.is_read).length;
+                const badge = document.getElementById('badge-notif');
+                
+                if (unread > 0) { badge.innerText = unread; badge.style.display = 'inline-block'; } 
+                else { badge.style.display = 'none'; }
+                
+                container.innerHTML = "";
+                if(data.notifications.length > 0) {
+                    data.notifications.forEach(n => {
+                        const bgClass = n.is_read ? '' : 'unread';
+                        container.innerHTML += `
+                            <div class="notif-item p-3 border-bottom ${bgClass}" onclick="window.location.href='komunitas.html?post_id=${n.post_id}'">
+                                <div class="fw-bold">${n.sender_name}</div>
+                                <div class="text-muted small">${n.message}</div>
+                            </div>
+                        `;
+                    });
+                } else { container.innerHTML = "<div class='text-center text-muted py-4'>Tidak ada notifikasi baru.</div>"; }
+                
+            } catch(e) {
+                container.innerHTML = `<div class='text-center text-danger py-4 fw-bold'>Gagal memuat notifikasi.</div>`;
+            }
+        }
+
+        function bukaModalNotif(e) {
+            e.preventDefault(); 
+            if(!TOKEN) {
+                alert("Silakan Masuk (Login) terlebih dahulu untuk melihat notifikasi.");
+                window.location.href = "auth.html";
+                return;
+            }
+            modalNotif.show();
+            fetch(`${API_URL}/community/notifications/read`, { method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}` }}).then(() => { document.getElementById('badge-notif').style.display = 'none'; });
+        }
+
+        function logout() {
+            localStorage.removeItem('korisu_token');
+            localStorage.removeItem('korisu_user');
+            window.location.href = "auth.html";
+        }
+
+        // ==========================
+        // Logika Form Kontak WhatsApp
+        // ==========================
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-submit');
+            const formState = document.getElementById('contact-form');
+            const successState = document.getElementById('success-state');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+            btn.classList.remove('hover:-translate-y-1', 'shadow-xl');
+            btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="animate-spin"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Mengalihkan...`;
+
+            const name = document.getElementById('input-name').value;
+            const whatsapp = document.getElementById('input-whatsapp').value;
+            const email = document.getElementById('input-email').value;
+            const message = document.getElementById('input-message').value;
+
+            const phoneNumber = "6285641552605";
+            const text = `Halo Admin KORISU Gakkou,\n\nNama: ${name}\nWhatsApp: ${whatsapp}\nEmail: ${email}\n\nPesan:\n${message}`;
+            const encodedText = encodeURIComponent(text);
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+
+            setTimeout(() => {
+                formState.classList.add('hidden');
+                formState.classList.remove('block');
+                successState.classList.remove('hidden');
+                successState.classList.add('flex');
+                
+                window.open(whatsappUrl, '_blank');
+                document.getElementById('contact-form').reset();
+
+                setTimeout(() => {
+                    successState.classList.add('hidden');
+                    successState.classList.remove('flex');
+                    formState.classList.remove('hidden');
+                    formState.classList.add('block');
+                    
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                    btn.classList.add('hover:-translate-y-1', 'shadow-xl');
+                    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Kirim Pesan via WhatsApp`;
+                }, 5000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

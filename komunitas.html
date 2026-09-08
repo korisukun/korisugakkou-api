@@ -29,7 +29,7 @@
         .header-section { padding: 20px 0 40px 0; text-align: center; }
         .heading-main { font-weight: 900; font-size: 3.5rem; letter-spacing: -1px; color: var(--korisu-black); margin-bottom: 10px; }
         
-        .card-post { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.03); padding: 25px; margin-bottom: 20px; }
+        .card-post { background-color: var(--korisu-white); border: 1px solid #f0f0f0; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.03); padding: 25px; margin-bottom: 20px; transition: box-shadow 0.5s ease; }
         .post-author-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #ffecd9 0%, #fffaf5 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; border: 2px solid #ffe8d6; margin-right: 15px; }
         .post-author-name { font-weight: 800; color: var(--korisu-black); font-size: 1.1rem; margin-bottom: 0; }
         .post-time { font-size: 0.85rem; color: #888; font-weight: 600; }
@@ -151,7 +151,7 @@
         </div>
     </div>
 
-    <!-- MODAL EDIT POSTINGAN -->
+    <!-- MODAL EDIT POSTINGAN UTAMA -->
     <div class="modal fade" id="modalEditPost" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content" style="border-radius: 20px;">
@@ -165,6 +165,25 @@
                 <div class="modal-footer border-0 pt-0">
                     <button class="btn btn-light rounded-pill fw-bold" data-bs-dismiss="modal">Batal</button>
                     <button class="btn btn-korisu-solid" id="btn-simpan-edit">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT KOMENTAR (BARU) -->
+    <div class="modal fade" id="modalEditKomen" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">✏️ Edit Komentar</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4">
+                    <textarea id="input-edit-komen" class="form-control rounded-4 p-3" rows="4" style="resize: none;" placeholder="Tulis komentar..."></textarea>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button class="btn btn-light rounded-pill fw-bold px-4" data-bs-dismiss="modal">Batal</button>
+                    <button class="btn btn-korisu-solid" id="btn-simpan-edit-komen">Simpan Komentar</button>
                 </div>
             </div>
         </div>
@@ -203,11 +222,16 @@
 
         let postGlobal = []; 
         let currentEditPostId = null;
+        let currentEditCommentId = null;
+        let currentEditCommentPostId = null;
+        
         let modalEdit = null;
+        let modalEditKomen = null;
         let modalNotif = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             modalEdit = new bootstrap.Modal(document.getElementById('modalEditPost'));
+            modalEditKomen = new bootstrap.Modal(document.getElementById('modalEditKomen'));
             modalNotif = new bootstrap.Modal(document.getElementById('modalNotif'));
             muatFeed();
             muatNotifikasi();
@@ -217,25 +241,38 @@
         // SISTEM NOTIFIKASI
         // ==========================
         async function muatNotifikasi() {
+            const container = document.getElementById('notif-container');
             try {
                 const res = await fetch(`${API_URL}/community/notifications`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
-                const data = await res.json();
-                if(res.ok) {
-                    const unread = data.notifications.filter(n => !n.is_read).length;
-                    const badge = document.getElementById('badge-notif');
-                    if (unread > 0) { badge.innerText = unread; badge.style.display = 'inline-block'; } 
-                    else { badge.style.display = 'none'; }
-                    
-                    const container = document.getElementById('notif-container');
-                    container.innerHTML = "";
-                    if(data.notifications.length > 0) {
-                        data.notifications.forEach(n => {
-                            const bgClass = n.is_read ? '' : 'unread';
-                            container.innerHTML += `<div class="notif-item p-3 border-bottom ${bgClass}"><div class="fw-bold">${n.sender_name}</div><div class="text-muted small">${n.message}</div></div>`;
-                        });
-                    } else { container.innerHTML = "<div class='text-center text-muted py-4'>Tidak ada notifikasi baru.</div>"; }
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => null);
+                    throw new Error(errData ? errData.message : `HTTP Error ${res.status}`);
                 }
-            } catch(e) {}
+
+                const data = await res.json();
+                
+                const unread = data.notifications.filter(n => !n.is_read).length;
+                const badge = document.getElementById('badge-notif');
+                if (unread > 0) { badge.innerText = unread; badge.style.display = 'inline-block'; } 
+                else { badge.style.display = 'none'; }
+                
+                container.innerHTML = "";
+                if(data.notifications.length > 0) {
+                    data.notifications.forEach(n => {
+                        const bgClass = n.is_read ? '' : 'unread';
+                        container.innerHTML += `
+                            <div class="notif-item p-3 border-bottom ${bgClass}" onclick="window.location.href='komunitas.html?post_id=${n.post_id}'">
+                                <div class="fw-bold">${n.sender_name}</div>
+                                <div class="text-muted small">${n.message}</div>
+                            </div>
+                        `;
+                    });
+                } else { container.innerHTML = "<div class='text-center text-muted py-4'>Tidak ada notifikasi baru.</div>"; }
+                
+            } catch(e) {
+                console.error("Error Notifikasi:", e);
+                container.innerHTML = `<div class='text-center text-danger py-4 fw-bold'>Gagal memuat notifikasi.</div><div class='text-center text-muted small px-3'>${e.message}</div>`;
+            }
         }
 
         function bukaModalNotif(e) {
@@ -277,7 +314,7 @@
                         }
 
                         container.innerHTML += `
-                            <div class="card-post">
+                            <div class="card-post" id="post-card-${post.id}">
                                 <div class="d-flex justify-content-between align-items-center w-100">
                                     <div class="d-flex align-items-center">
                                         <div class="post-author-icon">👤</div>
@@ -301,12 +338,33 @@
                             </div>
                         `;
                     });
+                    cekAutoScroll();
                 } else { container.innerHTML = `<div class="text-center p-5 bg-white rounded-4 border"><h3 class="fw-bold">Belum ada diskusi 🍃</h3><p class="text-muted">Mulai pembicaraan!</p></div>`; }
             } catch (error) { document.getElementById('feed-container').innerHTML = "<div class='text-danger text-center'>Gagal memuat komunitas.</div>"; }
         }
 
+        function cekAutoScroll() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetPost = urlParams.get('post_id');
+            if (targetPost) {
+                setTimeout(() => {
+                    const el = document.getElementById(`post-card-${targetPost}`);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        el.style.boxShadow = "0 0 25px rgba(255, 127, 0, 0.6)";
+                        setTimeout(() => el.style.boxShadow = "0 15px 35px rgba(0,0,0,0.03)", 3000);
+                        
+                        const box = document.getElementById(`comment-box-${targetPost}`);
+                        if (box && box.style.display !== 'block') {
+                            toggleKomentar(targetPost);
+                        }
+                    }
+                }, 500);
+            }
+        }
+
         // ==========================
-        // SISTEM KOMENTAR (CRUD & MENTION)
+        // SISTEM KOMENTAR
         // ==========================
         async function toggleKomentar(postId) {
             const box = document.getElementById(`comment-box-${postId}`);
@@ -326,7 +384,6 @@
                     parentComments.forEach(c => {
                         const isSensei = c.role === 'sensei' || c.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
                         
-                        // Opsi CRUD Komentar Induk
                         let opsInduk = '';
                         if (c.user_id == userData.id || userData.role === 'sensei' || userData.role === 'admin') {
                             let btnEdit = (c.user_id == userData.id) ? `<li><button class="dropdown-item py-1" onclick="editKomen(${c.id}, ${postId})">✏️ Edit</button></li>` : '';
@@ -340,7 +397,6 @@
                             childReplies.forEach(r => {
                                 const isSenseiReply = r.role === 'sensei' || r.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
                                 
-                                // Opsi CRUD Komentar Balasan
                                 let opsBalasan = '';
                                 if (r.user_id == userData.id || userData.role === 'sensei' || userData.role === 'admin') {
                                     let btnEdit = (r.user_id == userData.id) ? `<li><button class="dropdown-item py-1" onclick="editKomen(${r.id}, ${postId})">✏️ Edit</button></li>` : '';
@@ -380,38 +436,53 @@
             } catch(e) { list.innerHTML = "Gagal memuat."; }
         }
 
-        // [BARU] Fungsi Edit Komentar (Sederhana via Prompt)
-        async function editKomen(commentId, postId) {
+        // ==========================
+        // Logika CRUD Komentar (DIPERBAIKI)
+        // ==========================
+        function editKomen(commentId, postId) {
             const elLama = document.getElementById(`komen-teks-${commentId}`);
             if(!elLama) return;
-            const teksLama = elLama.innerText;
             
-            const teksBaru = prompt("Edit komentar Anda:", teksLama);
-            if (teksBaru === null || teksBaru.trim() === "" || teksBaru === teksLama) return;
-
-            try {
-                const res = await fetch(`${API_URL}/community/comment/${commentId}`, {
-                    method: 'PUT', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ komentar: teksBaru.trim() })
-                });
-                if(res.ok) { 
-                    document.getElementById(`comment-box-${postId}`).style.display = 'none'; 
-                    await toggleKomentar(postId); 
-                } else { alert("Gagal mengedit komentar."); }
-            } catch(e) { alert("Error jaringan"); }
+            // Simpan ID yang sedang diedit ke memori global
+            currentEditCommentId = commentId;
+            currentEditCommentPostId = postId;
+            
+            // Isi teks lama ke dalam textarea modal
+            document.getElementById('input-edit-komen').value = elLama.innerText;
+            
+            // Buka Modal Frontend
+            modalEditKomen.show();
         }
 
-        // [BARU] Fungsi Hapus Komentar
+        // Eksekusi Simpan Edit Komentar
+        document.getElementById('btn-simpan-edit-komen').addEventListener('click', async () => {
+            const teksBaru = document.getElementById('input-edit-komen').value.trim();
+            if (!teksBaru) return alert("Komentar tidak boleh kosong!");
+
+            const btn = document.getElementById('btn-simpan-edit-komen'); 
+            btn.disabled = true; btn.innerText = "Menyimpan...";
+
+            try {
+                const res = await fetch(`${API_URL}/community/comment/${currentEditCommentId}`, {
+                    method: 'PUT', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ komentar: teksBaru })
+                });
+                if(res.ok) { 
+                    modalEditKomen.hide();
+                    document.getElementById(`comment-box-${currentEditCommentPostId}`).style.display = 'none'; 
+                    await toggleKomentar(currentEditCommentPostId); 
+                } else { alert("Gagal mengedit komentar."); }
+            } catch(e) { alert("Error jaringan"); } finally {
+                btn.disabled = false; btn.innerText = "Simpan Komentar";
+            }
+        });
+
         async function hapusKomen(commentId, postId) {
             if(!confirm("Yakin ingin menghapus komentar ini secara permanen?")) return;
             try {
-                const res = await fetch(`${API_URL}/community/comment/${commentId}`, {
-                    method: 'DELETE', headers: { 'Authorization': `Bearer ${TOKEN}` }
-                });
-                if(res.ok) { 
-                    document.getElementById(`comment-box-${postId}`).style.display = 'none'; 
-                    await toggleKomentar(postId); 
-                } else { alert("Gagal menghapus komentar."); }
+                const res = await fetch(`${API_URL}/community/comment/${commentId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${TOKEN}` } });
+                if(res.ok) { document.getElementById(`comment-box-${postId}`).style.display = 'none'; await toggleKomentar(postId); } 
+                else { alert("Gagal menghapus komentar."); }
             } catch(e) { alert("Error jaringan"); }
         }
 
@@ -420,7 +491,7 @@
             form.style.setProperty('display', 'flex', 'important'); 
             const input = document.getElementById(`input-balas-${parentId}`);
             if (!input.value.includes(`@${namaUser}`)) { input.value = `@${namaUser} ` + input.value; }
-            input.dataset.mentionId = userId; // Simpan ID user untuk dikirim ke backend
+            input.dataset.mentionId = userId; 
             input.focus();
         }
 
@@ -479,7 +550,7 @@
             } catch(e){}
         }
 
-        function bagikanPost(postId) { navigator.clipboard.writeText(`https://korisugakkou.com/komunitas.html?post=${postId}`).then(() => { alert("Tautan ke diskusi ini telah disalin! 📋"); }); }
+        function bagikanPost(postId) { navigator.clipboard.writeText(`https://korisugakkou.com/komunitas.html?post_id=${postId}`).then(() => { alert("Tautan ke diskusi ini telah disalin! 📋"); }); }
         function logout() { localStorage.removeItem('korisu_token'); localStorage.removeItem('korisu_user'); window.location.href = "auth.html"; }
     </script>
 </body>
