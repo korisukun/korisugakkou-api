@@ -77,22 +77,30 @@ const getComments = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+// [PERBAIKAN] Mengirim Notifikasi Tepat Sasaran via mention_id
 const addComment = async (req, res) => {
-    const { post_id, komentar, parent_id } = req.body;
+    const { post_id, komentar, parent_id, mention_id } = req.body;
     if (!komentar) return res.status(400).json({ message: 'Komentar kosong.' });
+    
     try {
-        await db.query('INSERT INTO community_comments (post_id, user_id, komentar, parent_id) VALUES ($1, $2, $3, $4)', [post_id, req.user.id, komentar, parent_id || null]);
+        // 1. Simpan komentar
+        await db.query(
+            'INSERT INTO community_comments (post_id, user_id, komentar, parent_id) VALUES ($1, $2, $3, $4)', 
+            [post_id, req.user.id, komentar, parent_id || null]
+        );
         
-        const mentionMatch = komentar.match(/@([a-zA-Z0-9_ ]+)/);
-        if (mentionMatch) {
-            let namaMention = mentionMatch[1].trim();
-            const userRes = await db.query('SELECT id FROM users WHERE nama_lengkap ILIKE $1 LIMIT 1', [`%${namaMention}%`]);
-            if (userRes.rows.length > 0 && userRes.rows[0].id !== req.user.id) {
-                await db.query("INSERT INTO notifications (user_id, sender_id, type, post_id, message) VALUES ($1, $2, 'mention', $3, $4)", [userRes.rows[0].id, req.user.id, post_id, 'membalas dan menyebut Anda di komunitas.']);
-            }
+        // 2. Kirim Notifikasi (Hanya jika mention_id dikirim dan bukan mention diri sendiri)
+        if (mention_id && mention_id !== req.user.id) {
+            await db.query(
+                "INSERT INTO notifications (user_id, sender_id, type, post_id, message) VALUES ($1, $2, 'mention', $3, $4)", 
+                [mention_id, req.user.id, post_id, 'membalas dan menyebut Anda di komunitas.']
+            );
         }
+        
         res.status(201).json({ message: 'Komentar dikirim!' });
-    } catch (error) { res.status(500).json({ message: error.message }); }
+    } catch (error) { 
+        res.status(500).json({ message: error.message }); 
+    }
 };
 
 // [BARU] Logika Edit Komentar

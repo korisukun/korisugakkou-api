@@ -11,6 +11,7 @@
         :root { --korisu-orange: #ff7f00; --korisu-black: #1a1a1a; --korisu-white: #ffffff; --bg-light: #fafafa; }
         body { background-color: var(--bg-light); background-image: radial-gradient(#e0e0e0 2px, transparent 2px); background-size: 30px 30px; color: var(--korisu-black); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
         
+        /* Navigasi */
         .nav-wrapper { padding-top: 25px; margin-bottom: 20px; z-index: 1050; position: relative; }
         .navbar-custom { background-color: var(--korisu-orange); padding: 15px 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(255, 127, 0, 0.2); }
         .navbar-custom .nav-link { color: rgba(255, 255, 255, 0.8) !important; font-weight: 600; margin: 0 10px; font-size: 0.95rem; position: relative; }
@@ -24,6 +25,7 @@
         .dropdown-item.text-danger:hover { background-color: #fff0f0; color: #dc3545; }
         .stats-top { background: rgba(255,255,255,0.2); padding: 6px 15px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.3); }
 
+        /* UI Komunitas Khusus */
         .header-section { padding: 20px 0 40px 0; text-align: center; }
         .heading-main { font-weight: 900; font-size: 3.5rem; letter-spacing: -1px; color: var(--korisu-black); margin-bottom: 10px; }
         
@@ -45,6 +47,7 @@
         .btn-korisu-solid { background-color: var(--korisu-orange); color: white; border: none; border-radius: 12px; font-weight: bold; padding: 12px 25px; transition: all 0.3s; }
         .btn-korisu-solid:hover { background-color: #e67300; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 127, 0, 0.25); }
 
+        /* Komentar Section */
         .comment-section { background-color: #f8f9fa; border-radius: 16px; padding: 20px; margin-top: 15px; display: none; }
         .comment-item { padding: 12px 0; border-bottom: 1px solid #e9ecef; }
         .comment-item:last-child { border-bottom: none; }
@@ -57,6 +60,7 @@
         .reply-item { margin-top: 10px; padding-bottom: 10px; border-bottom: 1px dashed #e9ecef; }
         .reply-item:last-child { border-bottom: none; padding-bottom: 0; }
 
+        /* Notifikasi Dropdown */
         .notif-item { cursor: pointer; transition: background 0.2s; }
         .notif-item:hover { background-color: #f8f9fa; }
         .notif-item.unread { background-color: #fffaf5; border-left: 4px solid var(--korisu-orange); }
@@ -68,6 +72,7 @@
 </head>
 <body>
 
+    <!-- Navigasi -->
     <div class="container nav-wrapper">
         <nav class="navbar navbar-expand-lg navbar-custom">
             <div class="container-fluid px-2">
@@ -108,13 +113,19 @@
         </nav>
     </div>
 
+    <!-- Header Section -->
     <div class="header-section">
         <div class="container">
-            <h1 class="heading-main">Forum <span style="color: var(--korisu-orange);">Komunitas</span></h1>
-            <p class="text-muted mt-2 fs-5 mx-auto" style="max-width: 650px;">Ruang diskusi bersama. Tanyakan keraguanmu, bagikan progresmu, dan saling dukung dengan sesama pelajar bahasa Jepang!</p>
+            <h1 class="heading-main">
+                Forum <span style="color: var(--korisu-orange);">Komunitas</span>
+            </h1>
+            <p class="text-muted mt-2 fs-5 mx-auto" style="max-width: 650px;">
+                Ruang diskusi bersama. Tanyakan keraguanmu, bagikan progresmu, dan saling dukung dengan sesama pelajar bahasa Jepang!
+            </p>
         </div>
     </div>
 
+    <!-- Area Feed -->
     <div class="container pb-5">
         <div class="row justify-content-center">
             <div class="col-lg-8">
@@ -140,6 +151,7 @@
         </div>
     </div>
 
+    <!-- MODAL EDIT POSTINGAN -->
     <div class="modal fade" id="modalEditPost" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content" style="border-radius: 20px;">
@@ -158,6 +170,7 @@
         </div>
     </div>
 
+    <!-- MODAL NOTIFIKASI -->
     <div class="modal fade" id="modalNotif" tabindex="-1">
         <div class="modal-dialog modal-dialog-scrollable">
             <div class="modal-content" style="border-radius: 20px;">
@@ -200,6 +213,9 @@
             muatNotifikasi();
         });
 
+        // ==========================
+        // SISTEM NOTIFIKASI
+        // ==========================
         async function muatNotifikasi() {
             try {
                 const res = await fetch(`${API_URL}/community/notifications`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
@@ -227,6 +243,9 @@
             fetch(`${API_URL}/community/notifications/read`, { method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}` }}).then(() => { document.getElementById('badge-notif').style.display = 'none'; });
         }
 
+        // ==========================
+        // SISTEM FEED POSTINGAN
+        // ==========================
         async function muatFeed() {
             try {
                 const res = await fetch(`${API_URL}/community/posts`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
@@ -286,6 +305,9 @@
             } catch (error) { document.getElementById('feed-container').innerHTML = "<div class='text-danger text-center'>Gagal memuat komunitas.</div>"; }
         }
 
+        // ==========================
+        // SISTEM KOMENTAR (CRUD & MENTION)
+        // ==========================
         async function toggleKomentar(postId) {
             const box = document.getElementById(`comment-box-${postId}`);
             if(box.style.display === 'block') { box.style.display = 'none'; return; }
@@ -304,19 +326,11 @@
                     parentComments.forEach(c => {
                         const isSensei = c.role === 'sensei' || c.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
                         
-                        // [BARU] Opsi Edit/Hapus Komentar Induk
+                        // Opsi CRUD Komentar Induk
                         let opsInduk = '';
                         if (c.user_id == userData.id || userData.role === 'sensei' || userData.role === 'admin') {
                             let btnEdit = (c.user_id == userData.id) ? `<li><button class="dropdown-item py-1" onclick="editKomen(${c.id}, ${postId})">✏️ Edit</button></li>` : '';
-                            opsInduk = `
-                                <div class="dropdown float-end">
-                                    <button class="btn btn-sm btn-link text-muted px-2 py-0 text-decoration-none" data-bs-toggle="dropdown">⋮</button>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 120px;">
-                                        ${btnEdit}
-                                        <li><button class="dropdown-item text-danger py-1" onclick="hapusKomen(${c.id}, ${postId})">🗑️ Hapus</button></li>
-                                    </ul>
-                                </div>
-                            `;
+                            opsInduk = `<div class="dropdown float-end"><button class="btn btn-sm btn-link text-muted px-2 py-0 text-decoration-none" data-bs-toggle="dropdown">⋮</button><ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 120px;">${btnEdit}<li><button class="dropdown-item text-danger py-1" onclick="hapusKomen(${c.id}, ${postId})">🗑️ Hapus</button></li></ul></div>`;
                         }
                         
                         let htmlBalasan = '';
@@ -326,19 +340,11 @@
                             childReplies.forEach(r => {
                                 const isSenseiReply = r.role === 'sensei' || r.role === 'admin' ? '<span class="badge-sensei">SENSEI</span>' : '';
                                 
-                                // [BARU] Opsi Edit/Hapus Komentar Balasan
+                                // Opsi CRUD Komentar Balasan
                                 let opsBalasan = '';
                                 if (r.user_id == userData.id || userData.role === 'sensei' || userData.role === 'admin') {
                                     let btnEdit = (r.user_id == userData.id) ? `<li><button class="dropdown-item py-1" onclick="editKomen(${r.id}, ${postId})">✏️ Edit</button></li>` : '';
-                                    opsBalasan = `
-                                        <div class="dropdown float-end">
-                                            <button class="btn btn-sm btn-link text-muted px-2 py-0 text-decoration-none" data-bs-toggle="dropdown">⋮</button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 120px;">
-                                                ${btnEdit}
-                                                <li><button class="dropdown-item text-danger py-1" onclick="hapusKomen(${r.id}, ${postId})">🗑️ Hapus</button></li>
-                                            </ul>
-                                        </div>
-                                    `;
+                                    opsBalasan = `<div class="dropdown float-end"><button class="btn btn-sm btn-link text-muted px-2 py-0 text-decoration-none" data-bs-toggle="dropdown">⋮</button><ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 120px;">${btnEdit}<li><button class="dropdown-item text-danger py-1" onclick="hapusKomen(${r.id}, ${postId})">🗑️ Hapus</button></li></ul></div>`;
                                 }
 
                                 htmlBalasan += `
@@ -346,7 +352,7 @@
                                         ${opsBalasan}
                                         <div class="comment-author">${r.nama_lengkap} ${isSenseiReply}</div>
                                         <div class="comment-text" id="komen-teks-${r.id}">${r.komentar}</div>
-                                        <button class="btn-reply text-muted mt-1" style="font-size: 0.75rem;" onclick="balasKeUser(${c.id}, '${r.nama_lengkap}')">↪ Balas</button>
+                                        <button class="btn-reply text-muted mt-1" style="font-size: 0.75rem;" onclick="balasKeUser(${c.id}, '${r.nama_lengkap}', ${r.user_id})">↪ Balas</button>
                                     </div>
                                 `;
                             });
@@ -359,7 +365,7 @@
                                 <div class="comment-author">${c.nama_lengkap} ${isSensei}</div>
                                 <div class="comment-text" id="komen-teks-${c.id}">${c.komentar}</div>
                                 
-                                <button class="btn-reply" onclick="balasKeUser(${c.id}, '${c.nama_lengkap}')">↪ Balas</button>
+                                <button class="btn-reply" onclick="balasKeUser(${c.id}, '${c.nama_lengkap}', ${c.user_id})">↪ Balas</button>
                                 
                                 ${htmlBalasan}
 
@@ -374,15 +380,13 @@
             } catch(e) { list.innerHTML = "Gagal memuat."; }
         }
 
-        // [BARU] Logika Edit Komentar
+        // [BARU] Fungsi Edit Komentar (Sederhana via Prompt)
         async function editKomen(commentId, postId) {
             const elLama = document.getElementById(`komen-teks-${commentId}`);
             if(!elLama) return;
             const teksLama = elLama.innerText;
             
-            // Menggunakan prompt bawaan browser untuk kecepatan dan kesederhanaan
             const teksBaru = prompt("Edit komentar Anda:", teksLama);
-            
             if (teksBaru === null || teksBaru.trim() === "" || teksBaru === teksLama) return;
 
             try {
@@ -397,7 +401,7 @@
             } catch(e) { alert("Error jaringan"); }
         }
 
-        // [BARU] Logika Hapus Komentar
+        // [BARU] Fungsi Hapus Komentar
         async function hapusKomen(commentId, postId) {
             if(!confirm("Yakin ingin menghapus komentar ini secara permanen?")) return;
             try {
@@ -411,11 +415,12 @@
             } catch(e) { alert("Error jaringan"); }
         }
 
-        function balasKeUser(parentId, namaUser) {
+        function balasKeUser(parentId, namaUser, userId) {
             const form = document.getElementById(`form-balas-${parentId}`);
             form.style.setProperty('display', 'flex', 'important'); 
             const input = document.getElementById(`input-balas-${parentId}`);
             if (!input.value.includes(`@${namaUser}`)) { input.value = `@${namaUser} ` + input.value; }
+            input.dataset.mentionId = userId; // Simpan ID user untuk dikirim ke backend
             input.focus();
         }
 
@@ -425,19 +430,24 @@
             const text = input.value.trim();
             if(!text) return;
             
+            const mentionId = input.dataset.mentionId || null;
             input.disabled = true;
             try {
                 const res = await fetch(`${API_URL}/community/comment`, {
                     method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ post_id: postId, komentar: text, parent_id: parentId })
+                    body: JSON.stringify({ post_id: postId, komentar: text, parent_id: parentId, mention_id: mentionId })
                 });
                 if(res.ok) { 
-                    input.value = ''; document.getElementById(`comment-box-${postId}`).style.display = 'none';
+                    input.value = ''; input.dataset.mentionId = '';
+                    document.getElementById(`comment-box-${postId}`).style.display = 'none';
                     await toggleKomentar(postId); 
                 }
             } catch(e){} finally { input.disabled = false; }
         }
 
+        // ==========================
+        // Logika Postingan Utama
+        // ==========================
         document.getElementById('form-post').addEventListener('submit', async (e) => {
             e.preventDefault(); let konten = quill.root.innerHTML;
             if(konten === '<p><br></p>') return alert('Postingan tidak boleh kosong!');
