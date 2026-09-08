@@ -17,10 +17,11 @@ const buyItem = async (req, res) => {
     const { item_id, harga_koin, nama_item } = req.body;
 
     try {
-        // Cek saldo koin
+        // Cek saldo koin langsung dari tabel statistik
         const checkWallet = await db.query('SELECT koin_dimiliki FROM user_statistics WHERE murid_id = $1', [murid_id]);
         const koinSekarang = checkWallet.rows.length > 0 ? checkWallet.rows[0].koin_dimiliki : 0;
 
+        // Validasi kecukupan koin
         if (koinSekarang < harga_koin) {
             return res.status(400).json({ message: 'Koin Tupai kamu belum cukup! Yuk rajin kuis lagi 🐿️' });
         }
@@ -31,19 +32,24 @@ const buyItem = async (req, res) => {
         
         const tipeItem = itemData.rows[0].tipe_item;
         
-        // Potong koin
+        // Potong koin dengan teknik UPSERT agar aman dari error baris kosong
         const sisaKoin = koinSekarang - harga_koin;
-        await db.query('UPDATE user_statistics SET koin_dimiliki = $1 WHERE murid_id = $2', [sisaKoin, murid_id]);
+        await db.query(`
+            INSERT INTO user_statistics (murid_id, koin_dimiliki) 
+            VALUES ($1, $2) 
+            ON CONFLICT (murid_id) 
+            DO UPDATE SET koin_dimiliki = EXCLUDED.koin_dimiliki
+        `, [murid_id, sisaKoin]);
 
-        // Pastikan murid punya baris maskot
-        const cekMaskot = await db.query('SELECT id FROM user_mascots WHERE murid_id = $1', [murid_id]);
-        if (cekMaskot.rows.length === 0) {
-            await db.query('INSERT INTO user_mascots (murid_id, level_mascot, status_mood) VALUES ($1, 1, 100)', [murid_id]);
-        }
+        // Pastikan murid punya baris maskot dengan UPSERT
+        await db.query(`
+            INSERT INTO user_mascots (murid_id, level_mascot, status_mood) 
+            VALUES ($1, 1, 100)
+            ON CONFLICT (murid_id) DO NOTHING
+        `, [murid_id]);
 
         // Proses Distribusi Barang
         if (tipeItem === 'aksesoris' || tipeItem === 'background') {
-            // SUNTIKAN SUPER: Masukkan barang ke tabel inventori agar bisa bertumpuk
             await db.query('INSERT INTO user_items (murid_id, item_id) VALUES ($1, $2)', [murid_id, item_id]);
         } else if (tipeItem === 'makanan') {
             await db.query('UPDATE user_mascots SET status_mood = LEAST(status_mood + 20, 100) WHERE murid_id = $1', [murid_id]);

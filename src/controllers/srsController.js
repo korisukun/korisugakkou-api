@@ -92,15 +92,15 @@ const submitReview = async (req, res) => {
             WHERE murid_id = $6 AND vocab_id = $7 AND arah_kuis = $8
         `, [srs_level, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
 
-        // B. [PERBAIKAN KRUSIAL] Menambahkan Koin dan EXP secara nyata ke profil database murid!
-        if (expReward > 0 || koinReward > 0) {
-            await db.query(`
-                UPDATE users 
-                SET koin = COALESCE(koin, 0) + $1, 
-                    exp = COALESCE(exp, 0) + $2 
-                WHERE id = $3
-            `, [koinReward, expReward, muridId]);
-        }
+        // B. Menambahkan Koin dan EXP secara nyata ke profil database murid!
+if (expReward > 0 || koinReward > 0) {
+    await db.query(`
+        UPDATE user_statistics 
+        SET koin_dimiliki = COALESCE(koin_dimiliki, 0) + $1, 
+            total_exp_points = COALESCE(total_exp_points, 0) + $2 
+        WHERE murid_id = $3
+    `, [koinReward, expReward, muridId]);
+}
 
         res.json({ message: 'Progres arah kuis disimpan.', reward: { exp: expReward, koin: koinReward } });
     } catch (error) {
