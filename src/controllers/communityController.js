@@ -63,7 +63,6 @@ const toggleLike = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [PERBAIKAN] Tambahkan c.user_id agar frontend tahu siapa penulis komentar ini
 const getComments = async (req, res) => {
     try {
         const result = await db.query(`
@@ -77,19 +76,16 @@ const getComments = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [PERBAIKAN] Mengirim Notifikasi Tepat Sasaran via mention_id
 const addComment = async (req, res) => {
     const { post_id, komentar, parent_id, mention_id } = req.body;
     if (!komentar) return res.status(400).json({ message: 'Komentar kosong.' });
     
     try {
-        // 1. Simpan komentar
         await db.query(
             'INSERT INTO community_comments (post_id, user_id, komentar, parent_id) VALUES ($1, $2, $3, $4)', 
             [post_id, req.user.id, komentar, parent_id || null]
         );
         
-        // 2. Kirim Notifikasi (Hanya jika mention_id dikirim dan bukan mention diri sendiri)
         if (mention_id && mention_id !== req.user.id) {
             await db.query(
                 "INSERT INTO notifications (user_id, sender_id, type, post_id, message) VALUES ($1, $2, 'mention', $3, $4)", 
@@ -103,7 +99,6 @@ const addComment = async (req, res) => {
     }
 };
 
-// [BARU] Logika Edit Komentar
 const editComment = async (req, res) => {
     const { id } = req.params;
     const { komentar } = req.body;
@@ -117,14 +112,12 @@ const editComment = async (req, res) => {
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
-// [BARU] Logika Hapus Komentar
 const deleteComment = async (req, res) => {
     const { id } = req.params;
     try {
         const comment = await db.query('SELECT user_id FROM community_comments WHERE id = $1', [id]);
         if (comment.rows.length === 0) return res.status(404).json({ message: 'Komentar tidak ditemukan.' });
         
-        // Hanya penulis atau Admin/Sensei yang boleh menghapus
         if (comment.rows[0].user_id !== req.user.id && req.user.role !== 'sensei' && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'Akses ditolak.' });
         }

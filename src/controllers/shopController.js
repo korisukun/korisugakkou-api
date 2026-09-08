@@ -17,12 +17,12 @@ const buyItem = async (req, res) => {
     const { item_id, harga_koin, nama_item } = req.body;
 
     try {
-        // Cek saldo koin langsung dari tabel statistik
+        // Cek saldo koin langsung dari tabel user_statistics
         const checkWallet = await db.query('SELECT koin_dimiliki FROM user_statistics WHERE murid_id = $1', [murid_id]);
-        const koinSekarang = checkWallet.rows.length > 0 ? checkWallet.rows[0].koin_dimiliki : 0;
+        const koinSekarang = checkWallet.rows.length > 0 ? parseInt(checkWallet.rows[0].koin_dimiliki) : 0;
 
         // Validasi kecukupan koin
-        if (koinSekarang < harga_koin) {
+        if (koinSekarang < parseInt(harga_koin)) {
             return res.status(400).json({ message: 'Koin Tupai kamu belum cukup! Yuk rajin kuis lagi 🐿️' });
         }
 
@@ -32,8 +32,8 @@ const buyItem = async (req, res) => {
         
         const tipeItem = itemData.rows[0].tipe_item;
         
-        // Potong koin dengan teknik UPSERT agar aman dari error baris kosong
-        const sisaKoin = koinSekarang - harga_koin;
+        // Potong koin dengan teknik UPSERT
+        const sisaKoin = koinSekarang - parseInt(harga_koin);
         await db.query(`
             INSERT INTO user_statistics (murid_id, koin_dimiliki) 
             VALUES ($1, $2) 
@@ -48,7 +48,7 @@ const buyItem = async (req, res) => {
             ON CONFLICT (murid_id) DO NOTHING
         `, [murid_id]);
 
-        // Proses Distribusi Barang
+        // Proses Distribusi Barang berdasarkan Tipe Item (Constraint ERD)
         if (tipeItem === 'aksesoris' || tipeItem === 'background') {
             await db.query('INSERT INTO user_items (murid_id, item_id) VALUES ($1, $2)', [murid_id, item_id]);
         } else if (tipeItem === 'makanan') {
@@ -70,11 +70,9 @@ const buyItem = async (req, res) => {
 const getMascot = async (req, res) => {
     const murid_id = req.user.id;
     try {
-        // Ambil status mood dasar
         const mascotResult = await db.query('SELECT level_mascot, status_mood FROM user_mascots WHERE murid_id = $1', [murid_id]);
         let mascot = mascotResult.rows.length > 0 ? mascotResult.rows[0] : { level_mascot: 1, status_mood: 100 };
 
-        // Tarik SELURUH barang dari tas inventori murid ini
         const itemsRes = await db.query(`
             SELECT s.nama_item, s.image_url 
             FROM user_items ui
@@ -82,7 +80,6 @@ const getMascot = async (req, res) => {
             WHERE ui.murid_id = $1 AND s.tipe_item = 'aksesoris'
         `, [murid_id]);
 
-        // Jadikan sebuah array agar frontend bisa menumpuknya
         mascot.items_dipakai = itemsRes.rows;
 
         res.json({ mascot });
@@ -92,7 +89,7 @@ const getMascot = async (req, res) => {
     }
 };
 
-// 4. Menambah Item Toko Baru (Khusus Sensei)
+// 4. Menambah Item Toko Baru
 const addItem = async (req, res) => {
     const { nama_item, tipe_item, harga_koin, image_url } = req.body;
     

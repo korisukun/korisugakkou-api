@@ -9,36 +9,24 @@ const addVocabBulk = async (req, res) => {
     }
 
     try {
-        // A. Mencari murid yang terdaftar (Mengecek semua kemungkinan struktur tabel)
         let enrolledUsers = [];
-        const queriesToTry = [
-            'SELECT user_id AS id FROM course_enrollments WHERE course_id = $1',
-            'SELECT murid_id AS id FROM course_enrollments WHERE course_id = $1',
-            'SELECT user_id AS id FROM enrollments WHERE course_id = $1',
-            'SELECT murid_id AS id FROM enrollments WHERE course_id = $1',
-            'SELECT DISTINCT murid_id AS id FROM srs_reviews sr JOIN vocabularies v ON sr.vocab_id = v.id WHERE v.course_id = $1'
-        ];
+        try {
+            const srsRes = await db.query(
+                'SELECT DISTINCT murid_id AS id FROM srs_reviews sr JOIN vocabularies v ON sr.vocab_id = v.id WHERE v.course_id = $1', 
+                [course_id]
+            );
+            enrolledUsers = srsRes.rows.map(r => r.id);
+        } catch (e) { console.error("Gagal menarik data enrolledUsers"); }
 
-        for (let q of queriesToTry) {
-            try {
-                const result = await db.query(q, [course_id]);
-                if (result.rows.length > 0) {
-                    enrolledUsers = result.rows.map(r => r.id);
-                    break; 
-                }
-            } catch (e) { /* Abaikan jika tabel tidak cocok */ }
-        }
-
-        // B. Menyisipkan kosakata ke tabel master dan mendistribusikannya
+        // Menyisipkan kosakata ke tabel master dan mendistribusikannya
         for (const v of vocabularies) {
-            // 1. Simpan ke master vocabularies
             const vocabRes = await db.query(
                 'INSERT INTO vocabularies (course_id, kanji, furigana, arti_indonesia) VALUES ($1, $2, $3, $4) RETURNING id',
                 [course_id, v.kanji, v.furigana, v.arti_indonesia]
             );
             const newVocabId = vocabRes.rows[0].id;
 
-            // 2. Suntikkan ke jadwal SRS murid lama dengan nilai default eksplisit
+            // Suntikkan ke jadwal SRS murid lama
             if (enrolledUsers.length > 0) {
                 for (const muridId of enrolledUsers) {
                     for (let arah = 1; arah <= 6; arah++) {
@@ -50,7 +38,7 @@ const addVocabBulk = async (req, res) => {
                                 [muridId, newVocabId, arah]
                             );
                         } catch (insertErr) {
-                            // Abaikan hanya jika benar-benar duplikat
+                            // Abaikan duplikat
                         }
                     }
                 }

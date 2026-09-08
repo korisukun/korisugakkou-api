@@ -10,7 +10,7 @@ const getAllCourses = async (req, res) => {
 const getCourseCurriculum = async (req, res) => {
     try {
         const { id } = req.params;
-        const muridId = req.user.id; // TANGKAP ID MURID
+        const muridId = req.user.id; 
 
         const courseRes = await db.query('SELECT * FROM courses WHERE id = $1', [id]);
         if (courseRes.rows.length === 0) return res.status(404).json({ message: 'Kelas tidak ditemukan.' });
@@ -27,14 +27,12 @@ const getCourseCurriculum = async (req, res) => {
             };
         });
 
-        // [PERBAIKAN] Cek apakah murid ini sudah mengambil kelas ini di database
         const cekEnroll = await db.query(
             'SELECT id FROM srs_reviews WHERE murid_id = $1 AND vocab_id IN (SELECT id FROM vocabularies WHERE course_id = $2) LIMIT 1', 
             [muridId, id]
         );
         const isEnrolled = cekEnroll.rows.length > 0;
 
-        // Kirim status is_enrolled ke HTML
         res.json({ course: { ...course, modules: modulesData, is_enrolled: isEnrolled } });
     } catch (error) { res.status(500).json({ message: 'Gagal memuat kurikulum kelas.' }); }
 };
@@ -56,7 +54,7 @@ const enrollCourse = async (req, res) => {
         `, [muridId, courseId]);
 
         const courseData = await db.query('SELECT product_id FROM courses WHERE id = $1', [courseId]);
-        if(courseData.rows.length > 0) {
+        if(courseData.rows.length > 0 && courseData.rows[0].product_id) {
             await db.query(`INSERT INTO user_access (murid_id, product_id, tipe_akses) VALUES ($1, $2, 'lifetime')`, [muridId, courseData.rows[0].product_id]);
         }
         res.json({ message: 'Pendaftaran Berhasil! Seluruh kosakata kelas ini (6 Arah Kuis) telah dibuka. 🚀' });
@@ -120,7 +118,6 @@ const editLesson = async (req, res) => {
     } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-// [BARU] 11. Mengedit Detail Kelas
 const editCourse = async (req, res) => {
     const { id } = req.params;
     const { judul_course, thumbnail_url, deskripsi } = req.body;
@@ -130,7 +127,6 @@ const editCourse = async (req, res) => {
     } catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-// [BARU] 12. Menghapus Data (Kelas, Modul, Materi)
 const deleteCourse = async (req, res) => {
     try { await db.query('DELETE FROM courses WHERE id = $1', [req.params.id]); res.json({ message: 'Kelas dan seluruh isinya berhasil dihapus! 🗑️' }); } 
     catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
@@ -146,5 +142,4 @@ const deleteLesson = async (req, res) => {
     catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-// Pastikan baris export Anda diperbarui menjadi seperti ini:
 module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson, editCourse, deleteCourse, deleteModule, deleteLesson };

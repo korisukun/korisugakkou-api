@@ -23,7 +23,7 @@ const completeLesson = async (req, res) => {
         const { id } = req.params;
         const murid_id = req.user.id;
 
-        // Cek apakah progres sudah pernah dicatat
+        // Cek apakah progres sudah pernah dicatat di tabel lesson_progress
         const cekProgress = await db.query('SELECT id FROM lesson_progress WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
         
         if (cekProgress.rows.length === 0) {
@@ -36,11 +36,15 @@ const completeLesson = async (req, res) => {
         const expDidapat = 10;
         const koinDidapat = 5;
 
-        // Gamifikasi: Berikan 10 EXP dan 5 Koin nyata ke tabel user_statistics
-        await db.query(
-            'UPDATE user_statistics SET koin_dimiliki = COALESCE(koin_dimiliki, 0) + $1, total_exp_points = COALESCE(total_exp_points, 0) + $2 WHERE murid_id = $3', 
-            [koinDidapat, expDidapat, murid_id]
-        );
+        // Gamifikasi: Gunakan UPSERT pada user_statistics untuk mencegah error row kosong
+        await db.query(`
+            INSERT INTO user_statistics (murid_id, koin_dimiliki, total_exp_points) 
+            VALUES ($1, $2, $3)
+            ON CONFLICT (murid_id) 
+            DO UPDATE SET 
+                koin_dimiliki = COALESCE(user_statistics.koin_dimiliki, 0) + EXCLUDED.koin_dimiliki, 
+                total_exp_points = COALESCE(user_statistics.total_exp_points, 0) + EXCLUDED.total_exp_points
+        `, [murid_id, koinDidapat, expDidapat]);
 
         res.json({ 
             message: 'Materi diselesaikan! +10 EXP & +5 Koin 🐿️', 

@@ -11,7 +11,6 @@ const pool = new Pool({
 // --- JARING PENGAMAN ANTI-CRASH ---
 pool.on('error', (err, client) => {
     console.error('Peringatan: Koneksi database terputus secara tidak terduga', err.message);
-    // Dengan adanya fungsi ini, server TIDAK AKAN mati saat koneksi berkedip.
 });
 
 module.exports = pool;

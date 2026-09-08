@@ -6,8 +6,6 @@ const { protect, isSensei } = require('../middlewares/authMiddleware');
 router.post('/bulk-add', protect, isSensei, addVocabBulk);
 router.get('/course/:course_id', protect, isSensei, getVocabsByCourse);
 router.put('/:id/edit', protect, isSensei, editVocab);
-
-// [BARU] Rute Delete
 router.delete('/:id', protect, isSensei, deleteVocab);
 
 module.exports = router;

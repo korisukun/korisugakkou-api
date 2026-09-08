@@ -6,7 +6,7 @@ const db = require('./src/config/db');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json()); // Menerima payload JSON dari frontend
+app.use(express.json());
 
 // Pengaturan Satpam CORS
 app.use(cors({
@@ -21,66 +21,37 @@ app.use(cors({
 
 // Tes pancingan agar database merespons
 db.query('SELECT NOW()', (err, res) => {
-    if (err) {
-        console.error('Koneksi Database Gagal:', err.message);
-    } else {
-        console.log('PostgreSQL (Neon) Berhasil Terhubung! Waktu Server:', res.rows[0].now);
-    }
+    if (err) console.error('Koneksi Database Gagal:', err.message);
+    else console.log('PostgreSQL (Neon) Berhasil Terhubung! Waktu Server:', res.rows[0].now);
 });
 
 // ==========================================
-// ROUTING API
+// ROUTING API UTAMA
 // ==========================================
-const authRoutes = require('./src/routes/authRoutes');
-app.use('/api', authRoutes); 
-
-const courseRoutes = require('./src/routes/courseRoutes');
-app.use('/api/courses', courseRoutes);
-
-// KOREKSI: Diubah dari /api/curriculum menjadi /api/lessons agar cocok dengan frontend video-player.html
-const lessonRoutes = require('./src/routes/lessonRoutes');
-app.use('/api/lessons', lessonRoutes);
-
-const vocabRoutes = require('./src/routes/vocabRoutes');
-app.use('/api/vocabulary', vocabRoutes);
-
-const srsRoutes = require('./src/routes/srsRoutes');
-app.use('/api/srs', srsRoutes);
-
-const shopRoutes = require('./src/routes/shopRoutes');
-app.use('/api/shop', shopRoutes);
-
-const quoteRoutes = require('./src/routes/quoteRoutes');
-app.use('/api/quotes', quoteRoutes);
-
-const communityRoutes = require('./src/routes/communityRoutes');
-app.use('/api/community', communityRoutes);
+app.use('/api', require('./src/routes/authRoutes')); 
+app.use('/api/courses', require('./src/routes/courseRoutes'));
+app.use('/api/lessons', require('./src/routes/lessonRoutes'));
+app.use('/api/vocabulary', require('./src/routes/vocabRoutes'));
+app.use('/api/srs', require('./src/routes/srsRoutes'));
+app.use('/api/shop', require('./src/routes/shopRoutes'));
+app.use('/api/quotes', require('./src/routes/quoteRoutes'));
+app.use('/api/community', require('./src/routes/communityRoutes'));
 
 // Endpoint Tes (Health Check)
 app.get('/api/status', (req, res) => {
-    res.json({ 
-        status: "sukses",
-        message: "Server KORISU Gakkou berjalan dengan baik! 🐿️" 
-    });
+    res.json({ status: "sukses", message: "Server KORISU Gakkou berjalan dengan baik! 🐿️" });
 });
 
 // ==========================================
-// MIDDLEWARE & PROTECTED ROUTES
+// MIDDLEWARE & PROTECTED ROUTES KHUSUS
 // ==========================================
-const { protect, isSensei } = require('./src/middlewares/authMiddleware');
-
-// Halaman LMS Utama (Hanya bisa dibuka jika login valid)
-app.get('/api/lms/materi-eksklusif', protect, (req, res) => {
-    res.json({
-        message: "Berhasil masuk! Ini adalah materi rahasia Kaigo Kokka Shiken.",
-        profil_pengakses: req.user
-    });
-});
-
-// [BARU] Rute untuk memanggil data Maskot di Dashboard
+const { protect } = require('./src/middlewares/authMiddleware');
 const { getMascot } = require('./src/controllers/shopController');
+
+app.get('/api/lms/materi-eksklusif', protect, (req, res) => {
+    res.json({ message: "Berhasil masuk! Ini materi rahasia Kaigo.", profil_pengakses: req.user });
+});
+
 app.get('/api/mascot', protect, getMascot);
 
-app.listen(PORT, () => {
-    console.log(`Server siap dan berjalan di port ${PORT}`);
-});
+app.listen(PORT, () => { console.log(`Server siap dan berjalan di port ${PORT}`); });

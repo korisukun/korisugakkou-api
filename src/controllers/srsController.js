@@ -66,55 +66,48 @@ const submitReview = async (req, res) => {
         let newTotalReview = safeTotalReview + 1;
         let newAvgWaktu = Math.round(((safeAvgWaktu * safeTotalReview) + safeWaktuJawab) / newTotalReview);
 
-        // Array Level Waktu (0 = 1m, 1 = 10m, 2 = 12j, 3 = 1h, 4 = 3h, 5 = 7h, 6 = 15h, 7 = 30h)
+        // Interval berdasarkan Kategori (0 = 1m, 1 = 10m, 2 = 12j, 3 = 1h, 4 = 3h, 5 = 7h, 6 = 15h, 7 = 30h)
         const intervals = [1, 10, 720, 1440, 4320, 10080, 21600, 43200]; 
         let intervalMinutes = 1;
         let statusCat = 'again';
         let expReward = 0;
         let koinReward = 0;
 
-        // LOGIKA PENENTUAN 5 PATOKAN LEVEL SRS
         if (is_correct) {
             if (safeWaktuJawab < 5) {
-                // EASY
                 safeSrsLevel += 2; 
                 statusCat = 'easy';
                 expReward = 15 + safeSrsLevel;
                 koinReward = 5;
             } else if (safeWaktuJawab <= 10) {
-                // MEDIUM
                 safeSrsLevel += 1; 
                 statusCat = 'medium';
                 expReward = 10 + safeSrsLevel;
                 koinReward = 3;
             } else if (safeWaktuJawab <= 15) {
-                // HARD (Level Ditahan +0)
                 safeSrsLevel += 0; 
                 statusCat = 'hard';
                 expReward = 5 + safeSrsLevel;
                 koinReward = 2;
             } else {
-                // VERY HARD (Penurunan -1 Level)
                 safeSrsLevel = Math.max(0, safeSrsLevel - 1);
                 statusCat = 'very_hard';
                 expReward = 2 + safeSrsLevel;
                 koinReward = 1;
             }
 
-            // Mencegah level melampaui batas array maksimal (Batas: Level 7)
             safeSrsLevel = Math.min(safeSrsLevel, intervals.length - 1);
             intervalMinutes = intervals[safeSrsLevel];
 
         } else {
-            // AGAIN (Salah - Reset ke Level 0)
             safeSrsLevel = 0;
             statusCat = 'again';
-            intervalMinutes = intervals[0]; // 1 menit
+            intervalMinutes = intervals[0];
             expReward = 1; 
             koinReward = 0;
         }
 
-        // A. Menyimpan progres memori ke SRS Review
+        // Simpan progres waktu review SRS
         await db.query(`
             UPDATE srs_reviews 
             SET srs_level = $1, 
@@ -125,7 +118,7 @@ const submitReview = async (req, res) => {
             WHERE murid_id = $6 AND vocab_id = $7 AND arah_kuis = $8
         `, [safeSrsLevel, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
 
-        // B. Menggunakan UPSERT untuk Database Dompet Murid
+        // UPSERT Statistik (Exp & Koin)
         if (expReward > 0 || koinReward > 0) {
             await db.query(`
                 INSERT INTO user_statistics (murid_id, koin_dimiliki, total_exp_points) 

@@ -15,18 +15,9 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
-        // A. Simpan data profil utama
         const newUser = await db.query(
             'INSERT INTO users (nama_lengkap, email, password_hash, role) VALUES ($1, $2, $3, $4) RETURNING id, nama_lengkap, email, role',
             [nama_lengkap, email, password_hash, role || 'murid']
-        );
-
-        const newUserId = newUser.rows[0].id;
-
-        // B. [PENTING ERD V.1.0] Buat dompet statistik kosong untuk murid ini
-        await db.query(
-            'INSERT INTO user_statistics (murid_id, total_exp_points, koin_dimiliki, current_streak) VALUES ($1, 0, 0, 0)',
-            [newUserId]
         );
 
         res.status(201).json({
@@ -52,17 +43,14 @@ const login = async (req, res) => {
         }
         
         const user = userResult.rows[0];
-
         const isMatch = await bcrypt.compare(password, user.password_hash);
         
         if (!isMatch) {
             return res.status(400).json({ message: 'Email atau password salah!' });
         }
 
-        // C. [PENTING ERD V.1.0] Ambil dompet statistik murid dari tabel terpisah
+        // Ambil dompet statistik murid dari tabel user_statistics (Sesuai ERD)
         const statsResult = await db.query('SELECT koin_dimiliki, total_exp_points, current_streak FROM user_statistics WHERE murid_id = $1', [user.id]);
-        
-        // Beri nilai bawaan 0 jika dompet karena alasan tertentu belum terbuat
         const userStats = statsResult.rows.length > 0 ? statsResult.rows[0] : { koin_dimiliki: 0, total_exp_points: 0, current_streak: 0 };
 
         const token = jwt.sign(
@@ -78,9 +66,9 @@ const login = async (req, res) => {
                 id: user.id, 
                 nama_lengkap: user.nama_lengkap, 
                 role: user.role,
-                koin: userStats.koin_dimiliki, // Diambil dari user_statistics
-                exp: userStats.total_exp_points, // Diambil dari user_statistics
-                streak: userStats.current_streak // Diambil dari user_statistics
+                koin: userStats.koin_dimiliki, 
+                exp: userStats.total_exp_points, 
+                streak: userStats.current_streak 
             }
         });
 
