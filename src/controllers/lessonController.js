@@ -21,7 +21,7 @@ const getLesson = async (req, res) => {
 const completeLesson = async (req, res) => {
     try {
         const { id } = req.params;
-        const murid_id = req.user.id;
+        const murid_id = req.user.id; // Menggunakan snake_case
 
         // Cek apakah progres sudah pernah dicatat
         const cekProgress = await db.query('SELECT id FROM lesson_progress WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
@@ -32,10 +32,21 @@ const completeLesson = async (req, res) => {
             await db.query('UPDATE lesson_progress SET is_completed = true WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
         }
 
-        // Gamifikasi: Berikan 10 EXP karena rajin menonton video
-	await db.query('UPDATE users SET koin = COALESCE(koin, 0) + $1, exp = COALESCE(exp, 0) + $2 WHERE id = $3', [koinDidapat, expDidapat, muridId]);
+        // [PERBAIKAN] Tentukan jumlah hadiah yang didapat
+        const expDidapat = 10;
+        const koinDidapat = 5;
 
-        res.json({ message: 'Materi diselesaikan! +10 EXP 🐿️', exp_didapat: 10 });
+        // Gamifikasi: Berikan 10 EXP dan 5 Koin nyata ke Database karena rajin menonton video
+        await db.query(
+            'UPDATE users SET koin = COALESCE(koin, 0) + $1, exp = COALESCE(exp, 0) + $2 WHERE id = $3', 
+            [koinDidapat, expDidapat, murid_id]
+        );
+
+        res.json({ 
+            message: 'Materi diselesaikan! +10 EXP & +5 Koin 🐿️', 
+            exp_didapat: expDidapat,
+            koin_didapat: koinDidapat // Ditambahkan agar frontend bisa membacanya
+        });
     } catch (error) {
         console.error('Error simpan progres:', error.message);
         res.status(500).json({ message: 'Gagal menyimpan progres belajar.' });
