@@ -12,7 +12,7 @@ const addVocabBulk = async (req, res) => {
         // A. Cari tahu siapa saja murid yang sudah terlanjur mengikuti kelas ini
         let enrolledUsers = [];
         try {
-            // Mencoba mencari dari tabel pendaftaran resmi (asumsi nama tabel 'enrollments')
+            // Mencoba mencari dari tabel pendaftaran resmi
             const enrollRes = await db.query('SELECT user_id FROM enrollments WHERE course_id = $1', [course_id]);
             enrolledUsers = enrollRes.rows.map(r => r.user_id);
         } catch (err) {
@@ -39,8 +39,9 @@ const addVocabBulk = async (req, res) => {
                 for (const muridId of enrolledUsers) {
                     for (let arah = 1; arah <= 6; arah++) {
                         try {
+                            // [PERBAIKAN KURSUS]: Menambahkan CURRENT_TIMESTAMP agar langsung masuk antrean hari ini!
                             await db.query(
-                                'INSERT INTO srs_reviews (murid_id, vocab_id, arah_kuis) VALUES ($1, $2, $3)',
+                                'INSERT INTO srs_reviews (murid_id, vocab_id, arah_kuis, next_review_date) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)',
                                 [muridId, newVocabId, arah]
                             );
                         } catch (duplicateErr) {
@@ -51,7 +52,7 @@ const addVocabBulk = async (req, res) => {
             }
         }
         
-        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan & disinkronkan ke murid lama! 📚' });
+        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan & siap direview murid! 📚' });
     } catch (error) {
         console.error('Error tambah kosakata masal:', error.message);
         res.status(500).json({ message: `Gagal: ${error.message}` });
