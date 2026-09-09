@@ -17,7 +17,7 @@ const getTodayReviews = async (req, res) => {
                   AND v.course_id = $2
                   AND sr.next_review_date <= CURRENT_TIMESTAMP
                 ORDER BY sr.srs_level ASC, sr.next_review_date ASC
-                LIMIT 99999999999999
+                LIMIT 30
             `, [muridId, courseId]);
 
             // B. ANGKA VISUAL: Hitung TOTAL ASLI seluruh antrean untuk ditampilkan di Dasbor
