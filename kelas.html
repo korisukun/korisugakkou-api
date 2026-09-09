@@ -543,18 +543,24 @@
                         let tombolLanjutHtml = '';
                         if (totalLessons > 0) {
                             if (completedLessons >= totalLessons) {
-                                tombolLanjutHtml = `<button class="btn btn-ulang" onclick="resetBelajar(${courseId})">🔄 Ulang Belajar</button>`;
+                                // Tambahkan class w-100 agar tombol memenuhi lebar wadah
+                                tombolLanjutHtml = `<button class="btn btn-ulang w-100" onclick="resetBelajar(${courseId})">🔄 Ulang Belajar</button>`;
                             } else {
                                 const targetLanjut = firstUncompletedLessonId ? firstUncompletedLessonId : course.modules[0].lessons[0].id;
-                                tombolLanjutHtml = `<button class="btn btn-lanjut" onclick="window.location.href='video-player.html?id=${targetLanjut}&course_id=${courseId}'">🚀 Lanjutkan Belajar</button>`;
+                                // Tambahkan class w-100
+                                tombolLanjutHtml = `<button class="btn btn-lanjut w-100" onclick="window.location.href='video-player.html?id=${targetLanjut}&course_id=${courseId}'">🚀 Lanjutkan Belajar</button>`;
                             }
                         }
 
-                        // 👉 TAMBAHAN: Tombol Batal Ikuti Kelas berwarna merah Outline
+                        // 👉 PERUBAHAN WADAH: Ubah menjadi flex-column (vertikal) dan batasi lebar maksimalnya
+                        wadahAksi.className = "d-flex flex-column gap-3 mt-4 mx-auto";
+                        wadahAksi.style.maxWidth = "400px";
+
+                        // Susunan baru: Atas (Lanjut Belajar) -> Tengah (Info) -> Bawah (Batal)
                         wadahAksi.innerHTML = `
-                            <button id="btn-enroll" class="btn btn-secondary-custom" disabled>✅ Kelas Sudah Diikuti</button>
                             ${tombolLanjutHtml}
-                            <button class="btn btn-outline-danger fw-bold rounded-3 px-4 ms-md-auto mt-3 mt-md-0" onclick="batalIkutiKelas(${courseId})">❌ Batal Ikuti Kelas</button>
+                            <button id="btn-enroll" class="btn btn-secondary-custom w-100" disabled>✅ Kelas Sudah Diikuti</button>
+                            <button class="btn btn-outline-danger w-100" style="border-radius: 15px; font-weight: 800; padding: 15px 30px; font-size: 1.1rem; border-width: 2px;" onclick="batalIkutiKelas(${courseId})">❌ Batal Ikuti Kelas</button>
                         `;
 
                         try {
@@ -588,7 +594,10 @@
                         } catch (e) { console.log("Gagal memuat info SRS"); }
 
                     } else {
-                        // Jika Belum Mengikuti Kelas
+                        // Jika Belum Mengikuti Kelas (Kembalikan wadah ke mode baris/horizontal)
+                        wadahAksi.className = "d-flex justify-content-center flex-wrap gap-3 mt-2";
+                        wadahAksi.style.maxWidth = "none";
+
                         wadahAksi.innerHTML = `
                             <button id="btn-enroll" class="btn btn-enroll-success" onclick="ikutiKelas()">➕ Ikuti Kelas & Mulai Hafalkan Kosakata</button>
                         `;

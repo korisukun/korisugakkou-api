@@ -4,13 +4,35 @@ const db = require('../config/db');
 const getLesson = async (req, res) => {
     try {
         const { id } = req.params;
-        const lessonRes = await db.query('SELECT * FROM lessons WHERE id = $1', [id]);
+        const muridId = req.user.id;
+        
+        // Ambil data materi dan juga course_id dari relasi tabel modules
+        const lessonRes = await db.query(`
+            SELECT l.*, m.course_id 
+            FROM lessons l
+            JOIN modules m ON l.module_id = m.id
+            WHERE l.id = $1
+        `, [id]);
         
         if (lessonRes.rows.length === 0) {
             return res.status(404).json({ message: 'Materi tidak ditemukan.' });
         }
         
-        res.json({ lesson: lessonRes.rows[0] });
+        const lessonData = lessonRes.rows[0];
+        const courseId = lessonData.course_id;
+
+        // 👉 PERBAIKAN: Validasi Pendaftaran Kelas (Enrollment Check)
+        const cekEnroll = await db.query(
+            'SELECT id FROM srs_reviews WHERE murid_id = $1 AND vocab_id IN (SELECT id FROM vocabularies WHERE course_id = $2) LIMIT 1', 
+            [muridId, courseId]
+        );
+        
+        // Jika murid belum terdaftar, kirim status 403 (Forbidden)
+        if (cekEnroll.rows.length === 0) {
+            return res.status(403).json({ message: 'Anda belum mengikuti kelas ini. Silakan daftar terlebih dahulu!' });
+        }
+        
+        res.json({ lesson: lessonData });
     } catch (error) {
         console.error('Error memuat video:', error.message);
         res.status(500).json({ message: 'Gagal memuat materi.' });
@@ -23,7 +45,6 @@ const completeLesson = async (req, res) => {
         const { id } = req.params;
         const murid_id = req.user.id;
 
-        // Cek apakah progres sudah pernah dicatat di tabel lesson_progress
         const cekProgress = await db.query('SELECT id FROM lesson_progress WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
         
         if (cekProgress.rows.length === 0) {
@@ -32,11 +53,9 @@ const completeLesson = async (req, res) => {
             await db.query('UPDATE lesson_progress SET is_completed = true WHERE murid_id = $1 AND lesson_id = $2', [murid_id, id]);
         }
 
-        // Tentukan jumlah hadiah yang didapat
         const expDidapat = 10;
         const koinDidapat = 5;
 
-        // Gamifikasi: Gunakan UPSERT pada user_statistics untuk mencegah error row kosong
         await db.query(`
             INSERT INTO user_statistics (murid_id, koin_dimiliki, total_exp_points) 
             VALUES ($1, $2, $3)

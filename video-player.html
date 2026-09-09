@@ -201,6 +201,13 @@
                 const res = await fetch(`${API_URL}/lessons/${lessonId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
                 const data = await res.json();
 
+                // 👉 PERBAIKAN: Jika Server Menolak (403), Usir Murid!
+                if (res.status === 403) {
+                    alert("Akses Ditolak: Anda belum mengikuti kelas ini. Silakan klik 'Ikuti Kelas' terlebih dahulu.");
+                    window.location.href = `kelas.html?course_id=${sourceCourseId}`;
+                    return; // Hentikan eksekusi kode di bawahnya
+                }
+
                 if (res.ok && data.lesson) {
                     document.getElementById('judul-materi').innerText = data.lesson.judul_materi;
                     document.getElementById('teks-deskripsi').innerHTML = data.lesson.deskripsi || "Sensei belum menambahkan catatan untuk materi ini. Silakan langsung tonton videonya ya!";
