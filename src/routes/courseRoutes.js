@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson, editCourse, deleteCourse, deleteModule, deleteLesson } = require('../controllers/courseController');
+const { getAllCourses, getCourseCurriculum, enrollCourse, unenrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson, editCourse, deleteCourse, deleteModule, deleteLesson } = require('../controllers/courseController');
 const { protect, isSensei } = require('../middlewares/authMiddleware');
 
 // Akses Murid & Publik
 router.get('/', protect, getAllCourses); 
 router.get('/:id', protect, getCourseCurriculum); 
 router.post('/:id/enroll', protect, enrollCourse); 
+router.post('/:id/unenroll', protect, unenrollCourse);
 
 // Akses Khusus Sensei (CRUD)
 router.post('/add', protect, isSensei, addCourse); 

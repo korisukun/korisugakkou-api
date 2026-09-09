@@ -482,8 +482,7 @@
                     document.getElementById('judul-course').innerText = course.judul_course;
                     document.getElementById('desc-course').innerText = course.deskripsi;
                     
-                    const btnEnroll = document.getElementById('btn-enroll');
-                    const btnLanjut = document.getElementById('btn-lanjut-belajar');
+                    const wadahAksi = document.getElementById('action-buttons-wrapper');
                     const isEnrolledLokal = localStorage.getItem(`enrolled_${courseId}`);
 
                     let totalLessons = 0;
@@ -500,14 +499,10 @@
                             let htmlLessons = "";
                             modul.lessons.forEach(lesson => {
                                 totalLessons++;
-                                
                                 let isCompleted = lesson.is_completed || localStorage.getItem(`selesai_lesson_${lesson.id}`);
                                 
-                                if (isCompleted) {
-                                    completedLessons++;
-                                } else if (!firstUncompletedLessonId) {
-                                    firstUncompletedLessonId = lesson.id; 
-                                }
+                                if (isCompleted) { completedLessons++; } 
+                                else if (!firstUncompletedLessonId) { firstUncompletedLessonId = lesson.id; }
 
                                 let icon = lesson.tipe_lesson.includes('video') ? '🎥' : '📝';
                                 let statusHtml = isCompleted ? `<span class="ms-auto">✔️</span>` : ``;
@@ -542,31 +537,25 @@
                         });
                     }
 
+                    // Logika Render Tombol Jika Murid Sudah Mengambil Kelas
                     if (course.is_enrolled || isEnrolledLokal) {
                         
-                        btnEnroll.innerText = "✅ Kelas Sudah Diikuti";
-                        btnEnroll.disabled = true;
-                        btnEnroll.className = "btn btn-secondary-custom";
-                        
+                        let tombolLanjutHtml = '';
                         if (totalLessons > 0) {
-                            btnLanjut.style.display = 'inline-block';
-                            
                             if (completedLessons >= totalLessons) {
-                                btnLanjut.innerText = "🔄 Ulang Belajar";
-                                btnLanjut.className = "btn btn-ulang";
-                                btnLanjut.onclick = () => resetBelajar(courseId);
+                                tombolLanjutHtml = `<button class="btn btn-ulang" onclick="resetBelajar(${courseId})">🔄 Ulang Belajar</button>`;
                             } else {
-                                btnLanjut.innerText = "🚀 Lanjutkan Belajar";
-                                btnLanjut.className = "btn btn-lanjut";
-                                btnLanjut.onclick = () => {
-                                    if(firstUncompletedLessonId) {
-                                        window.location.href = `video-player.html?id=${firstUncompletedLessonId}&course_id=${courseId}`;
-                                    } else {
-                                        window.location.href = `video-player.html?id=${course.modules[0].lessons[0].id}&course_id=${courseId}`;
-                                    }
-                                };
+                                const targetLanjut = firstUncompletedLessonId ? firstUncompletedLessonId : course.modules[0].lessons[0].id;
+                                tombolLanjutHtml = `<button class="btn btn-lanjut" onclick="window.location.href='video-player.html?id=${targetLanjut}&course_id=${courseId}'">🚀 Lanjutkan Belajar</button>`;
                             }
                         }
+
+                        // 👉 TAMBAHAN: Tombol Batal Ikuti Kelas berwarna merah Outline
+                        wadahAksi.innerHTML = `
+                            <button id="btn-enroll" class="btn btn-secondary-custom" disabled>✅ Kelas Sudah Diikuti</button>
+                            ${tombolLanjutHtml}
+                            <button class="btn btn-outline-danger fw-bold rounded-3 px-4 ms-md-auto mt-3 mt-md-0" onclick="batalIkutiKelas(${courseId})">❌ Batal Ikuti Kelas</button>
+                        `;
 
                         try {
                             const srsRes = await fetch(`${API_URL}/srs/today?course_id=${courseId}`, { headers: { 'Authorization': `Bearer ${TOKEN}` }});
@@ -599,10 +588,10 @@
                         } catch (e) { console.log("Gagal memuat info SRS"); }
 
                     } else {
-                        btnLanjut.style.display = 'none'; 
-                        btnEnroll.innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
-                        btnEnroll.disabled = false;
-                        btnEnroll.className = "btn btn-enroll-success";
+                        // Jika Belum Mengikuti Kelas
+                        wadahAksi.innerHTML = `
+                            <button id="btn-enroll" class="btn btn-enroll-success" onclick="ikutiKelas()">➕ Ikuti Kelas & Mulai Hafalkan Kosakata</button>
+                        `;
                     }
 
                 }
@@ -625,9 +614,6 @@
                 
                 if (res.ok) {
                     localStorage.setItem(`enrolled_${activeCourseId}`, 'true');
-                    btn.innerText = "✅ Kelas Sudah Diikuti";
-                    btn.className = "btn btn-secondary-custom";
-                    
                     showAlert(data.message || "Kelas berhasil diikuti!", "🎉", "Berhasil!");
                     setTimeout(() => bukaKurikulum(activeCourseId), 1000); 
                 } else {
@@ -640,6 +626,35 @@
                 btn.innerText = "➕ Ikuti Kelas & Mulai Hafalkan Kosakata";
                 btn.disabled = false;
             }
+        }
+
+        // FUNGSI BARU: Eksekusi Batal Ikuti Kelas
+        function batalIkutiKelas(courseId) {
+            showConfirm("YAKIN INGIN MEMBATALKAN KELAS INI? Semua memori kosakata SRS dan progres materi video Anda untuk kelas ini akan musnah permanen dan tidak bisa dikembalikan.", async () => {
+                try {
+                    const res = await fetch(`${API_URL}/courses/${courseId}/unenroll`, {
+                        method: 'POST', headers: { 'Authorization': `Bearer ${TOKEN}` }
+                    });
+                    const data = await res.json();
+
+                    if(res.ok) {
+                        // Hapus memori lokal yang terkait dengan kelas ini
+                        localStorage.removeItem(`enrolled_${courseId}`);
+                        if(window.currentCourseData) {
+                            window.currentCourseData.modules.forEach(m => {
+                                m.lessons.forEach(l => localStorage.removeItem(`selesai_lesson_${l.id}`));
+                            });
+                        }
+                        
+                        showAlert(data.message, "🗑️", "Kelas Dihapus");
+                        bukaKurikulum(courseId); // Segarkan tampilan
+                    } else {
+                        showAlert(data.message, "❌", "Gagal Membatalkan");
+                    }
+                } catch(e) {
+                    showAlert("Gagal menghubungi server.", "🔌", "Error");
+                }
+            });
         }
 
         function resetBelajar(courseId) {

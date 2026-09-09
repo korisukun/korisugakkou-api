@@ -61,6 +61,42 @@ const enrollCourse = async (req, res) => {
     } catch (error) { res.status(500).json({ message: 'Gagal mendaftar kelas.' }); }
 };
 
+// FUNGSI BARU: Batal Ikuti Kelas
+const unenrollCourse = async (req, res) => {
+    const courseId = req.params.id;
+    const muridId = req.user.id;
+    try {
+        // Hapus SEMUA jadwal SRS murid ini yang kosakatanya berasal dari kelas ini
+        await db.query(`
+            DELETE FROM srs_reviews 
+            WHERE murid_id = $1 
+            AND vocab_id IN (SELECT id FROM vocabularies WHERE course_id = $2)
+        `, [muridId, courseId]);
+
+        // Cek product_id untuk menghapus user_access (opsional, untuk kebersihan data)
+        const courseData = await db.query('SELECT product_id FROM courses WHERE id = $1', [courseId]);
+        if (courseData.rows.length > 0 && courseData.rows[0].product_id) {
+            await db.query('DELETE FROM user_access WHERE murid_id = $1 AND product_id = $2', [muridId, courseData.rows[0].product_id]);
+        }
+
+        // Hapus progres tontonan materi agar bersih 100%
+        await db.query(`
+            DELETE FROM lesson_progress 
+            WHERE murid_id = $1 
+            AND lesson_id IN (
+                SELECT l.id FROM lessons l 
+                JOIN modules m ON l.module_id = m.id 
+                WHERE m.course_id = $2
+            )
+        `, [muridId, courseId]);
+
+        res.json({ message: 'Berhasil membatalkan pendaftaran. Seluruh kosakata kelas ini telah dihapus dari antrean kuis harianmu.' });
+    } catch (error) {
+        console.error('Error unenroll:', error.message);
+        res.status(500).json({ message: 'Gagal membatalkan kelas.' });
+    }
+};
+
 const addCourse = async (req, res) => {
     const { judul_course, thumbnail_url, deskripsi } = req.body;
     try {
@@ -142,4 +178,4 @@ const deleteLesson = async (req, res) => {
     catch (error) { res.status(500).json({ message: `Gagal: ${error.message}` }); }
 };
 
-module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson, editCourse, deleteCourse, deleteModule, deleteLesson };
+module.exports = { getAllCourses, getCourseCurriculum, enrollCourse, unenrollCourse, addCourse, addModule, getModulesByCourse, addLesson, getLessonsByModule, editModule, editLesson, editCourse, deleteCourse, deleteModule, deleteLesson };
