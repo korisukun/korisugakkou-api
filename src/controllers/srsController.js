@@ -43,10 +43,16 @@ const getTodayReviews = async (req, res) => {
                 kamus_distraktor: kamusRes.rows 
             });
         } else {
+            // Untuk halaman Dashboard utama: Hanya hitung jika Kosakata EKSIS dan Kelas DIIKUTI
             const result = await db.query(`
                 SELECT count(sr.id) as total
                 FROM srs_reviews sr
-                WHERE sr.murid_id = $1 AND sr.next_review_date <= CURRENT_TIMESTAMP
+                JOIN vocabularies v ON sr.vocab_id = v.id
+                JOIN courses c ON v.course_id = c.id
+                JOIN user_access ua ON c.product_id = ua.product_id
+                WHERE sr.murid_id = $1 
+                  AND ua.murid_id = $1
+                  AND sr.next_review_date <= CURRENT_TIMESTAMP
             `, [muridId]);
             res.json({ jumlah_antrean: parseInt(result.rows[0].total) });
         }

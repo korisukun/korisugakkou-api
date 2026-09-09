@@ -1,7 +1,7 @@
 const db = require('./db');
 
 const createTables = async () => {
-    // 100% Menggunakan Struktur ERD Resmi KORISU Gakkou
+    // 100% Menggunakan Struktur ERD Resmi KORISU Gakkou dengan Relasi CASCADE Penuh
     const schemaDatabaseMutlak = `
         CREATE SCHEMA IF NOT EXISTS "public";
 
@@ -70,7 +70,7 @@ const createTables = async () => {
 
         CREATE TABLE IF NOT EXISTS "community_posts" (
             "id" serial PRIMARY KEY,
-            "user_id" integer NOT NULL,
+            "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
             "konten" text NOT NULL,
             "created_at" timestamp DEFAULT CURRENT_TIMESTAMP
         );
@@ -78,7 +78,7 @@ const createTables = async () => {
         CREATE TABLE IF NOT EXISTS "community_comments" (
             "id" serial PRIMARY KEY,
             "post_id" integer REFERENCES "community_posts"("id") ON DELETE CASCADE,
-            "user_id" integer NOT NULL,
+            "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
             "komentar" text NOT NULL,
             "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
             "parent_id" integer REFERENCES "community_comments"("id") ON DELETE CASCADE
@@ -87,7 +87,7 @@ const createTables = async () => {
         CREATE TABLE IF NOT EXISTS "community_likes" (
             "id" serial PRIMARY KEY,
             "post_id" integer REFERENCES "community_posts"("id") ON DELETE CASCADE,
-            "user_id" integer NOT NULL,
+            "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
             "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
             CONSTRAINT "community_likes_post_id_user_id_key" UNIQUE("post_id","user_id")
         );
@@ -170,8 +170,8 @@ const createTables = async () => {
 
         CREATE TABLE IF NOT EXISTS "notifications" (
             "id" serial PRIMARY KEY,
-            "user_id" integer NOT NULL,
-            "sender_id" integer NOT NULL,
+            "user_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+            "sender_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
             "type" varchar(50) NOT NULL,
             "post_id" integer REFERENCES "community_posts"("id") ON DELETE CASCADE,
             "message" text NOT NULL,
@@ -252,7 +252,7 @@ const createTables = async () => {
 
         CREATE TABLE IF NOT EXISTS "srs_flashcards" (
             "vocab_id" serial PRIMARY KEY,
-            "murid_id" integer,
+            "murid_id" integer REFERENCES "users"("id") ON DELETE CASCADE,
             "kanji" varchar(50),
             "furigana" varchar(50),
             "arti_indonesia" text,
@@ -270,10 +270,11 @@ const createTables = async () => {
             "course_id" integer REFERENCES "courses"("id") ON DELETE CASCADE
         );
 
+        -- 👉 PERBAIKAN: Menambahkan relasi ON DELETE CASCADE secara eksplisit
         CREATE TABLE IF NOT EXISTS "srs_reviews" (
             "id" serial PRIMARY KEY,
-            "murid_id" integer NOT NULL,
-            "vocab_id" integer NOT NULL,
+            "murid_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+            "vocab_id" integer NOT NULL REFERENCES "vocabularies"("id") ON DELETE CASCADE,
             "arah_kuis" integer NOT NULL,
             "srs_level" integer DEFAULT 0,
             "next_review_date" timestamp DEFAULT CURRENT_TIMESTAMP,
@@ -338,26 +339,17 @@ const createTables = async () => {
             "quote_id" integer REFERENCES "study_quotes"("id") ON DELETE CASCADE
         );
 
-        CREATE TABLE IF NOT EXISTS "user_goals" (
-            "id" serial PRIMARY KEY,
-            "murid_id" integer REFERENCES "users"("id") ON DELETE CASCADE,
-            "exam_schedule_id" integer REFERENCES "exam_schedules"("id") ON DELETE SET NULL,
-            "custom_nama_ujian" varchar(100),
-            "custom_tanggal_ujian" date,
-            "target_belajar_menit_per_hari" integer DEFAULT 30
-        );
-
         CREATE TABLE IF NOT EXISTS "user_inventory" (
             "id" serial PRIMARY KEY,
-            "murid_id" integer,
-            "item_id" integer,
+            "murid_id" integer REFERENCES "users"("id") ON DELETE CASCADE,
+            "item_id" integer REFERENCES "shop_items"("id") ON DELETE CASCADE,
             "tanggal_beli" timestamp DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS "user_items" (
             "id" serial PRIMARY KEY,
-            "murid_id" integer NOT NULL,
-            "item_id" integer NOT NULL,
+            "murid_id" integer NOT NULL REFERENCES "users"("id") ON DELETE CASCADE,
+            "item_id" integer NOT NULL REFERENCES "shop_items"("id") ON DELETE CASCADE,
             "tanggal_beli" timestamp DEFAULT CURRENT_TIMESTAMP
         );
 
