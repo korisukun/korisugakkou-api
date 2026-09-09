@@ -659,6 +659,10 @@
                 srsLevelBaru = 0; // Reset jika salah
             }
 
+// 👉 PERBAIKAN: Masukkan angka baru ke dalam keranjang antreanSoal untuk tabel akhir!
+            antreanSoal[indeksSaatIni].srs_level = srsLevelBaru;
+            antreanSoal[indeksSaatIni].avg_waktu_detik = avgWaktuBaru;
+
             // 4. Warnai Tombol Pilihan
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
             semuaTombol.forEach(btn => btn.disabled = true);
@@ -733,26 +737,77 @@
                 // Cek apakah di database masih ada sisa tunggakan di luar 10 soal ini
                 let sisaDiLuarSesi = Math.max(0, sisaTunggakanDatabase - antreanSoal.length);
                 
+                // 👉 BUAT TABEL REKAPITULASI SESI INI
+                let htmlRekap = `
+                    <div class="text-start mt-4 mb-4" style="max-height: 250px; overflow-y: auto;">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Kata</th>
+                                    <th class="text-center">Arah</th>
+                                    <th class="text-center">Lvl Baru</th>
+                                    <th class="text-center">Avg</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                // Urutkan dari Avg terlama (tersulit) ke tercepat (termudah)
+                let rekapSoal = [...antreanSoal].sort((a,b) => parseFloat(b.avg_waktu_detik || 0) - parseFloat(a.avg_waktu_detik || 0));
+                
+                rekapSoal.forEach(v => {
+                    let lvl = parseInt(v.srs_level) || 0;
+                    let avg = parseFloat(v.avg_waktu_detik) || 0;
+                    let emojiArah = ["", "A1", "A2", "A3", "A4", "A5", "A6"][parseInt(v.arah_kuis)];
+                    
+                    let bgClass = "";
+                    if(avg > 15) bgClass = "table-danger"; // Sangat Sulit
+                    else if(avg < 5) bgClass = "table-success"; // Sangat Mudah
+                    
+                    htmlRekap += `
+                        <tr class="${bgClass}">
+                            <td class="fw-bold">${v.kanji} <small class="text-muted d-block fw-normal">${v.arti_indonesia}</small></td>
+                            <td class="text-center align-middle"><span class="badge bg-secondary">${emojiArah}</span></td>
+                            <td class="text-center align-middle fw-bold">${lvl}</td>
+                            <td class="text-center align-middle">${avg.toFixed(1)}s</td>
+                        </tr>
+                    `;
+                });
+                
+                htmlRekap += `</tbody></table></div>`;
+
+
                 if (sisaDiLuarSesi > 0) {
-                    // MUNCULKAN TEMBOK PEMBATAS ISTIRAHAT
+                    // MUNCULKAN TEMBOK PEMBATAS ISTIRAHAT DENGAN TABEL
                     document.querySelector('.flashcard-modern').innerHTML = `
                         <h1 class="mb-3" style="font-size: 5rem;">☕</h1>
                         <h3 class="fw-bold mb-3 text-dark">Kerja Bagus!</h3>
-                        <p class="text-muted fs-5 mb-4">Kamu baru saja menyelesaikan 1 sesi evaluasi. Istirahatkan matamu sejenak.</p>
-                        <div class="alert alert-warning border-warning rounded-4 mb-4">
+                        <p class="text-muted fs-5 mb-3">Kamu baru saja menyelesaikan 1 sesi evaluasi. Istirahatkan matamu sejenak.</p>
+                        
+                        <div class="alert alert-warning border-warning rounded-4 mb-2">
                             <span class="fw-bold text-dark">Masih ada <span class="text-danger fs-5">${sisaDiLuarSesi}</span> kuis 6-Arah lagi di antrean hari ini.</span>
                         </div>
+                        
+                        <h6 class="fw-bold text-start mt-4 mb-2 text-dark">📊 Rekapitulasi Memori (Sesi Ini):</h6>
+                        <small class="text-muted text-start d-block mb-2">Diurutkan dari kata yang paling lambat kamu ingat.</small>
+                        ${htmlRekap}
+                        
                         <div class="d-flex flex-column gap-2">
                             <button onclick="window.location.reload()" class="btn-korisu-solid">🔥 Lanjut Sesi Berikutnya</button>
                             <button onclick="kembaliKeKelas()" class="btn-outline-korisu">Kembali ke Kurikulum</button>
                         </div>
                     `;
                 } else {
-                    // BENAR-BENAR BERSIH 100%
+                    // BENAR-BENAR BERSIH 100% DENGAN TABEL
                     document.querySelector('.flashcard-modern').innerHTML = `
                         <h1 class="mb-3" style="font-size: 5rem;">🎉</h1>
                         <h3 class="fw-bold mb-3 text-dark">Sempurna!</h3>
                         <p class="text-muted fs-5 mb-4">Semua ulasan hari ini telah selesai. Otakmu sudah menyerap semuanya dengan baik!</p>
+                        
+                        <h6 class="fw-bold text-start mt-4 mb-2 text-dark">📊 Rekapitulasi Memori (Sesi Ini):</h6>
+                        <small class="text-muted text-start d-block mb-2">Diurutkan dari kata yang paling lambat kamu ingat.</small>
+                        ${htmlRekap}
+                        
                         <button onclick="kembaliKeKelas()" class="btn-korisu-solid">Kembali ke Kurikulum</button>
                     `;
                 }
