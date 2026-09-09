@@ -7,9 +7,9 @@ const getTodayReviews = async (req, res) => {
 
     try {
         if (courseId) {
-            // A. DATA KUIS: Ambil maksimal 50 soal saja untuk dikirim ke memori Kuis (Mencegah Lag)
+            // 👉 PERBAIKAN: Menambahkan sr.total_review ke dalam SELECT
             const result = await db.query(`
-                SELECT sr.vocab_id, sr.arah_kuis, sr.srs_level, sr.avg_waktu_detik,
+                SELECT sr.vocab_id, sr.arah_kuis, sr.srs_level, sr.avg_waktu_detik, sr.total_review,
                        v.kanji, v.furigana, v.arti_indonesia
                 FROM srs_reviews sr
                 JOIN vocabularies v ON sr.vocab_id = v.id
@@ -38,8 +38,8 @@ const getTodayReviews = async (req, res) => {
             );
 
             res.json({ 
-                jumlah_antrean: trueTotal, // Mengirim angka asli (Misal: 80), bukan terpaku pada 50
-                data: result.rows,         // Array soal kuis tetap dibatasi maksimal 50
+                jumlah_antrean: trueTotal, 
+                data: result.rows,         
                 kamus_distraktor: kamusRes.rows 
             });
         } else {

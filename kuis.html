@@ -617,33 +617,49 @@
             
             const isBenar = (jawabanUser === String(kunciJawabanSaatIni || "Tidak diketahui"));
 
-            // Kalkulasi Instan di Frontend menyelaraskan 5 Kategori Backend
-            let srsLevelSekarang = parseInt(vocabSaatIni.srs_level) || 0;
+            // 1. Tarik data lama sebelum menjawab
+            let srsLevelLama = parseInt(vocabSaatIni.srs_level) || 0;
+            let avgWaktuLama = parseFloat(vocabSaatIni.avg_waktu_detik) || 0;
+            let totalReviewLama = parseInt(vocabSaatIni.total_review) || 0;
+
+            // 2. Siapkan wadah untuk data baru
+            let srsLevelBaru = srsLevelLama;
+            let totalReviewBaru = totalReviewLama + 1;
+            let avgWaktuBaru = ((avgWaktuLama * totalReviewLama) + detikDihabiskan) / totalReviewBaru;
+
             let expPrediksi = 0;
             let koinPrediksi = 0;
             let tingkatKesulitan = "";
 
+            // 3. Kalkulasi Logika Kenaikan Level (Sesuai Backend)
             if (isBenar) {
                 if (detikDihabiskan < 5) {
-                    expPrediksi = 15 + Math.min(7, srsLevelSekarang + 2);
+                    srsLevelBaru += 2;
+                    expPrediksi = 15 + Math.min(7, srsLevelBaru);
                     koinPrediksi = 5;
                     tingkatKesulitan = "Easy (<5s)";
                 } else if (detikDihabiskan <= 10) {
-                    expPrediksi = 10 + Math.min(7, srsLevelSekarang + 1);
+                    srsLevelBaru += 1;
+                    expPrediksi = 10 + Math.min(7, srsLevelBaru);
                     koinPrediksi = 3;
                     tingkatKesulitan = "Medium (5-10s)";
                 } else if (detikDihabiskan <= 15) {
-                    expPrediksi = 5 + srsLevelSekarang; // Level ditahan (+0)
+                    srsLevelBaru += 0; // Ditahan
+                    expPrediksi = 5 + srsLevelBaru;
                     koinPrediksi = 2;
                     tingkatKesulitan = "Hard (10-15s)";
                 } else {
-                    let levelTurun = Math.max(0, srsLevelSekarang - 1);
-                    expPrediksi = 2 + levelTurun;
+                    srsLevelBaru = Math.max(0, srsLevelBaru - 1); // Penalti Waktu
+                    expPrediksi = 2 + srsLevelBaru;
                     koinPrediksi = 1;
                     tingkatKesulitan = "Very Hard (>15s)";
                 }
+                srsLevelBaru = Math.min(srsLevelBaru, 7); // Maksimal Level 7
+            } else {
+                srsLevelBaru = 0; // Reset jika salah
             }
 
+            // 4. Warnai Tombol Pilihan
             const semuaTombol = document.querySelectorAll('.btn-pilihan');
             semuaTombol.forEach(btn => btn.disabled = true);
 
@@ -657,10 +673,15 @@
                 });
             }
 
+            // 5. Tampilkan Hasil
             setTimeout(() => {
                 document.getElementById('area-soal').style.display = "none";
                 const notifBox = document.getElementById('hasil-notif');
                 notifBox.style.display = "block";
+
+                // 👉 PERBAIKAN: Update Statistik di Kartu secara Real-Time
+                let statInfoBaru = `📈 Level Kekuatan: ${srsLevelBaru} | ⏱️ Avg: ${avgWaktuBaru.toFixed(2)}s`;
+                document.getElementById('info-kanji').innerHTML = `${vocabSaatIni.kanji} <br><small class="text-muted fw-normal">${statInfoBaru}</small>`;
 
                 if(isBenar) {
                     document.getElementById('status-jawaban').innerText = `Tepat Sekali! 🎉 (${tingkatKesulitan})`;
@@ -683,13 +704,13 @@
                 } else {
                     document.getElementById('status-jawaban').innerText = `Jawaban Kurang Tepat ❌ (Again)`;
                     document.getElementById('status-jawaban').className = "fw-bold mb-3 text-danger";
-                    document.getElementById('reward-text').innerText = `Level memori turun. Kosakata ini akan direview ulang segera!`;
+                    document.getElementById('reward-text').innerText = `Level memori di-reset. Kosakata ini akan direview ulang segera!`;
                 }
                 
                 document.getElementById('btn-lanjut').focus(); 
             }, 300);
 
-            // SYNC BACKEND BERJALAN SENYAP DI LATAR BELAKANG
+            // 6. SYNC BACKEND BERJALAN SENYAP DI LATAR BELAKANG
             fetch(`${API_URL}/srs/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN_SAYA}` },
