@@ -11,12 +11,18 @@ const addVocabBulk = async (req, res) => {
     try {
         let enrolledUsers = [];
         try {
-            const srsRes = await db.query(
-                'SELECT DISTINCT murid_id AS id FROM srs_reviews sr JOIN vocabularies v ON sr.vocab_id = v.id WHERE v.course_id = $1', 
-                [course_id]
-            );
-            enrolledUsers = srsRes.rows.map(r => r.id);
-        } catch (e) { console.error("Gagal menarik data enrolledUsers"); }
+            // 👉 PERBAIKAN: Mencari murid berdasarkan kepemilikan lisensi (user_access)
+            const enrollRes = await db.query(`
+                SELECT ua.murid_id AS id 
+                FROM user_access ua
+                JOIN courses c ON ua.product_id = c.product_id
+                WHERE c.id = $1
+            `, [course_id]);
+            
+            enrolledUsers = enrollRes.rows.map(r => r.id);
+        } catch (e) { 
+            console.error("Gagal menarik data enrolledUsers"); 
+        }
 
         // Menyisipkan kosakata ke tabel master dan mendistribusikannya
         for (const v of vocabularies) {
@@ -26,7 +32,7 @@ const addVocabBulk = async (req, res) => {
             );
             const newVocabId = vocabRes.rows[0].id;
 
-            // Suntikkan ke jadwal SRS murid lama
+            // Suntikkan ke jadwal SRS murid terdaftar
             if (enrolledUsers.length > 0) {
                 for (const muridId of enrolledUsers) {
                     for (let arah = 1; arah <= 6; arah++) {
@@ -38,14 +44,14 @@ const addVocabBulk = async (req, res) => {
                                 [muridId, newVocabId, arah]
                             );
                         } catch (insertErr) {
-                            // Abaikan duplikat
+                            // Abaikan duplikat jika data sudah ada
                         }
                     }
                 }
             }
         }
         
-        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan & siap direview! 📚' });
+        res.status(201).json({ message: 'Semua Kosakata berhasil disimpan & siap direview oleh murid! 📚' });
     } catch (error) {
         console.error('Error tambah kosakata masal:', error.message);
         res.status(500).json({ message: `Gagal: ${error.message}` });

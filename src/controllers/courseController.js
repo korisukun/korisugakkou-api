@@ -27,11 +27,15 @@ const getCourseCurriculum = async (req, res) => {
             };
         });
 
-        const cekEnroll = await db.query(
-            'SELECT id FROM srs_reviews WHERE murid_id = $1 AND vocab_id IN (SELECT id FROM vocabularies WHERE course_id = $2) LIMIT 1', 
-            [muridId, id]
-        );
-        const isEnrolled = cekEnroll.rows.length > 0;
+        // [PERBAIKAN]: Mengecek Pendaftaran Kelas dari Hak Akses Produk, bukan dari jumlah Kosakata
+        let isEnrolled = false;
+        if (course.product_id) {
+            const cekEnroll = await db.query(
+                'SELECT id FROM user_access WHERE murid_id = $1 AND product_id = $2 LIMIT 1', 
+                [muridId, course.product_id]
+            );
+            isEnrolled = cekEnroll.rows.length > 0;
+        }
 
         res.json({ course: { ...course, modules: modulesData, is_enrolled: isEnrolled } });
     } catch (error) { res.status(500).json({ message: 'Gagal memuat kurikulum kelas.' }); }
