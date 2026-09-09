@@ -7,7 +7,7 @@ const getTodayReviews = async (req, res) => {
 
     try {
         if (courseId) {
-            // 👉 PERBAIKAN: Menambahkan sr.total_review ke dalam SELECT
+            // Ambil maksimal 30 soal untuk dikirim ke memori Kuis
             const result = await db.query(`
                 SELECT sr.vocab_id, sr.arah_kuis, sr.srs_level, sr.avg_waktu_detik, sr.total_review,
                        v.kanji, v.furigana, v.arti_indonesia
@@ -20,7 +20,7 @@ const getTodayReviews = async (req, res) => {
                 LIMIT 30
             `, [muridId, courseId]);
 
-            // B. ANGKA VISUAL: Hitung TOTAL ASLI seluruh antrean untuk ditampilkan di Dasbor
+            // Hitung TOTAL ASLI seluruh antrean untuk ditampilkan di Dasbor/Notif
             const countResult = await db.query(`
                 SELECT count(sr.id) as total
                 FROM srs_reviews sr
@@ -43,7 +43,6 @@ const getTodayReviews = async (req, res) => {
                 kamus_distraktor: kamusRes.rows 
             });
         } else {
-            // Untuk halaman Dashboard utama (akumulasi seluruh kelas)
             const result = await db.query(`
                 SELECT count(sr.id) as total
                 FROM srs_reviews sr
@@ -57,7 +56,7 @@ const getTodayReviews = async (req, res) => {
     }
 };
 
-// 2. Menerima Jawaban Murid & MENTRANSFER HADIAH KE DATABASE
+// 2. Menerima Jawaban Murid & Mengkalkulasi Logika Baru
 const submitReview = async (req, res) => {
     const muridId = req.user.id;
     const { vocab_id, arah_kuis, is_correct, waktu_jawab_detik } = req.body;
@@ -74,65 +73,52 @@ const submitReview = async (req, res) => {
         
         let safeSrsLevel = parseInt(srs_level) || 0;
         let safeTotalReview = parseInt(total_review) || 0;
-        let safeAvgWaktu = parseInt(avg_waktu_detik) || 0;
+        let safeAvgWaktu = parseFloat(avg_waktu_detik) || 0;
         let safeWaktuJawab = parseInt(waktu_jawab_detik) || 0;
 
         let newTotalReview = safeTotalReview + 1;
-        let newAvgWaktu = Math.round(((safeAvgWaktu * safeTotalReview) + safeWaktuJawab) / newTotalReview);
+        let newAvgWaktu = ((safeAvgWaktu * safeTotalReview) + safeWaktuJawab) / newTotalReview;
 
-        // Interval berdasarkan Kategori (0 = 1m, 1 = 10m, 2 = 12j, 3 = 1h, 4 = 3h, 5 = 7h, 6 = 15h, 7 = 30h)
-        const intervals = [1, 10, 720, 1440, 4320, 10080, 21600, 43200]; 
-        let intervalMinutes = 1;
+        // 👉 INTERVAL BARU (DALAM DETIK): 30s, 1m, 10m, 12h, 1d, 3d, 7d, 15d, 30d
+        const intervalSeconds = [30, 60, 600, 43200, 86400, 259200, 604800, 1296000, 2592000]; 
+        
         let statusCat = 'again';
         let expReward = 0;
         let koinReward = 0;
 
         if (is_correct) {
             if (safeWaktuJawab < 5) {
-                safeSrsLevel += 2; 
-                statusCat = 'easy';
-                expReward = 15 + safeSrsLevel;
-                koinReward = 5;
+                safeSrsLevel += 3; 
+                statusCat = 'easy'; expReward = 20; koinReward = 4;
             } else if (safeWaktuJawab <= 10) {
-                safeSrsLevel += 1; 
-                statusCat = 'medium';
-                expReward = 10 + safeSrsLevel;
-                koinReward = 3;
+                safeSrsLevel += 2; 
+                statusCat = 'medium'; expReward = 15; koinReward = 3;
             } else if (safeWaktuJawab <= 15) {
-                safeSrsLevel += 0; 
-                statusCat = 'hard';
-                expReward = 5 + safeSrsLevel;
-                koinReward = 2;
+                safeSrsLevel += 1; 
+                statusCat = 'hard'; expReward = 10; koinReward = 2;
             } else {
-                safeSrsLevel = Math.max(0, safeSrsLevel - 1);
-                statusCat = 'very_hard';
-                expReward = 2 + safeSrsLevel;
-                koinReward = 1;
+                safeSrsLevel += 0;
+                statusCat = 'very_hard'; expReward = 5; koinReward = 1;
             }
-
-            safeSrsLevel = Math.min(safeSrsLevel, intervals.length - 1);
-            intervalMinutes = intervals[safeSrsLevel];
-
+            safeSrsLevel = Math.min(safeSrsLevel, 8); // Maksimal Level 8
         } else {
             safeSrsLevel = 0;
-            statusCat = 'again';
-            intervalMinutes = intervals[0];
-            expReward = 1; 
-            koinReward = 0;
+            statusCat = 'again'; expReward = 0; koinReward = 0;
         }
 
-        // Simpan progres waktu review SRS
+        let secondsToAdd = intervalSeconds[safeSrsLevel];
+
+        // Simpan progres menggunakan perhitungan detik (seconds)
         await db.query(`
             UPDATE srs_reviews 
             SET srs_level = $1, 
-                next_review_date = CURRENT_TIMESTAMP + ($2 || ' minutes')::interval,
+                next_review_date = CURRENT_TIMESTAMP + ($2 || ' seconds')::interval,
                 kategori_terakhir = $3,
                 total_review = $4,
                 avg_waktu_detik = $5
             WHERE murid_id = $6 AND vocab_id = $7 AND arah_kuis = $8
-        `, [safeSrsLevel, intervalMinutes, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
+        `, [safeSrsLevel, secondsToAdd, statusCat, newTotalReview, newAvgWaktu, muridId, vocab_id, arah_kuis]);
 
-        // UPSERT Statistik (Exp & Koin)
         if (expReward > 0 || koinReward > 0) {
             await db.query(`
                 INSERT INTO user_statistics (murid_id, koin_dimiliki, total_exp_points) 
@@ -144,7 +130,7 @@ const submitReview = async (req, res) => {
             `, [muridId, koinReward, expReward]);
         }
 
-        res.json({ message: 'Progres arah kuis disimpan.', reward: { exp: expReward, koin: koinReward } });
+        res.json({ message: 'Progres disimpan.', reward: { exp: expReward, koin: koinReward } });
     } catch (error) {
         console.error('Error submit SRS:', error.message);
         res.status(500).json({ message: 'Gagal menyimpan hasil review.' });
